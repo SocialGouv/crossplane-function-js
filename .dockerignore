@@ -1,0 +1,21 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Binaries
+bin/
+dist/
+
+# Tests
+test/
+tests/
+
+# Misc
+.editorconfig
+README.md
+Makefile

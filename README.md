@@ -70,13 +70,43 @@ The Node.js runtime executes the JavaScript/TypeScript code. It:
 
 ## Testing
 
-### Running Tests
+### Running Unit Tests
 
 ```bash
-go test ./test/e2e
+make test
 ```
 
 ### End-to-End Testing with Crossplane
+
+The project includes a comprehensive end-to-end testing setup that uses Kind (Kubernetes in Docker) to test the Skyhook server with Crossplane.
+
+#### Prerequisites
+
+- Docker
+- Kind
+- kubectl
+- Helm
+
+#### Running E2E Tests
+
+```bash
+# Set up the test environment (creates a Kind cluster and installs Crossplane)
+make setup-test-env
+
+# Run the e2e tests
+make e2e-test
+
+# Clean up the test environment
+make clean-test-env
+```
+
+The e2e tests:
+1. Set up a Kind cluster with a local Docker registry
+2. Install Crossplane
+3. Build and deploy the Skyhook server
+4. Apply test CRDs and Compositions
+5. Create a test SimpleConfigMap resource
+6. Verify that the resulting ConfigMap is created with the expected data
 
 The `test/fixtures` directory contains sample Kubernetes manifests for testing with Crossplane:
 

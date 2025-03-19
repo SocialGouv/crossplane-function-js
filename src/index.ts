@@ -29,10 +29,14 @@ process.stdin.on('data', async (data) => {
   try {
     // Parse the request
     const request = JSON.parse(data.toString()) as NodeRequest;
-    const { input } = request;
+    
+    // The Go code sends both code and input, but we already have the code from the file
+    // We'll use the code from the request if provided, otherwise use the code from the file
+    const codeToRun = request.code || code;
+    const input = request.input;
 
     // Run the code
-    const result = await runCode(code, input);
+    const result = await runCode(codeToRun, input);
 
     // Send the result back
     process.stdout.write(JSON.stringify(result) + '\n');

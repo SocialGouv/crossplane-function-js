@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
-set -eo errexit
+set -e
+
+# Function to handle errors
+handle_error() {
+  echo "Error occurred at line $1"
+  echo "=== Test failed! ==="
+  exit 1
+}
+
+# Set up error trap
+trap 'handle_error $LINENO' ERR
 
 # Create a test namespace
 echo "Creating test namespace..."
@@ -12,7 +22,12 @@ kubectl apply -f test/fixtures/composition.yaml
 
 # Wait for CRDs to be established
 echo "Waiting for CRDs to be established..."
-kubectl wait --for=condition=established crd/simpleconfigmaps.test.crossplane.io --timeout=60s
+kubectl wait --for=condition=established crd/simpleconfigmaps.test.crossplane.io --timeout=60s || {
+  echo "CRD not established within timeout"
+  echo "Current CRD status:"
+  kubectl get crd/simpleconfigmaps.test.crossplane.io -o yaml
+  exit 1
+}
 
 # Create a test SimpleConfigMap
 echo "Creating test SimpleConfigMap..."
@@ -20,14 +35,38 @@ kubectl apply -f test/fixtures/sample.yaml
 
 # Wait for the ConfigMap to be created
 echo "Waiting for ConfigMap to be created..."
+configmap_created=false
 for i in {1..30}; do
   if kubectl get configmap generated-configmap -n test-skyhook &> /dev/null; then
     echo "ConfigMap created successfully!"
+    configmap_created=true
     break
   fi
   echo "Waiting for ConfigMap to be created... ($i/30)"
+  
+  # Check the status of the SimpleConfigMap
+  if [ $((i % 5)) -eq 0 ]; then
+    echo "SimpleConfigMap status:"
+    kubectl get simpleconfigmaps.test.crossplane.io -n test-skyhook -o yaml || true
+    echo "Crossplane Function status:"
+    kubectl get functions.pkg.crossplane.io || true
+    echo "FunctionRuntime status:"
+    kubectl get functionruntimes.pkg.crossplane.io || true
+  fi
+  
   sleep 2
 done
+
+if [ "$configmap_created" = false ]; then
+  echo "ConfigMap was not created within timeout"
+  echo "Final SimpleConfigMap status:"
+  kubectl get simpleconfigmaps.test.crossplane.io -n test-skyhook -o yaml || true
+  echo "Final Crossplane Function status:"
+  kubectl get functions.pkg.crossplane.io || true
+  echo "Final FunctionRuntime status:"
+  kubectl get functionruntimes.pkg.crossplane.io || true
+  exit 1
+fi
 
 # Verify the ConfigMap data
 echo "Verifying ConfigMap data..."

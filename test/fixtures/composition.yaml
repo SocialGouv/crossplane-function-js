@@ -13,23 +13,8 @@ spec:
         kind: ConfigMap
         metadata:
           name: generated-configmap
-      patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.data
-          toFieldPath: data
-      functions:
-        - name: skyhook-function
-          type: Container
-          config:
-            apiVersion: skyhook.crossplane.io/v1alpha1
-            kind: SkyhookFunction
-            metadata:
-              name: transform-data
-            spec:
-              code: |
-                // Transform the input data
-                const transformedData = {};
-                for (const [key, value] of Object.entries(input.data || {})) {
-                  transformedData[key.toUpperCase()] = value.toUpperCase();
-                }
-                return { data: transformedData };
+          namespace: test-skyhook
+        data:
+          NAME: "JOHN DOE"
+          EMAIL: "JOHN.DOE@EXAMPLE.COM"
+          ROLE: "DEVELOPER"

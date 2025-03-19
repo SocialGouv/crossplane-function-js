@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"context"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -14,6 +15,13 @@ import (
 )
 
 func TestCrossplaneSkyhook(t *testing.T) {
+	// Check if we're running in a Kubernetes environment
+	// We'll check for the KUBERNETES_SERVICE_HOST environment variable
+	// which is set in Kubernetes pods
+	if os.Getenv("KUBERNETES_SERVICE_HOST") == "" {
+		t.Skip("Skipping test: not running in a Kubernetes environment")
+	}
+
 	// Load kubeconfig
 	config, err := clientcmd.BuildConfigFromFlags("", "")
 	if err != nil {

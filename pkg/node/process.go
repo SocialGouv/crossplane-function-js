@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -14,6 +13,7 @@ import (
 	"time"
 
 	"github.com/fabrique/crossplane-skyhook/pkg/hash"
+	"github.com/fabrique/crossplane-skyhook/pkg/logger"
 )
 
 // ProcessInfo holds information about a Node.js process
@@ -32,11 +32,11 @@ type ProcessManager struct {
 	gcInterval  time.Duration
 	idleTimeout time.Duration
 	tempDir     string
-	logger      *log.Logger
+	logger      logger.Logger
 }
 
 // NewProcessManager creates a new process manager
-func NewProcessManager(gcInterval, idleTimeout time.Duration, tempDir string, logger *log.Logger) (*ProcessManager, error) {
+func NewProcessManager(gcInterval, idleTimeout time.Duration, tempDir string, logger logger.Logger) (*ProcessManager, error) {
 	// Create temp directory if it doesn't exist
 	if err := os.MkdirAll(tempDir, 0755); err != nil {
 		return nil, fmt.Errorf("failed to create temp directory: %w", err)
@@ -76,7 +76,7 @@ func (pm *ProcessManager) collectGarbage() {
 	for id, info := range pm.processes {
 		info.Lock.Lock()
 		if now.Sub(info.LastUsed) > pm.idleTimeout {
-			pm.logger.Printf("Terminating idle process: %s", id)
+			pm.logger.Infof("Terminating idle process: %s", id)
 			// Close stdin to signal the process to exit
 			if info.Stdin != nil {
 				info.Stdin.Close()
@@ -186,17 +186,44 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, code string) (
 		return nil, fmt.Errorf("failed to get current working directory: %w", err)
 	}
 
-	// Check if we're running in the test directory
+	// Determine the correct path to the index file
 	var indexPath string
+
+	// Check if we're running the simple_test.go test
 	if strings.Contains(cwd, "test/e2e") {
-		// Use the test-specific implementation
-		indexPath = filepath.Join(cwd, "index.js")
+		// We're in the test/e2e directory, look for index.js in the same directory
+		testIndexPath := filepath.Join(cwd, "index.js")
+		if _, err := os.Stat(testIndexPath); err == nil {
+			indexPath = testIndexPath
+			pm.logger.Infof("Using test index file: %s", indexPath)
+		} else {
+			// Try the project root
+			rootPath := filepath.Join(cwd, "..", "..")
+			testIndexPath = filepath.Join(rootPath, "test", "e2e", "index.js")
+			if _, err := os.Stat(testIndexPath); err == nil {
+				indexPath = testIndexPath
+				pm.logger.Infof("Using test index file from project root: %s", indexPath)
+			} else {
+				return nil, fmt.Errorf("could not find test index file at %s or %s", filepath.Join(cwd, "index.js"), testIndexPath)
+			}
+		}
 	} else {
-		// Use the main implementation
-		indexPath = filepath.Join(cwd, "src", "index.ts")
+		// We're in the main project, look for index.ts/js in src directory
+		rootPath := cwd
+		tsPath := filepath.Join(rootPath, "src", "index.ts")
+		jsPath := filepath.Join(rootPath, "src", "index.js")
+
+		if _, err := os.Stat(tsPath); err == nil {
+			indexPath = tsPath
+		} else if _, err := os.Stat(jsPath); err == nil {
+			indexPath = jsPath
+		} else {
+			return nil, fmt.Errorf("could not find index file at %s or %s", tsPath, jsPath)
+		}
+		pm.logger.Infof("Using main index file: %s", indexPath)
 	}
 
-	// Create the Node.js process with the appropriate path to index.ts
+	// Create the Node.js process with the appropriate path to the index file
 	cmd := exec.CommandContext(ctx, "node", "--no-warnings", "--experimental-strip-types", indexPath, tempFilePath)
 	cmd.Env = append(os.Environ(), "NODE_OPTIONS=--no-warnings --experimental-strip-types")
 
@@ -222,7 +249,7 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, code string) (
 		return nil, fmt.Errorf("failed to start Node.js process: %w", err)
 	}
 
-	pm.logger.Printf("Started Node.js process for code hash: %s", codeHash[:8])
+	pm.logger.Infof("Started Node.js process for code hash: %s", codeHash[:8])
 
 	// Create the process info
 	process = &ProcessInfo{
@@ -247,11 +274,19 @@ func isTypeScript(code string) bool {
 
 // logWriter is a simple io.Writer that writes to a logger
 type logWriter struct {
-	logger *log.Logger
+	logger logger.Logger
 	prefix string
 }
 
 func (w *logWriter) Write(p []byte) (n int, err error) {
-	w.logger.Printf("%s%s", w.prefix, string(p))
+	// Trim trailing newlines for cleaner log output
+	message := string(p)
+	for len(message) > 0 && (message[len(message)-1] == '\n' || message[len(message)-1] == '\r') {
+		message = message[:len(message)-1]
+	}
+
+	if message != "" {
+		w.logger.WithField("component", "node").Infof("%s%s", w.prefix, message)
+	}
 	return len(p), nil
 }

@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/fabrique/crossplane-skyhook/pkg/logger"
 	"github.com/fabrique/crossplane-skyhook/pkg/node"
 )
 
@@ -19,11 +19,11 @@ type Server struct {
 	UnimplementedSkyhookServiceServer
 	processManager *node.ProcessManager
 	server         *grpc.Server
-	logger         *log.Logger
+	logger         logger.Logger
 }
 
 // NewServer creates a new Skyhook gRPC server
-func NewServer(processManager *node.ProcessManager, logger *log.Logger) *Server {
+func NewServer(processManager *node.ProcessManager, logger logger.Logger) *Server {
 	return &Server{
 		processManager: processManager,
 		logger:         logger,
@@ -37,10 +37,13 @@ func (s *Server) Start(address string) error {
 		return fmt.Errorf("failed to listen on %s: %w", address, err)
 	}
 
-	s.server = grpc.NewServer()
+	// Create a new gRPC server with the logging interceptor
+	s.server = grpc.NewServer(
+		grpc.UnaryInterceptor(logger.UnaryServerInterceptor(s.logger)),
+	)
 	RegisterSkyhookServiceServer(s.server, s)
 
-	s.logger.Printf("Starting gRPC server on %s", address)
+	s.logger.Infof("Starting gRPC server on %s", address)
 	return s.server.Serve(listener)
 }
 
@@ -57,10 +60,13 @@ func (s *Server) RunFunction(ctx context.Context, req *RunFunctionRequest) (*Run
 		return nil, status.Error(codes.InvalidArgument, "code is required")
 	}
 
+	// Log request details (code length only, not the full code)
+	s.logger.WithField("code_length", len(req.Code)).Debug("RunFunction request received")
+
 	// Execute the function using the process manager
 	result, err := s.processManager.ExecuteFunction(ctx, req.Code, req.InputJson)
 	if err != nil {
-		s.logger.Printf("Error executing function: %v", err)
+		s.logger.Errorf("Error executing function: %v", err)
 		return &RunFunctionResponse{
 			Error: &ErrorInfo{
 				Code:       int32(codes.Internal),
@@ -81,7 +87,7 @@ func (s *Server) RunFunction(ctx context.Context, req *RunFunctionRequest) (*Run
 	}
 
 	if err := json.Unmarshal([]byte(result), &nodeResp); err != nil {
-		s.logger.Printf("Error parsing Node.js response: %v", err)
+		s.logger.Errorf("Error parsing Node.js response: %v", err)
 		return &RunFunctionResponse{
 			Error: &ErrorInfo{
 				Code:       int32(codes.Internal),
@@ -99,7 +105,7 @@ func (s *Server) RunFunction(ctx context.Context, req *RunFunctionRequest) (*Run
 			Message:    nodeResp.Error.Message,
 			StackTrace: nodeResp.Error.Stack,
 		}
-		s.logger.Printf("Node.js execution error: %s", nodeResp.Error.Message)
+		s.logger.Errorf("Node.js execution error: %s", nodeResp.Error.Message)
 	} else {
 		response.OutputJson = string(nodeResp.Result)
 	}

@@ -3,7 +3,7 @@ PROJECT_NAME := crossplane-skyhook
 VERSION := $(shell git describe --tags 2>/dev/null || echo "v0.1.0")
 DOCKER_IMAGE := localhost:5001/$(PROJECT_NAME)
 
-.PHONY: all build build-static clean test e2e-test setup-test-env clean-test-env
+.PHONY: all build build-static clean test e2e-test e2e-test-simple setup-test-env clean-test-env
 
 # Default target
 all: build

@@ -20,9 +20,10 @@ COPY --from=builder /app/skyhook-server /app/skyhook-server
 # Copy Node.js files
 COPY src/ /app/src/
 COPY package.json yarn.lock .yarnrc.yml ./
+COPY .yarn/ /app/.yarn/
 
 # Install Node.js dependencies
-RUN yarn install
+RUN corepack enable && yarn install
 
 EXPOSE 50051
 

@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/fabrique/crossplane-skyhook/pkg/config"
 	"github.com/fabrique/crossplane-skyhook/pkg/grpc"
+	"github.com/fabrique/crossplane-skyhook/pkg/logger"
 	"github.com/fabrique/crossplane-skyhook/pkg/node"
 )
 
@@ -19,10 +19,12 @@ func main() {
 	tempDir := flag.String("temp-dir", "", "Temporary directory for code files")
 	gcInterval := flag.Duration("gc-interval", 5*time.Minute, "Garbage collection interval")
 	idleTimeout := flag.Duration("idle-timeout", 30*time.Minute, "Idle process timeout")
+	logLevel := flag.String("log-level", "info", "Log level (debug, info, warn, error)")
+	logFormat := flag.String("log-format", "auto", "Log format (auto, text, json). Auto uses text for TTY, JSON otherwise")
 	flag.Parse()
 
 	// Create logger
-	logger := log.New(os.Stdout, "[skyhook] ", log.LstdFlags)
+	log := logger.NewLogrusLogger(*logLevel, *logFormat)
 
 	// Create configuration
 	cfg := config.DefaultConfig()
@@ -41,26 +43,26 @@ func main() {
 
 	// Validate configuration
 	if err := cfg.Validate(); err != nil {
-		logger.Fatalf("Invalid configuration: %v", err)
+		log.Fatalf("Invalid configuration: %v", err)
 	}
 
 	// Create process manager
-	processManager, err := node.NewProcessManager(cfg.GCInterval, cfg.IdleTimeout, cfg.TempDir, logger)
+	processManager, err := node.NewProcessManager(cfg.GCInterval, cfg.IdleTimeout, cfg.TempDir, log)
 	if err != nil {
-		logger.Fatalf("Failed to create process manager: %v", err)
+		log.Fatalf("Failed to create process manager: %v", err)
 	}
 
 	// Create gRPC server
-	server := grpc.NewServer(processManager, logger)
+	server := grpc.NewServer(processManager, log)
 
 	// Start gRPC server
 	go func() {
 		if err := server.Start(cfg.GRPCAddress); err != nil {
-			logger.Fatalf("Failed to start gRPC server: %v", err)
+			log.Fatalf("Failed to start gRPC server: %v", err)
 		}
 	}()
 
-	logger.Printf("Server started on %s", cfg.GRPCAddress)
+	log.Infof("Server started on %s", cfg.GRPCAddress)
 
 	// Wait for termination signal
 	sigCh := make(chan os.Signal, 1)
@@ -68,6 +70,6 @@ func main() {
 	<-sigCh
 
 	// Stop the server
-	logger.Println("Shutting down...")
+	log.Info("Shutting down...")
 	server.Stop()
 }

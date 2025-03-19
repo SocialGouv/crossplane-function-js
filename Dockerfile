@@ -1,12 +1,11 @@
-FROM golang:1.22 AS builder
+FROM golang:1.23 AS builder
 
 WORKDIR /app
 
 COPY go.mod go.sum ./
-RUN go mod download
-
+COPY vendor/ vendor/
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o skyhook-server cmd/server/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -mod=vendor -o skyhook-server cmd/server/main.go
 
 FROM node:22-alpine
 

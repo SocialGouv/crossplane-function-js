@@ -1,0 +1,35 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: simpleconfigmaps.test.crossplane.io
+spec:
+  compositeTypeRef:
+    apiVersion: test.crossplane.io/v1alpha1
+    kind: SimpleConfigMap
+  resources:
+    - name: configmap
+      base:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: generated-configmap
+      patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.data
+          toFieldPath: data
+      functions:
+        - name: skyhook-function
+          type: Container
+          config:
+            apiVersion: skyhook.crossplane.io/v1alpha1
+            kind: SkyhookFunction
+            metadata:
+              name: transform-data
+            spec:
+              code: |
+                // Transform the input data
+                const transformedData = {};
+                for (const [key, value] of Object.entries(input.data || {})) {
+                  transformedData[key.toUpperCase()] = value.toUpperCase();
+                }
+                return { data: transformedData };

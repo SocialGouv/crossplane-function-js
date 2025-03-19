@@ -1,0 +1,9 @@
+apiVersion: test.crossplane.io/v1alpha1
+kind: SimpleConfigMap
+metadata:
+  name: sample-configmap
+spec:
+  data:
+    name: "John Doe"
+    email: "john.doe@example.com"
+    role: "developer"

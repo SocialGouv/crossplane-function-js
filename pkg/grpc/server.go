@@ -2,12 +2,14 @@ package grpc
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 
 	"github.com/socialgouv/crossplane-skyhook/pkg/logger"
@@ -31,20 +33,48 @@ func NewServer(processManager *node.ProcessManager, logger logger.Logger) *Serve
 }
 
 // Start starts the gRPC server on the specified address
-func (s *Server) Start(address string) error {
+func (s *Server) Start(address string, tlsEnabled bool, certFile, keyFile string) error {
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		return fmt.Errorf("failed to listen on %s: %w", address, err)
 	}
 
-	// Create a new gRPC server with the logging interceptor
-	s.server = grpc.NewServer(
-		grpc.UnaryInterceptor(logger.UnaryServerInterceptor(s.logger)),
-	)
+	// Create server options
+	var opts []grpc.ServerOption
+	opts = append(opts, grpc.UnaryInterceptor(logger.UnaryServerInterceptor(s.logger)))
+
+	// Add TLS credentials if enabled
+	if tlsEnabled {
+		creds, err := s.loadTLSCredentials(certFile, keyFile)
+		if err != nil {
+			return fmt.Errorf("failed to load TLS credentials: %w", err)
+		}
+		opts = append(opts, grpc.Creds(creds))
+	}
+
+	// Create a new gRPC server with the options
+	s.server = grpc.NewServer(opts...)
 	RegisterSkyhookServiceServer(s.server, s)
 
-	s.logger.Infof("Starting gRPC server on %s", address)
+	s.logger.Infof("Starting gRPC server on %s (TLS: %v)", address, tlsEnabled)
 	return s.server.Serve(listener)
+}
+
+// loadTLSCredentials loads TLS credentials from certificate and key files
+func (s *Server) loadTLSCredentials(certFile, keyFile string) (credentials.TransportCredentials, error) {
+	// Load server's certificate and private key
+	serverCert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load server certificate and key: %w", err)
+	}
+
+	// Create the credentials and return it
+	config := &tls.Config{
+		Certificates: []tls.Certificate{serverCert},
+		ClientAuth:   tls.NoClientCert,
+	}
+
+	return credentials.NewTLS(config), nil
 }
 
 // Stop stops the gRPC server

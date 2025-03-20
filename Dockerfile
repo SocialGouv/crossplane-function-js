@@ -29,6 +29,6 @@ COPY crossplane.yaml package.yaml /
 RUN corepack enable
 RUN yarn workspaces focus --production && yarn cache clean
 
-EXPOSE 50051
+EXPOSE 9443
 
 ENTRYPOINT ["/app/skyhook-server"]

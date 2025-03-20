@@ -15,4 +15,4 @@ runtimeConfig:
   service:
     name: skyhook-server
     namespace: crossplane-system
-    port: 50051
+    port: 9443

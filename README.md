@@ -38,12 +38,12 @@ go build -o bin/skyhook-server cmd/server/main.go
 ### Starting the Server
 
 ```bash
-./bin/skyhook-server --grpc-addr=:50051 --temp-dir=/tmp/crossplane-skyhook
+./bin/skyhook-server --grpc-addr=:9443 --temp-dir=/tmp/crossplane-skyhook
 ```
 
 ### Command Line Options
 
-- `--grpc-addr`: gRPC server address (default: `:50051`)
+- `--grpc-addr`: gRPC server address (default: `:9443`)
 - `--temp-dir`: Temporary directory for code files (default: OS temp dir + `/crossplane-skyhook`)
 - `--gc-interval`: Garbage collection interval (default: `5m`)
 - `--idle-timeout`: Idle process timeout (default: `30m`)

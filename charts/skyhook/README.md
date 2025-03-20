@@ -32,7 +32,7 @@ The following table lists the configurable parameters of the Skyhook chart and t
 | `runtimeConfig.name` | Name of the DeploymentRuntimeConfig resource | `skyhook-runtime-config` |
 | `runtimeConfig.service.name` | Name of the service | `skyhook-server` |
 | `runtimeConfig.service.namespace` | Namespace of the service | `crossplane-system` |
-| `runtimeConfig.service.port` | Port of the service | `50051` |
+| `runtimeConfig.service.port` | Port of the service | `9443` |
 
 ## Usage
 

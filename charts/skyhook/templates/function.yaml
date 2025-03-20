@@ -7,7 +7,7 @@ metadata:
 spec:
   package: {{ .Values.function.package.repository }}/{{ .Values.function.package.name }}:{{ .Values.function.package.tag }}
   packagePullPolicy: {{ .Values.function.pullPolicy }}
-  deploymentRuntimeConfigRef:
+  runtimeConfigRef:
     apiVersion: pkg.crossplane.io/v1beta1
     kind: DeploymentRuntimeConfig
     name: {{ .Values.runtimeConfig.name }}

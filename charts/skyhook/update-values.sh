@@ -20,7 +20,7 @@ PULL_POLICY="Always"
 RUNTIME_CONFIG_NAME="skyhook-runtime-config"
 SERVICE_NAME="skyhook-server"
 SERVICE_NAMESPACE="crossplane-system"
-SERVICE_PORT="50051"
+SERVICE_PORT="9443"
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do

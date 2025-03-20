@@ -3,18 +3,22 @@ kind: DeploymentRuntimeConfig
 metadata:
   name: {{ .Values.runtimeConfig.name }}
 spec:
+  serviceConfig:
+    name: {{ .Values.runtimeConfig.service.name }}
+    namespace: {{ .Values.runtimeConfig.service.namespace }}
+    port: 9443
   deploymentTemplate:
     spec:
       selector:
         matchLabels:
-          app: skyhook-function
+          pkg.crossplane.io/function: function-skyhook
       template:
         metadata:
           labels:
-            app: skyhook-function
+            pkg.crossplane.io/function: function-skyhook
         spec:
           containers:
-            - name: function-container
+            - name: package-runtime
               resources:
                 limits:
                   cpu: 250m

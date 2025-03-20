@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/fabrique/crossplane-skyhook/pkg/hash"
-	"github.com/fabrique/crossplane-skyhook/pkg/logger"
+	"github.com/socialgouv/crossplane-skyhook/pkg/hash"
+	"github.com/socialgouv/crossplane-skyhook/pkg/logger"
 )
 
 // ProcessInfo holds information about a Node.js process

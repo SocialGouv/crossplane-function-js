@@ -23,7 +23,7 @@ Crossplane Skyhook is a gRPC server that allows Crossplane to execute JavaScript
 
 ```bash
 # Clone the repository
-git clone https://github.com/fabrique/crossplane-skyhook.git
+git clone https://github.com/socialgouv/crossplane-skyhook.git
 cd crossplane-skyhook
 
 # Install Go dependencies
@@ -67,6 +67,35 @@ The Node.js runtime executes the JavaScript/TypeScript code. It:
 - Uses Node.js 22's experimental TypeScript support
 - Executes the code in a controlled environment
 - Returns structured results or errors
+
+## Deployment
+
+### Using Helm Chart
+
+The project includes a Helm chart for deploying the Skyhook Function and DeploymentRuntimeConfig to a Kubernetes cluster with Crossplane installed.
+
+```bash
+# Build and push the Docker image
+docker build --tag localhost:5001/crossplane-skyhook:test .
+docker push localhost:5001/crossplane-skyhook:test
+
+# Install the Helm chart
+helm upgrade --install skyhook ./charts/skyhook \
+  --set function.package.repository=localhost:5001 \
+  --set function.package.name=crossplane-skyhook \
+  --set function.package.tag=test
+```
+
+For more information about the Helm chart, see the [chart documentation](./charts/skyhook/README.md).
+
+### Manual Deployment
+
+You can also deploy the Skyhook server manually using the provided scripts:
+
+```bash
+# Deploy the Skyhook server
+./tests/deploy-skyhook.sh
+```
 
 ## Testing
 

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package skyhook;
 
-option go_package = "github.com/fabrique/crossplane-skyhook/pkg/grpc";
+option go_package = "github.com/socialgouv/crossplane-skyhook/pkg/grpc";
 
 service SkyhookService {
   // RunFunction executes a JavaScript/TypeScript function with the provided input

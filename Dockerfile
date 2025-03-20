@@ -22,8 +22,12 @@ COPY src/ /app/src/
 COPY package.json yarn.lock .yarnrc.yml ./
 COPY .yarn/ /app/.yarn/
 
+# Copy crossplane files
+COPY crossplane.yaml package.yaml /
+
 # Install Node.js dependencies
-RUN corepack enable && yarn install
+RUN corepack enable
+RUN yarn workspaces focus --production && yarn cache clean
 
 EXPOSE 50051
 

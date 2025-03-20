@@ -1,7 +1,8 @@
-apiVersion: test.crossplane.io/v1alpha1
-kind: SimpleConfigMap
+apiVersion: test.crossplane.io/v1beta1
+kind: SimpleConfigMapClaim
 metadata:
-  name: sample-configmap
+  name: sample-configmap-claim
+  namespace: test-skyhook
 spec:
   data:
     name: "John Doe"

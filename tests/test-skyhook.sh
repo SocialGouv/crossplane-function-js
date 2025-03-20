@@ -15,22 +15,26 @@ trap 'handle_error $LINENO' ERR
 echo "Creating test namespace..."
 kubectl create namespace test-skyhook --dry-run=client -o yaml | kubectl apply -f -
 
+# Clean up existing CRD if it exists
+echo "Cleaning up existing CRD..."
+./tests/cleanup-crd.sh
+
 # Apply CRDs and Compositions
 echo "Applying CRDs and Compositions..."
 kubectl apply -f test/fixtures/crd.yaml
 kubectl apply -f test/fixtures/composition.yaml
 
-# Wait for CRDs to be established
-echo "Waiting for CRDs to be established..."
-kubectl wait --for=condition=established crd/simpleconfigmaps.test.crossplane.io --timeout=60s || {
-  echo "CRD not established within timeout"
-  echo "Current CRD status:"
-  kubectl get crd/simpleconfigmaps.test.crossplane.io -o yaml
+# Wait for XRD to be established
+echo "Waiting for XRD to be established..."
+kubectl wait --for=condition=established xrd/simpleconfigmaps.test.crossplane.io --timeout=60s || {
+  echo "XRD not established within timeout"
+  echo "Current XRD status:"
+  kubectl get xrd/simpleconfigmaps.test.crossplane.io -o yaml
   exit 1
 }
 
-# Create a test SimpleConfigMap
-echo "Creating test SimpleConfigMap..."
+# Create a test SimpleConfigMapClaim
+echo "Creating test SimpleConfigMapClaim..."
 kubectl apply -f test/fixtures/sample.yaml
 
 # Wait for the ConfigMap to be created
@@ -44,10 +48,10 @@ for i in {1..30}; do
   fi
   echo "Waiting for ConfigMap to be created... ($i/30)"
   
-  # Check the status of the SimpleConfigMap
+  # Check the status of the SimpleConfigMapClaim
   if [ $((i % 5)) -eq 0 ]; then
-    echo "SimpleConfigMap status:"
-    kubectl get simpleconfigmaps.test.crossplane.io -n test-skyhook -o yaml || true
+    echo "SimpleConfigMapClaim status:"
+    kubectl get simpleconfigmapclaims.test.crossplane.io -n test-skyhook -o yaml || true
     echo "Crossplane Function status:"
     kubectl get functions.pkg.crossplane.io || true
     echo "FunctionRuntime status:"
@@ -59,8 +63,8 @@ done
 
 if [ "$configmap_created" = false ]; then
   echo "ConfigMap was not created within timeout"
-  echo "Final SimpleConfigMap status:"
-  kubectl get simpleconfigmaps.test.crossplane.io -n test-skyhook -o yaml || true
+  echo "Final SimpleConfigMapClaim status:"
+  kubectl get simpleconfigmapclaims.test.crossplane.io -n test-skyhook -o yaml || true
   echo "Final Crossplane Function status:"
   kubectl get functions.pkg.crossplane.io || true
   echo "Final FunctionRuntime status:"

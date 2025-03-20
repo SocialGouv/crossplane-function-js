@@ -4,17 +4,47 @@ metadata:
   name: simpleconfigmaps.test.crossplane.io
 spec:
   compositeTypeRef:
-    apiVersion: test.crossplane.io/v1alpha1
+    apiVersion: test.crossplane.io/v1beta1 
     kind: SimpleConfigMap
-  resources:
-    - name: configmap
-      base:
-        apiVersion: v1
-        kind: ConfigMap
-        metadata:
-          name: generated-configmap
-          namespace: test-skyhook
-        data:
-          NAME: "JOHN DOE"
-          EMAIL: "JOHN.DOE@EXAMPLE.COM"
-          ROLE: "DEVELOPER"
+  mode: Pipeline
+  pipeline:
+    - step: transform-to-uppercase
+      functionRef:
+        name: function-skyhook
+      input:
+        apiVersion: skyhook.fn.crossplane.io/v1beta1
+        kind: Input
+        spec:
+          source:
+            inline: |
+              // Get the data from the SimpleConfigMap
+              const data = input.observed.composite.resource.spec.data;
+              
+              // Create a new object with uppercase values
+              const uppercaseData = {};
+              for (const key in data) {
+                uppercaseData[key.toUpperCase()] = data[key].toUpperCase();
+              }
+              
+              // Create the ConfigMap with uppercase values
+              const configMap = {
+                apiVersion: "v1",
+                kind: "ConfigMap",
+                metadata: {
+                  name: "generated-configmap",
+                  namespace: "test-skyhook"
+                },
+                data: uppercaseData
+              };
+              
+              // Set the desired composed resource
+              input.desired = {
+                resources: {
+                  configmap: {
+                    resource: configMap
+                  }
+                }
+              };
+              
+              // Return the result
+              return input.desired;

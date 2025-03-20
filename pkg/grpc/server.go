@@ -10,8 +10,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/fabrique/crossplane-skyhook/pkg/logger"
-	"github.com/fabrique/crossplane-skyhook/pkg/node"
+	"github.com/socialgouv/crossplane-skyhook/pkg/logger"
+	"github.com/socialgouv/crossplane-skyhook/pkg/node"
 )
 
 // Server is the gRPC server for the Skyhook service

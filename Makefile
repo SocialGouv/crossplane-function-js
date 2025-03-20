@@ -8,6 +8,15 @@ DOCKER_IMAGE := localhost:5001/$(PROJECT_NAME)
 # Default target
 all: build
 
+# Refresh dependencies
+deps:
+	$(GO) mod tidy
+	$(GO) mod vendor
+
+# Update dependencies
+update-deps:
+	$(GO) get -u ./...
+
 # Build the project
 build:
 	$(GO) build -o bin/skyhook-server cmd/server/main.go

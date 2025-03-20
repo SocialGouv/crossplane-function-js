@@ -19,3 +19,12 @@ tests/
 .editorconfig
 README.md
 Makefile
+
+charts
+node_modules
+tests
+test
+/*.md
+.editorconfig
+.nvmrc
+.node-version

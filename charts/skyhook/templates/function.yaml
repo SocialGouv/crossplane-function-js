@@ -1,0 +1,14 @@
+apiVersion: pkg.crossplane.io/v1
+kind: Function
+metadata:
+  name: {{ .Values.function.name }}
+  labels:
+    {{- include "skyhook.labels" . | nindent 4 }}
+spec:
+  package: {{ .Values.function.package.repository }}/{{ .Values.function.package.name }}:{{ .Values.function.package.tag }}
+  packagePullPolicy: {{ .Values.function.pullPolicy }}
+  deploymentRuntimeConfigRef:
+    apiVersion: pkg.crossplane.io/v1beta1
+    kind: DeploymentRuntimeConfig
+    name: {{ .Values.runtimeConfig.name }}
+

@@ -1,5 +1,5 @@
-apiVersion: apiextensions.k8s.io/v1
-kind: CustomResourceDefinition
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
 metadata:
   name: simpleconfigmaps.test.crossplane.io
 spec:
@@ -8,11 +8,13 @@ spec:
     kind: SimpleConfigMap
     plural: simpleconfigmaps
     singular: simpleconfigmap
-  scope: Namespaced
+  claimNames:
+    kind: SimpleConfigMapClaim
+    plural: simpleconfigmapclaims
   versions:
-    - name: v1alpha1
+    - name: v1beta1
       served: true
-      storage: true
+      referenceable: true
       schema:
         openAPIV3Schema:
           type: object

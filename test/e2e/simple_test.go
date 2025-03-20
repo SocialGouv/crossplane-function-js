@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fabrique/crossplane-skyhook/pkg/node"
+	"github.com/socialgouv/crossplane-skyhook/pkg/node"
 )
 
 func TestSimpleFunction(t *testing.T) {

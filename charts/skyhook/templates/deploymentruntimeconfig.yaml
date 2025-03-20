@@ -1,0 +1,24 @@
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+  name: {{ .Values.runtimeConfig.name }}
+spec:
+  deploymentTemplate:
+    spec:
+      selector:
+        matchLabels:
+          app: skyhook-function
+      template:
+        metadata:
+          labels:
+            app: skyhook-function
+        spec:
+          containers:
+            - name: function-container
+              resources:
+                limits:
+                  cpu: 250m
+                  memory: 512Mi
+                requests:
+                  cpu: 100m
+                  memory: 128Mi

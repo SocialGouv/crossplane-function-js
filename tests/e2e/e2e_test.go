@@ -37,7 +37,7 @@ func TestCrossplaneSkyhook(t *testing.T) {
 	// Define GVR for SimpleConfigMap
 	simpleConfigMapGVR := schema.GroupVersionResource{
 		Group:    "test.crossplane.io",
-		Version:  "v1alpha1",
+		Version:  "v1beta1",
 		Resource: "simpleconfigmaps",
 	}
 
@@ -66,7 +66,7 @@ func TestCrossplaneSkyhook(t *testing.T) {
 	// Create SimpleConfigMap
 	simpleConfigMap := &unstructured.Unstructured{
 		Object: map[string]interface{}{
-			"apiVersion": "test.crossplane.io/v1alpha1",
+			"apiVersion": "test.crossplane.io/v1beta1",
 			"kind":       "SimpleConfigMap",
 			"metadata": map[string]interface{}{
 				"name":      "test-simple-configmap",

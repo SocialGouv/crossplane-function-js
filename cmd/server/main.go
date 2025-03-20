@@ -7,10 +7,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/fabrique/crossplane-skyhook/pkg/config"
-	"github.com/fabrique/crossplane-skyhook/pkg/grpc"
-	"github.com/fabrique/crossplane-skyhook/pkg/logger"
-	"github.com/fabrique/crossplane-skyhook/pkg/node"
+	"github.com/socialgouv/crossplane-skyhook/pkg/config"
+	"github.com/socialgouv/crossplane-skyhook/pkg/grpc"
+	"github.com/socialgouv/crossplane-skyhook/pkg/logger"
+	"github.com/socialgouv/crossplane-skyhook/pkg/node"
 )
 
 func main() {

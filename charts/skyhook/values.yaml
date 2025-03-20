@@ -1,0 +1,18 @@
+# Default values for skyhook chart
+
+# Function configuration
+function:
+  name: function-skyhook
+  package:
+    repository: localhost:5001
+    name: crossplane-skyhook
+    tag: test
+  pullPolicy: Always
+
+# RuntimeConfig configuration
+runtimeConfig:
+  name: skyhook-runtime-config
+  service:
+    name: skyhook-server
+    namespace: crossplane-system
+    port: 50051

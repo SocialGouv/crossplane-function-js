@@ -223,18 +223,8 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, input []byte) (inter
 
 	if err := json.Unmarshal(input, &inputStruct); err != nil {
 		s.logger.Errorf("Error parsing input JSON: %v", err)
-		return &struct {
-			Error struct {
-				Code       int32  `json:"code"`
-				Message    string `json:"message"`
-				StackTrace string `json:"stack_trace"`
-			} `json:"error"`
-		}{
-			Error: struct {
-				Code       int32  `json:"code"`
-				Message    string `json:"message"`
-				StackTrace string `json:"stack_trace"`
-			}{
+		return &RunFunctionResponse{
+			Error: &ErrorInfo{
 				Code:       int32(codes.InvalidArgument),
 				Message:    fmt.Sprintf("Failed to parse input JSON: %v", err),
 				StackTrace: "",
@@ -254,18 +244,8 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, input []byte) (inter
 	var inputData map[string]interface{}
 	if err := json.Unmarshal(input, &inputData); err != nil {
 		s.logger.Errorf("Error parsing input JSON: %v", err)
-		return &struct {
-			Error struct {
-				Code       int32  `json:"code"`
-				Message    string `json:"message"`
-				StackTrace string `json:"stack_trace"`
-			} `json:"error"`
-		}{
-			Error: struct {
-				Code       int32  `json:"code"`
-				Message    string `json:"message"`
-				StackTrace string `json:"stack_trace"`
-			}{
+		return &RunFunctionResponse{
+			Error: &ErrorInfo{
 				Code:       int32(codes.InvalidArgument),
 				Message:    fmt.Sprintf("Failed to parse input JSON: %v", err),
 				StackTrace: "",
@@ -287,18 +267,8 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, input []byte) (inter
 					newInputJSON, err := json.Marshal(inputData)
 					if err != nil {
 						s.logger.Errorf("Error re-serializing input JSON: %v", err)
-						return &struct {
-							Error struct {
-								Code       int32  `json:"code"`
-								Message    string `json:"message"`
-								StackTrace string `json:"stack_trace"`
-							} `json:"error"`
-						}{
-							Error: struct {
-								Code       int32  `json:"code"`
-								Message    string `json:"message"`
-								StackTrace string `json:"stack_trace"`
-							}{
+						return &RunFunctionResponse{
+							Error: &ErrorInfo{
 								Code:       int32(codes.Internal),
 								Message:    fmt.Sprintf("Failed to re-serialize input JSON: %v", err),
 								StackTrace: "",
@@ -313,18 +283,8 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, input []byte) (inter
 
 	if code == "" {
 		s.logger.Error("No code found in the input")
-		return &struct {
-			Error struct {
-				Code       int32  `json:"code"`
-				Message    string `json:"message"`
-				StackTrace string `json:"stack_trace"`
-			} `json:"error"`
-		}{
-			Error: struct {
-				Code       int32  `json:"code"`
-				Message    string `json:"message"`
-				StackTrace string `json:"stack_trace"`
-			}{
+		return &RunFunctionResponse{
+			Error: &ErrorInfo{
 				Code:       int32(codes.InvalidArgument),
 				Message:    "No code found in the input",
 				StackTrace: "",
@@ -336,18 +296,8 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, input []byte) (inter
 	result, err := s.processManager.ExecuteFunction(ctx, code, extractedInputJSON)
 	if err != nil {
 		s.logger.Errorf("Error executing function: %v", err)
-		return &struct {
-			Error struct {
-				Code       int32  `json:"code"`
-				Message    string `json:"message"`
-				StackTrace string `json:"stack_trace"`
-			} `json:"error"`
-		}{
-			Error: struct {
-				Code       int32  `json:"code"`
-				Message    string `json:"message"`
-				StackTrace string `json:"stack_trace"`
-			}{
+		return &RunFunctionResponse{
+			Error: &ErrorInfo{
 				Code:       int32(codes.Internal),
 				Message:    err.Error(),
 				StackTrace: "",
@@ -367,18 +317,8 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, input []byte) (inter
 
 	if err := json.Unmarshal([]byte(result), &nodeResp); err != nil {
 		s.logger.Errorf("Error parsing Node.js response: %v", err)
-		return &struct {
-			Error struct {
-				Code       int32  `json:"code"`
-				Message    string `json:"message"`
-				StackTrace string `json:"stack_trace"`
-			} `json:"error"`
-		}{
-			Error: struct {
-				Code       int32  `json:"code"`
-				Message    string `json:"message"`
-				StackTrace string `json:"stack_trace"`
-			}{
+		return &RunFunctionResponse{
+			Error: &ErrorInfo{
 				Code:       int32(codes.Internal),
 				Message:    fmt.Sprintf("Failed to parse Node.js response: %v", err),
 				StackTrace: "",
@@ -387,18 +327,8 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, input []byte) (inter
 	}
 
 	if nodeResp.Error != nil {
-		return &struct {
-			Error struct {
-				Code       int32  `json:"code"`
-				Message    string `json:"message"`
-				StackTrace string `json:"stack_trace"`
-			} `json:"error"`
-		}{
-			Error: struct {
-				Code       int32  `json:"code"`
-				Message    string `json:"message"`
-				StackTrace string `json:"stack_trace"`
-			}{
+		return &RunFunctionResponse{
+			Error: &ErrorInfo{
 				Code:       int32(nodeResp.Error.Code),
 				Message:    nodeResp.Error.Message,
 				StackTrace: nodeResp.Error.Stack,
@@ -406,10 +336,8 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, input []byte) (inter
 		}, nil
 	}
 
-	// Return the result
-	return &struct {
-		Output []byte `json:"output"`
-	}{
-		Output: []byte(nodeResp.Result),
+	// Return the result as a proper protobuf message
+	return &RunFunctionResponse{
+		OutputJson: string(nodeResp.Result),
 	}, nil
 }

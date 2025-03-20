@@ -36,6 +36,12 @@ export function createServer(port: number) {
     try {
       const { code, input } = req.body as NodeRequest;
       
+      // Log the request for debugging
+      moduleLogger.debug(`Execute request received: ${JSON.stringify({ 
+        code_length: code?.length || 0,
+        input: input 
+      }, null, 2)}`);
+      
       if (!code) {
         return res.status(400).json({
           error: {
@@ -52,6 +58,10 @@ export function createServer(port: number) {
       const result = await executeCode(code, input);
       
       moduleLogger.info('Code execution completed');
+      
+      // Log the response for debugging
+      moduleLogger.debug(`Execute response: ${JSON.stringify(result, null, 2)}`);
+      
       return res.json(result);
     } catch (err: unknown) {
       const error = err as Error;

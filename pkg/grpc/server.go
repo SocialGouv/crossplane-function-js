@@ -13,6 +13,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/socialgouv/crossplane-skyhook/pkg/logger"
 	"github.com/socialgouv/crossplane-skyhook/pkg/node"
@@ -337,17 +339,85 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1beta1.RunFu
 		}, nil
 	}
 
+	// Parse the JavaScript function's response to extract the resources
+	var jsResponse struct {
+		Resources map[string]struct {
+			Resource json.RawMessage `json:"resource"`
+		} `json:"resources"`
+	}
+
+	if err := json.Unmarshal(nodeResp.Result, &jsResponse); err != nil {
+		s.logger.Errorf("Error parsing JavaScript function response: %v", err)
+		return &fnv1beta1.RunFunctionResponse{
+			Meta: &fnv1beta1.ResponseMeta{},
+			Results: []*fnv1beta1.Result{
+				{
+					Severity: fnv1beta1.Severity_SEVERITY_FATAL,
+					Message:  fmt.Sprintf("Failed to parse JavaScript function response: %v", err),
+				},
+			},
+		}, nil
+	}
+
 	// Create a new State object
 	state := &fnv1beta1.State{
-		Composite: &fnv1beta1.Resource{
-			Resource: req.Input,
-		},
 		Resources: make(map[string]*fnv1beta1.Resource),
 	}
 
+	// Create a copy of the input struct
+	compositeResource := proto.Clone(req.Input).(*structpb.Struct)
+
+	// Remove the spec.source field if it exists
+	if specValue, ok := compositeResource.Fields["spec"]; ok {
+		if specStruct, ok := specValue.Kind.(*structpb.Value_StructValue); ok {
+			delete(specStruct.StructValue.Fields, "source")
+		}
+	}
+
+	// Set the cleaned composite resource
+	state.Composite = &fnv1beta1.Resource{
+		Resource: compositeResource,
+	}
+
+	// Add the resources from the JavaScript function's response
+	for name, resourceObj := range jsResponse.Resources {
+		// Convert the JSON resource to a structpb.Struct
+		var resourceMap map[string]interface{}
+		if err := json.Unmarshal(resourceObj.Resource, &resourceMap); err != nil {
+			s.logger.Errorf("Error unmarshaling resource %s: %v", name, err)
+			continue
+		}
+
+		// Remove the namespace from the resource metadata if it exists
+		// This prevents Crossplane from trying to add it to resourceRefs
+		if metadata, ok := resourceMap["metadata"].(map[string]interface{}); ok {
+			if _, ok := metadata["namespace"].(string); ok {
+				// Remove the namespace from the resource metadata
+				delete(metadata, "namespace")
+			}
+		}
+
+		resourceStruct, err := structpb.NewStruct(resourceMap)
+		if err != nil {
+			s.logger.Errorf("Error converting resource %s to struct: %v", name, err)
+			continue
+		}
+
+		// Create a resource without namespace in resourceRefs
+		state.Resources[name] = &fnv1beta1.Resource{
+			Resource: resourceStruct,
+		}
+	}
+
+	// Log the final state for debugging
+	stateJSON, _ := json.MarshalIndent(state, "", "  ")
+	s.logger.Debugf("Final state being returned to Crossplane: %s", string(stateJSON))
+
 	// Return the result as a proper protobuf message
-	return &fnv1beta1.RunFunctionResponse{
+	response := &fnv1beta1.RunFunctionResponse{
 		Meta:    &fnv1beta1.ResponseMeta{},
 		Desired: state,
-	}, nil
+	}
+
+	return response, nil
 }

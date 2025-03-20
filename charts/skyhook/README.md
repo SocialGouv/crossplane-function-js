@@ -33,6 +33,18 @@ The following table lists the configurable parameters of the Skyhook chart and t
 | `runtimeConfig.service.name` | Name of the service | `skyhook-server` |
 | `runtimeConfig.service.namespace` | Namespace of the service | `crossplane-system` |
 | `runtimeConfig.service.port` | Port of the service | `9443` |
+| `config.logLevel` | Log level (debug, info, warn, error) | `info` |
+| `config.logFormat` | Log format (auto, text, json) | `auto` |
+| `config.tempDir` | Temporary directory for code files | `""` (uses default) |
+| `config.gcInterval` | Garbage collection interval | `""` (uses default) |
+| `config.idleTimeout` | Idle process timeout | `""` (uses default) |
+| `config.nodeServerPort` | Port for the Node.js HTTP server | `""` (uses default) |
+| `config.healthCheckWait` | Timeout for health check | `""` (uses default) |
+| `config.healthCheckInterval` | Interval for health check polling | `""` (uses default) |
+| `config.nodeRequestTimeout` | Timeout for Node.js requests | `""` (uses default) |
+| `config.tls.enabled` | Enable TLS | `false` |
+| `config.tls.certFile` | Path to TLS certificate file | `""` |
+| `config.tls.keyFile` | Path to TLS key file | `""` |
 
 ## Usage
 
@@ -67,3 +79,4 @@ spec:
 
 ```bash
 helm uninstall skyhook
+```

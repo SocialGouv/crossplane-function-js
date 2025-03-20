@@ -10,15 +10,14 @@ const DEFAULT_PORT = 3000;
 // Get the port from environment variable or use default
 const port = parseInt(process.env.PORT || `${DEFAULT_PORT}`, 10);
 
-// Check if a file path was provided (for backward compatibility)
 if (process.argv.length < 3) {
   moduleLogger.error('Usage: node index.js <code-file-path>');
   process.exit(1);
 }
 
-// Get the code file path (for backward compatibility)
+// Get the code file path
 const codeFilePath = process.argv[2];
-moduleLogger.info(`Code file path: ${codeFilePath} (for backward compatibility)`);
+moduleLogger.info(`Code file path: ${codeFilePath}`);
 
 // Set up error handling for uncaught exceptions
 process.on('uncaughtException', (err) => {

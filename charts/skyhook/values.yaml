@@ -16,3 +16,26 @@ runtimeConfig:
     name: skyhook-server
     namespace: crossplane-system
     port: 9443
+
+# Server configuration
+config:
+  # Logging configuration
+  logLevel: "debug"  # debug, info, warn, error
+  logFormat: "auto" # auto, text, json
+
+  # Server configuration
+  # tempDir: "/tmp/crossplane-skyhook"
+  # gcInterval: "5m"
+  # idleTimeout: "30m"
+
+  # Node.js configuration
+  # nodeServerPort: 3000
+  # healthCheckWait: "30s"
+  # healthCheckInterval: "500ms"
+  # nodeRequestTimeout: "30s"
+
+  # TLS configuration
+  tls:
+    enabled: false
+    # certFile: "/certs/tls.crt"
+    # keyFile: "/certs/tls.key"

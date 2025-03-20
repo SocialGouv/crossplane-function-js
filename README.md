@@ -41,12 +41,37 @@ go build -o bin/skyhook-server cmd/server/main.go
 ./bin/skyhook-server --grpc-addr=:9443 --temp-dir=/tmp/crossplane-skyhook
 ```
 
-### Command Line Options
+### Configuration
+
+The server can be configured using command-line flags, environment variables, or a combination of both.
+
+#### Command Line Options
 
 - `--grpc-addr`: gRPC server address (default: `:9443`)
 - `--temp-dir`: Temporary directory for code files (default: OS temp dir + `/crossplane-skyhook`)
 - `--gc-interval`: Garbage collection interval (default: `5m`)
 - `--idle-timeout`: Idle process timeout (default: `30m`)
+- `--log-level`: Log level (debug, info, warn, error) (default: `info`)
+- `--log-format`: Log format (auto, text, json) (default: `auto`)
+- `--node-server-port`: Port for the Node.js HTTP server (default: `3000`)
+- `--health-check-wait`: Timeout for health check (default: `30s`)
+- `--health-check-interval`: Interval for health check polling (default: `500ms`)
+- `--request-timeout`: Timeout for requests (default: `30s`)
+- `--tls-enabled`: Enable TLS (default: `false`)
+- `--tls-cert-file`: Path to TLS certificate file
+- `--tls-key-file`: Path to TLS key file
+
+#### Environment Variables
+
+All configuration options can also be set using environment variables. For example:
+
+```bash
+export SKYHOOK_GRPC_ADDRESS=":8443"
+export SKYHOOK_LOG_LEVEL="debug"
+./bin/skyhook-server
+```
+
+See [ENV_VARS.md](ENV_VARS.md) for a complete list of environment variables and their descriptions.
 
 ## Architecture
 

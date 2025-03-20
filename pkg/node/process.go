@@ -38,7 +38,7 @@ type ProcessManager struct {
 }
 
 // NewProcessManager creates a new process manager
-func NewProcessManager(gcInterval, idleTimeout time.Duration, tempDir string, logger logger.Logger) (*ProcessManager, error) {
+func NewProcessManager(gcInterval, idleTimeout time.Duration, tempDir string, logger logger.Logger, opts ...ProcessManagerOption) (*ProcessManager, error) {
 	// Create temp directory if it doesn't exist
 	if err := os.MkdirAll(tempDir, 0755); err != nil {
 		return nil, fmt.Errorf("failed to create temp directory: %w", err)
@@ -56,10 +56,46 @@ func NewProcessManager(gcInterval, idleTimeout time.Duration, tempDir string, lo
 		requestTimeout:      30 * time.Second,       // Default timeout for requests
 	}
 
+	// Apply options
+	for _, opt := range opts {
+		opt(pm)
+	}
+
 	// Start the garbage collector
 	pm.startGarbageCollector()
 
 	return pm, nil
+}
+
+// ProcessManagerOption is a function that configures a ProcessManager
+type ProcessManagerOption func(*ProcessManager)
+
+// WithNodeServerPort sets the port for the Node.js HTTP server
+func WithNodeServerPort(port int) ProcessManagerOption {
+	return func(pm *ProcessManager) {
+		pm.nodeServerPort = port
+	}
+}
+
+// WithHealthCheckWait sets the timeout for health check
+func WithHealthCheckWait(timeout time.Duration) ProcessManagerOption {
+	return func(pm *ProcessManager) {
+		pm.healthCheckWait = timeout
+	}
+}
+
+// WithHealthCheckInterval sets the interval for health check polling
+func WithHealthCheckInterval(interval time.Duration) ProcessManagerOption {
+	return func(pm *ProcessManager) {
+		pm.healthCheckInterval = interval
+	}
+}
+
+// WithRequestTimeout sets the timeout for requests
+func WithRequestTimeout(timeout time.Duration) ProcessManagerOption {
+	return func(pm *ProcessManager) {
+		pm.requestTimeout = timeout
+	}
 }
 
 // SetNodeServerPort sets the port for the Node.js HTTP server

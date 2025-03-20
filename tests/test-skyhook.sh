@@ -21,6 +21,7 @@ echo "Cleaning up existing CRD..."
 
 # Apply CRDs and Compositions
 echo "Applying CRDs and Compositions..."
+kubectl apply -f tests/fixtures/provider-in-cluster.yaml
 kubectl apply -f tests/fixtures/crd.yaml
 kubectl apply -f tests/fixtures/composition.yaml
 

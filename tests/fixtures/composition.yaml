@@ -81,16 +81,40 @@ spec:
                   kind: "ConfigMap",
                   metadata: {
                     name: "generated-configmap",
-                    namespace: "test-skyhook"
+                    namespace: "test-skyhook",
+                    labels: {
+                      example: "true"
+                    }
                   },
                   data: uppercaseData
                 };
                 
-                // Create the desired state
+                // Create the desired state using the Object format
                 const desired = {
                   resources: {
                     configmap: {
-                      resource: configMap
+                      resource: {
+                        apiVersion: "kubernetes.crossplane.io/v1alpha2",
+                        kind: "Object",
+                        metadata: {
+                          name: "generated-configmap",
+                          annotations: {
+                            "uptest.upbound.io/timeout": "60"
+                          }
+                        },
+                        spec: {
+                          // Watch for changes to the ConfigMap object.
+                          // Watching resources is an alpha feature and needs to be enabled with --enable-watches
+                          // in the provider to get this configuration working.
+                          // watch: true
+                          forProvider: {
+                            manifest: configMap
+                          },
+                          providerConfigRef: {
+                            name: "default"
+                          }
+                        }
+                      }
                     }
                   }
                 };

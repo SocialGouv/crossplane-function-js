@@ -4,9 +4,7 @@ import (
 	"flag"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"syscall"
-	"time"
 
 	"github.com/socialgouv/crossplane-skyhook/pkg/config"
 	"github.com/socialgouv/crossplane-skyhook/pkg/grpc"
@@ -15,64 +13,77 @@ import (
 )
 
 func main() {
-	// Parse command line flags
-	grpcAddr := flag.String("grpc-addr", ":9443", "gRPC server address")
-	tempDir := flag.String("temp-dir", "", "Temporary directory for code files")
-	gcInterval := flag.Duration("gc-interval", 5*time.Minute, "Garbage collection interval")
-	idleTimeout := flag.Duration("idle-timeout", 30*time.Minute, "Idle process timeout")
-	logLevel := flag.String("log-level", "info", "Log level (debug, info, warn, error)")
-	logFormat := flag.String("log-format", "auto", "Log format (auto, text, json). Auto uses text for TTY, JSON otherwise")
-	nodeServerPort := flag.Int("node-server-port", 3000, "Port for the Node.js HTTP server")
-	healthCheckWait := flag.Duration("health-check-wait", 30*time.Second, "Timeout for health check")
-	healthCheckInterval := flag.Duration("health-check-interval", 500*time.Millisecond, "Interval for health check polling")
-	requestTimeout := flag.Duration("request-timeout", 30*time.Second, "Timeout for requests")
+	// Create default configuration
+	cfg := config.DefaultConfig()
+
+	// Load configuration from environment variables
+	cfg.LoadFromEnv()
+
+	// Define command line flags with current config values as defaults
+	grpcAddr := flag.String("grpc-addr", cfg.GRPCAddress, "gRPC server address")
+	tempDir := flag.String("temp-dir", cfg.TempDir, "Temporary directory for code files")
+	gcInterval := flag.Duration("gc-interval", cfg.GCInterval, "Garbage collection interval")
+	idleTimeout := flag.Duration("idle-timeout", cfg.IdleTimeout, "Idle process timeout")
+	logLevel := flag.String("log-level", cfg.LogLevel, "Log level (debug, info, warn, error)")
+	logFormat := flag.String("log-format", cfg.LogFormat, "Log format (auto, text, json). Auto uses text for TTY, JSON otherwise")
+	nodeServerPort := flag.Int("node-server-port", cfg.NodeServerPort, "Port for the Node.js HTTP server")
+	healthCheckWait := flag.Duration("health-check-wait", cfg.HealthCheckWait, "Timeout for health check")
+	healthCheckInterval := flag.Duration("health-check-interval", cfg.HealthCheckInterval, "Interval for health check polling")
+	requestTimeout := flag.Duration("request-timeout", cfg.NodeRequestTimeout, "Timeout for requests")
+	tlsEnabled := flag.Bool("tls-enabled", cfg.TLSEnabled, "Enable TLS")
+	tlsCertFile := flag.String("tls-cert-file", cfg.TLSCertFile, "Path to TLS certificate file")
+	tlsKeyFile := flag.String("tls-key-file", cfg.TLSKeyFile, "Path to TLS key file")
 	flag.Parse()
 
-	// Create logger
-	log := logger.NewLogrusLogger(*logLevel, *logFormat)
-
-	// Create configuration
-	cfg := config.DefaultConfig()
-	if *grpcAddr != "" {
-		cfg.GRPCAddress = *grpcAddr
-	}
+	// Override config with command line flags (highest priority)
+	cfg.GRPCAddress = *grpcAddr
 	if *tempDir != "" {
 		cfg.TempDir = *tempDir
 	}
-	if *gcInterval > 0 {
-		cfg.GCInterval = *gcInterval
+	cfg.GCInterval = *gcInterval
+	cfg.IdleTimeout = *idleTimeout
+	cfg.LogLevel = *logLevel
+	cfg.LogFormat = *logFormat
+	cfg.NodeServerPort = *nodeServerPort
+	cfg.HealthCheckWait = *healthCheckWait
+	cfg.HealthCheckInterval = *healthCheckInterval
+	cfg.NodeRequestTimeout = *requestTimeout
+	cfg.TLSEnabled = *tlsEnabled
+	if *tlsCertFile != "" {
+		cfg.TLSCertFile = *tlsCertFile
 	}
-	if *idleTimeout > 0 {
-		cfg.IdleTimeout = *idleTimeout
+	if *tlsKeyFile != "" {
+		cfg.TLSKeyFile = *tlsKeyFile
 	}
 
-	// Check for TLS configuration
-	tlsCertsDir := os.Getenv("TLS_SERVER_CERTS_DIR")
-	if tlsCertsDir != "" {
-		log.Infof("TLS certificates directory found at %s", tlsCertsDir)
-		cfg.TLSEnabled = true
-		cfg.TLSCertFile = filepath.Join(tlsCertsDir, "tls.crt")
-		cfg.TLSKeyFile = filepath.Join(tlsCertsDir, "tls.key")
-	}
+	// Create logger
+	log := logger.NewLogrusLogger(cfg.LogLevel, cfg.LogFormat)
+
+	// Log configuration source information
+	log.Info("Configuration loaded from defaults, environment variables, and command line flags")
 
 	// Validate configuration
 	if err := cfg.Validate(); err != nil {
 		log.Fatalf("Invalid configuration: %v", err)
 	}
 
-	// Create process manager
-	processManager, err := node.NewProcessManager(cfg.GCInterval, cfg.IdleTimeout, cfg.TempDir, log)
+	// Create process manager with all configuration options
+	processManager, err := node.NewProcessManager(
+		cfg.GCInterval,
+		cfg.IdleTimeout,
+		cfg.TempDir,
+		log,
+		node.WithNodeServerPort(cfg.NodeServerPort),
+		node.WithHealthCheckWait(cfg.HealthCheckWait),
+		node.WithHealthCheckInterval(cfg.HealthCheckInterval),
+		node.WithRequestTimeout(cfg.NodeRequestTimeout),
+	)
 	if err != nil {
 		log.Fatalf("Failed to create process manager: %v", err)
 	}
 
 	// Create gRPC server
 	server := grpc.NewServer(processManager, log)
-
-	// Configure the Node.js HTTP server
-	server.SetNodeServerPort(*nodeServerPort)
-	server.SetNodeHealthCheckConfig(*healthCheckWait, *healthCheckInterval)
-	server.SetNodeRequestTimeout(*requestTimeout)
 
 	// Start gRPC server
 	go func() {

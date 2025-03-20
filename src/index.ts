@@ -2,8 +2,8 @@
 
 import fs from 'fs';
 import path from 'path';
-import { runCode } from './runner';
-import { NodeRequest, NodeResponse, NodeError } from './types';
+import { runCode } from './runner.js';
+import { NodeRequest, NodeResponse, NodeError } from './types.js';
 
 // Check if a file path was provided
 if (process.argv.length < 3) {
@@ -18,47 +18,82 @@ const codeFilePath = process.argv[2];
 let code: string;
 try {
   code = fs.readFileSync(codeFilePath, 'utf-8');
+  console.error(`Successfully read code file: ${codeFilePath}`);
 } catch (err: unknown) {
   const error = err as Error;
   console.error(`Failed to read code file: ${error.message}`);
   process.exit(1);
 }
 
+// Set up error handling for uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught exception:', err);
+  // Don't exit the process, just log the error
+});
+
+// Set up error handling for unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled promise rejection:', reason);
+  // Don't exit the process, just log the error
+});
+
 // Process stdin for requests
 process.stdin.on('data', async (data) => {
   try {
+    console.error(`Received data of length: ${data.length}`);
+    
     // Parse the request
-    const request = JSON.parse(data.toString()) as NodeRequest;
+    const requestStr = data.toString();
+    console.error(`Parsing request: ${requestStr.substring(0, 100)}...`);
+    
+    const request = JSON.parse(requestStr) as NodeRequest;
+    console.error('Request parsed successfully');
     
     // The Go code sends both code and input, but we already have the code from the file
     // We'll use the code from the request if provided, otherwise use the code from the file
     const codeToRun = request.code || code;
     const input = request.input;
+    
+    console.error(`Running code with input: ${JSON.stringify(input).substring(0, 100)}...`);
 
     // Run the code
     const result = await runCode(codeToRun, input);
+    console.error('Code execution completed');
 
     // Send the result back
-    process.stdout.write(JSON.stringify(result) + '\n');
+    const resultStr = JSON.stringify(result);
+    console.error(`Sending result: ${resultStr.substring(0, 100)}...`);
+    process.stdout.write(resultStr + '\n');
+    console.error('Result sent successfully');
   } catch (err: unknown) {
     // Send error back
     const error = err as Error;
+    console.error('Error processing request:', error);
+    
     const nodeError: NodeError = {
       code: 500,
       message: error.message || 'Unknown error',
       stack: error.stack,
     };
     const response: NodeResponse = { error: nodeError };
-    process.stdout.write(JSON.stringify(response) + '\n');
+    
+    try {
+      process.stdout.write(JSON.stringify(response) + '\n');
+      console.error('Error response sent successfully');
+    } catch (writeErr) {
+      console.error('Failed to write error response:', writeErr);
+    }
   }
 });
 
 // Handle process termination
 process.on('SIGTERM', () => {
+  console.error('Received SIGTERM, exiting...');
   process.exit(0);
 });
 
 process.on('SIGINT', () => {
+  console.error('Received SIGINT, exiting...');
   process.exit(0);
 });
 

@@ -118,30 +118,88 @@ func (pm *ProcessManager) ExecuteFunction(ctx context.Context, code, inputJSON s
 	// Update the last used time
 	process.LastUsed = time.Now()
 
-	// Write the request to the process's stdin
-	if _, err := process.Stdin.Write(append(requestJSON, '\n')); err != nil {
-		return "", fmt.Errorf("failed to write to process stdin: %w", err)
-	}
+	// Create a context with timeout for the operation
+	execCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
 
-	// Read the response from the process's stdout
-	// We'll use a simple protocol where each message is a single line
-	var responseBytes []byte
-	buffer := make([]byte, 4096)
-	for {
-		n, err := process.Stdout.Read(buffer)
-		if err != nil {
-			if err == io.EOF {
+	// Create channels for the result and error
+	resultCh := make(chan string, 1)
+	errCh := make(chan error, 1)
+
+	// Execute the function in a goroutine
+	go func() {
+		// Write the request to the process's stdin
+		pm.logger.Debugf("Writing request to process stdin: %s", string(requestJSON)[:100])
+		if _, err := process.Stdin.Write(append(requestJSON, '\n')); err != nil {
+			errCh <- fmt.Errorf("failed to write to process stdin: %w", err)
+			return
+		}
+		pm.logger.Debug("Request written to process stdin")
+
+		// Read the response from the process's stdout
+		// We'll use a simple protocol where each message is a single line
+		var responseBytes []byte
+		buffer := make([]byte, 4096)
+		for {
+			pm.logger.Debug("Reading from process stdout")
+			n, err := process.Stdout.Read(buffer)
+			if err != nil {
+				if err == io.EOF {
+					pm.logger.Debug("EOF received from process stdout")
+					break
+				}
+				errCh <- fmt.Errorf("failed to read from process stdout: %w", err)
+				return
+			}
+			pm.logger.Debugf("Read %d bytes from process stdout", n)
+			responseBytes = append(responseBytes, buffer[:n]...)
+			if n > 0 && buffer[n-1] == '\n' {
+				pm.logger.Debug("Newline received, breaking read loop")
 				break
 			}
-			return "", fmt.Errorf("failed to read from process stdout: %w", err)
 		}
-		responseBytes = append(responseBytes, buffer[:n]...)
-		if n > 0 && buffer[n-1] == '\n' {
-			break
-		}
-	}
 
-	return string(responseBytes), nil
+		// Send the result
+		resultCh <- string(responseBytes)
+	}()
+
+	// Wait for the result, error, or timeout
+	select {
+	case result := <-resultCh:
+		pm.logger.Debug("Received result from process")
+		return result, nil
+	case err := <-errCh:
+		pm.logger.Errorf("Error executing function: %v", err)
+		// If there's an error, we should restart the process next time
+		pm.restartProcess(process, code)
+		return "", err
+	case <-execCtx.Done():
+		pm.logger.Error("Function execution timed out")
+		// If there's a timeout, we should restart the process next time
+		pm.restartProcess(process, code)
+		return "", fmt.Errorf("function execution timed out after 30 seconds")
+	}
+}
+
+// restartProcess marks a process for restart by removing it from the processes map
+func (pm *ProcessManager) restartProcess(process *ProcessInfo, code string) {
+	codeHash := hash.GenerateHash(code)
+	pm.lock.Lock()
+	defer pm.lock.Unlock()
+
+	// Check if this process is still in the map
+	if existingProcess, exists := pm.processes[codeHash]; exists && existingProcess == process {
+		pm.logger.Infof("Marking process for restart: %s", codeHash[:8])
+		// Close stdin to signal the process to exit
+		if process.Stdin != nil {
+			process.Stdin.Close()
+		}
+		// Kill the process if it doesn't exit gracefully
+		if process.Process.Process != nil {
+			process.Process.Process.Kill()
+		}
+		delete(pm.processes, codeHash)
+	}
 }
 
 // getOrCreateProcess gets an existing process for the given code or creates a new one

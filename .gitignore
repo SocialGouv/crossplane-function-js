@@ -10,5 +10,5 @@ node_modules
 !.yarn/versions
 
 /build
-
 /bin
+/dist

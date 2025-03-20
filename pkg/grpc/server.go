@@ -216,7 +216,6 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1beta1.RunFu
 	// For Crossplane functions, the code is typically provided in the composition
 	// We need to extract it from the input data
 	var code string
-	var extractedInputJSON string
 
 	// Try to extract the code from the input
 	// This is a simplified approach - in a real implementation, you would need to
@@ -246,23 +245,8 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1beta1.RunFu
 		if sourceMap, ok := specMap["source"].(map[string]interface{}); ok {
 			if inlineCode, ok := sourceMap["inline"].(string); ok {
 				code = inlineCode
-				// Remove the code from the input to avoid duplication
-				delete(sourceMap, "inline")
-				// Re-serialize the input without the code
-				newInputJSON, err := json.Marshal(inputData)
-				if err != nil {
-					s.logger.Errorf("Error re-serializing input JSON: %v", err)
-					return &fnv1beta1.RunFunctionResponse{
-						Meta: &fnv1beta1.ResponseMeta{},
-						Results: []*fnv1beta1.Result{
-							{
-								Severity: fnv1beta1.Severity_SEVERITY_FATAL,
-								Message:  fmt.Sprintf("Failed to re-serialize input JSON: %v", err),
-							},
-						},
-					}, nil
-				}
-				extractedInputJSON = string(newInputJSON)
+				// We're not removing the code from the input anymore
+				// This ensures the JavaScript code receives the expected input structure
 			}
 		}
 	}
@@ -280,8 +264,9 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1beta1.RunFu
 		}, nil
 	}
 
-	// Execute the function using the process manager
-	result, err := s.processManager.ExecuteFunction(ctx, code, extractedInputJSON)
+	// Execute the function using the process manager with the original input
+	// This preserves the structure that the JavaScript code expects
+	result, err := s.processManager.ExecuteFunction(ctx, code, string(inputBytes))
 	if err != nil {
 		s.logger.Errorf("Error executing function: %v", err)
 		return &fnv1beta1.RunFunctionResponse{

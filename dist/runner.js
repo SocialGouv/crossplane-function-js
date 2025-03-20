@@ -6,9 +6,28 @@
  */
 export async function runCode(code, input) {
     try {
-        // Create a function from the code
+        // Add a wrapper around the code to provide better error handling
+        const wrappedCode = `
+      try {
+        // Validate input structure before executing user code
+        if (!input) {
+          throw new Error('Input is undefined or null');
+        }
+        
+        // Wrap the user code in a try-catch block
+        ${code}
+      } catch (err) {
+        // Provide detailed error information
+        if (err.message && err.message.includes('Cannot read properties')) {
+          // Enhance error message for property access errors
+          throw new Error(\`Property access error: \${err.message}. This may be due to missing properties in the input structure.\`);
+        }
+        throw err;
+      }
+    `;
+        // Create a function from the wrapped code
         const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
-        const fn = new AsyncFunction('input', code);
+        const fn = new AsyncFunction('input', wrappedCode);
         // Execute the function with the input
         const result = await fn(input);
         return { result };
@@ -16,6 +35,10 @@ export async function runCode(code, input) {
     catch (err) {
         // Format the error
         const error = err;
+        console.error('Error executing function:', error.message);
+        if (error.stack) {
+            console.error('Stack trace:', error.stack);
+        }
         const nodeError = {
             code: 500,
             message: error.message || 'Unknown error',

@@ -11,115 +11,9 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/reflect/protoreflect"
-	"google.golang.org/protobuf/runtime/protoimpl"
 
 	"github.com/socialgouv/crossplane-skyhook/pkg/logger"
 	"github.com/socialgouv/crossplane-skyhook/pkg/node"
-)
-
-// CrossplaneFunctionRunnerRequest is the request message for the Crossplane FunctionRunnerService
-// It implements the proto.Message interface required by gRPC
-type CrossplaneFunctionRunnerRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	// The input data for the function
-	Input []byte `protobuf:"bytes,1,opt,name=input,proto3" json:"input,omitempty"`
-}
-
-func (x *CrossplaneFunctionRunnerRequest) Reset() {
-	*x = CrossplaneFunctionRunnerRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_function_proto_msgTypes[0]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *CrossplaneFunctionRunnerRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-// ProtoMessage implements the proto.Message interface
-func (*CrossplaneFunctionRunnerRequest) ProtoMessage() {}
-
-func (x *CrossplaneFunctionRunnerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_function_proto_msgTypes[0]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-func (x *CrossplaneFunctionRunnerRequest) GetInput() []byte {
-	if x != nil {
-		return x.Input
-	}
-	return nil
-}
-
-// CrossplaneFunctionRunnerResponse is the response message for the Crossplane FunctionRunnerService
-// It implements the proto.Message interface required by gRPC
-type CrossplaneFunctionRunnerResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	// The output data from the function
-	Output []byte `protobuf:"bytes,1,opt,name=output,proto3" json:"output,omitempty"`
-
-	// Error information if execution failed
-	Error *struct {
-		Code       int32  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
-		Message    string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-		StackTrace string `protobuf:"bytes,3,opt,name=stack_trace,json=stackTrace,proto3" json:"stack_trace,omitempty"`
-	} `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
-}
-
-func (x *CrossplaneFunctionRunnerResponse) Reset() {
-	*x = CrossplaneFunctionRunnerResponse{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_function_proto_msgTypes[1]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *CrossplaneFunctionRunnerResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-// ProtoMessage implements the proto.Message interface
-func (*CrossplaneFunctionRunnerResponse) ProtoMessage() {}
-
-func (x *CrossplaneFunctionRunnerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_function_proto_msgTypes[1]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-func (x *CrossplaneFunctionRunnerResponse) GetOutput() []byte {
-	if x != nil {
-		return x.Output
-	}
-	return nil
-}
-
-// Dummy variable to avoid unused import errors
-var (
-	file_function_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 )
 
 // Server is the gRPC server for the Skyhook service
@@ -192,11 +86,14 @@ func (s *Server) Start(address string, tlsEnabled bool, certFile, keyFile string
 func (s *Server) runFunctionHandler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	s.logger.Info("Handling Crossplane FunctionRunnerService.RunFunction request")
 
-	// Create a proper protobuf message to decode the request
-	req := &CrossplaneFunctionRunnerRequest{}
+	// For Crossplane functions, we need to handle the raw bytes directly
+	// Create a simple struct to decode the request
+	var req struct {
+		Input []byte `protobuf:"bytes,1,opt,name=input,proto3" json:"input,omitempty"`
+	}
 
 	// Decode the request
-	if err := dec(req); err != nil {
+	if err := dec(&req); err != nil {
 		s.logger.Errorf("Error decoding request: %v", err)
 		return nil, status.Errorf(codes.Internal, "Error decoding request: %v", err)
 	}
@@ -326,12 +223,8 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, input []byte) (inter
 
 	if err := json.Unmarshal(input, &inputStruct); err != nil {
 		s.logger.Errorf("Error parsing input JSON: %v", err)
-		return &CrossplaneFunctionRunnerResponse{
-			Error: &struct {
-				Code       int32  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
-				Message    string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-				StackTrace string `protobuf:"bytes,3,opt,name=stack_trace,json=stackTrace,proto3" json:"stack_trace,omitempty"`
-			}{
+		return &RunFunctionResponse{
+			Error: &ErrorInfo{
 				Code:       int32(codes.InvalidArgument),
 				Message:    fmt.Sprintf("Failed to parse input JSON: %v", err),
 				StackTrace: "",
@@ -351,12 +244,8 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, input []byte) (inter
 	var inputData map[string]interface{}
 	if err := json.Unmarshal(input, &inputData); err != nil {
 		s.logger.Errorf("Error parsing input JSON: %v", err)
-		return &CrossplaneFunctionRunnerResponse{
-			Error: &struct {
-				Code       int32  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
-				Message    string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-				StackTrace string `protobuf:"bytes,3,opt,name=stack_trace,json=stackTrace,proto3" json:"stack_trace,omitempty"`
-			}{
+		return &RunFunctionResponse{
+			Error: &ErrorInfo{
 				Code:       int32(codes.InvalidArgument),
 				Message:    fmt.Sprintf("Failed to parse input JSON: %v", err),
 				StackTrace: "",
@@ -378,12 +267,8 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, input []byte) (inter
 					newInputJSON, err := json.Marshal(inputData)
 					if err != nil {
 						s.logger.Errorf("Error re-serializing input JSON: %v", err)
-						return &CrossplaneFunctionRunnerResponse{
-							Error: &struct {
-								Code       int32  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
-								Message    string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-								StackTrace string `protobuf:"bytes,3,opt,name=stack_trace,json=stackTrace,proto3" json:"stack_trace,omitempty"`
-							}{
+						return &RunFunctionResponse{
+							Error: &ErrorInfo{
 								Code:       int32(codes.Internal),
 								Message:    fmt.Sprintf("Failed to re-serialize input JSON: %v", err),
 								StackTrace: "",
@@ -398,12 +283,8 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, input []byte) (inter
 
 	if code == "" {
 		s.logger.Error("No code found in the input")
-		return &CrossplaneFunctionRunnerResponse{
-			Error: &struct {
-				Code       int32  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
-				Message    string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-				StackTrace string `protobuf:"bytes,3,opt,name=stack_trace,json=stackTrace,proto3" json:"stack_trace,omitempty"`
-			}{
+		return &RunFunctionResponse{
+			Error: &ErrorInfo{
 				Code:       int32(codes.InvalidArgument),
 				Message:    "No code found in the input",
 				StackTrace: "",
@@ -415,12 +296,8 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, input []byte) (inter
 	result, err := s.processManager.ExecuteFunction(ctx, code, extractedInputJSON)
 	if err != nil {
 		s.logger.Errorf("Error executing function: %v", err)
-		return &CrossplaneFunctionRunnerResponse{
-			Error: &struct {
-				Code       int32  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
-				Message    string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-				StackTrace string `protobuf:"bytes,3,opt,name=stack_trace,json=stackTrace,proto3" json:"stack_trace,omitempty"`
-			}{
+		return &RunFunctionResponse{
+			Error: &ErrorInfo{
 				Code:       int32(codes.Internal),
 				Message:    err.Error(),
 				StackTrace: "",
@@ -440,12 +317,8 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, input []byte) (inter
 
 	if err := json.Unmarshal([]byte(result), &nodeResp); err != nil {
 		s.logger.Errorf("Error parsing Node.js response: %v", err)
-		return &CrossplaneFunctionRunnerResponse{
-			Error: &struct {
-				Code       int32  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
-				Message    string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-				StackTrace string `protobuf:"bytes,3,opt,name=stack_trace,json=stackTrace,proto3" json:"stack_trace,omitempty"`
-			}{
+		return &RunFunctionResponse{
+			Error: &ErrorInfo{
 				Code:       int32(codes.Internal),
 				Message:    fmt.Sprintf("Failed to parse Node.js response: %v", err),
 				StackTrace: "",
@@ -454,12 +327,8 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, input []byte) (inter
 	}
 
 	if nodeResp.Error != nil {
-		return &CrossplaneFunctionRunnerResponse{
-			Error: &struct {
-				Code       int32  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
-				Message    string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-				StackTrace string `protobuf:"bytes,3,opt,name=stack_trace,json=stackTrace,proto3" json:"stack_trace,omitempty"`
-			}{
+		return &RunFunctionResponse{
+			Error: &ErrorInfo{
 				Code:       int32(nodeResp.Error.Code),
 				Message:    nodeResp.Error.Message,
 				StackTrace: nodeResp.Error.Stack,
@@ -468,7 +337,7 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, input []byte) (inter
 	}
 
 	// Return the result as a proper protobuf message
-	return &CrossplaneFunctionRunnerResponse{
-		Output: []byte(nodeResp.Result),
+	return &RunFunctionResponse{
+		OutputJson: string(nodeResp.Result),
 	}, nil
 }

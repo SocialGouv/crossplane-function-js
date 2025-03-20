@@ -22,6 +22,10 @@ func main() {
 	idleTimeout := flag.Duration("idle-timeout", 30*time.Minute, "Idle process timeout")
 	logLevel := flag.String("log-level", "info", "Log level (debug, info, warn, error)")
 	logFormat := flag.String("log-format", "auto", "Log format (auto, text, json). Auto uses text for TTY, JSON otherwise")
+	nodeServerPort := flag.Int("node-server-port", 3000, "Port for the Node.js HTTP server")
+	healthCheckWait := flag.Duration("health-check-wait", 30*time.Second, "Timeout for health check")
+	healthCheckInterval := flag.Duration("health-check-interval", 500*time.Millisecond, "Interval for health check polling")
+	requestTimeout := flag.Duration("request-timeout", 30*time.Second, "Timeout for requests")
 	flag.Parse()
 
 	// Create logger
@@ -64,6 +68,11 @@ func main() {
 
 	// Create gRPC server
 	server := grpc.NewServer(processManager, log)
+
+	// Configure the Node.js HTTP server
+	server.SetNodeServerPort(*nodeServerPort)
+	server.SetNodeHealthCheckConfig(*healthCheckWait, *healthCheckInterval)
+	server.SetNodeRequestTimeout(*requestTimeout)
 
 	// Start gRPC server
 	go func() {

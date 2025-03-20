@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"time"
 
 	fnv1beta1 "github.com/crossplane/function-sdk-go/proto/v1beta1"
 	"google.golang.org/grpc"
@@ -23,6 +24,7 @@ type Server struct {
 	processManager *node.ProcessManager
 	server         *grpc.Server
 	logger         logger.Logger
+	nodeServerPort int
 }
 
 // NewServer creates a new Skyhook gRPC server
@@ -30,11 +32,31 @@ func NewServer(processManager *node.ProcessManager, logger logger.Logger) *Serve
 	return &Server{
 		processManager: processManager,
 		logger:         logger,
+		nodeServerPort: 3000, // Default port
 	}
+}
+
+// SetNodeServerPort sets the port for the Node.js HTTP server
+func (s *Server) SetNodeServerPort(port int) {
+	s.nodeServerPort = port
+	s.processManager.SetNodeServerPort(port)
+}
+
+// SetNodeHealthCheckConfig sets the health check configuration for the Node.js HTTP server
+func (s *Server) SetNodeHealthCheckConfig(wait, interval time.Duration) {
+	s.processManager.SetHealthCheckWait(wait)
+	s.processManager.SetHealthCheckInterval(interval)
+}
+
+// SetNodeRequestTimeout sets the request timeout for the Node.js HTTP server
+func (s *Server) SetNodeRequestTimeout(timeout time.Duration) {
+	s.processManager.SetRequestTimeout(timeout)
 }
 
 // Start starts the gRPC server on the specified address
 func (s *Server) Start(address string, tlsEnabled bool, certFile, keyFile string) error {
+	// Configure the Node.js process manager with the server port
+	s.processManager.SetNodeServerPort(s.nodeServerPort)
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		return fmt.Errorf("failed to listen on %s: %w", address, err)

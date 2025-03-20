@@ -235,32 +235,34 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1beta1.RunFu
 		}, nil
 	}
 
+	// Log the input data for debugging
+	inputJSON, _ := json.MarshalIndent(inputData, "", "  ")
+	s.logger.Infof("Input data: %s", string(inputJSON))
+
 	// Look for the code in the input
 	// In a real implementation, you would need to know the exact path to the code
 	// For now, we'll look for a "source" field with an "inline" field
-	if inputMap, ok := inputData["input"].(map[string]interface{}); ok {
-		if specMap, ok := inputMap["spec"].(map[string]interface{}); ok {
-			if sourceMap, ok := specMap["source"].(map[string]interface{}); ok {
-				if inlineCode, ok := sourceMap["inline"].(string); ok {
-					code = inlineCode
-					// Remove the code from the input to avoid duplication
-					delete(sourceMap, "inline")
-					// Re-serialize the input without the code
-					newInputJSON, err := json.Marshal(inputData)
-					if err != nil {
-						s.logger.Errorf("Error re-serializing input JSON: %v", err)
-						return &fnv1beta1.RunFunctionResponse{
-							Meta: &fnv1beta1.ResponseMeta{},
-							Results: []*fnv1beta1.Result{
-								{
-									Severity: fnv1beta1.Severity_SEVERITY_FATAL,
-									Message:  fmt.Sprintf("Failed to re-serialize input JSON: %v", err),
-								},
+	if specMap, ok := inputData["spec"].(map[string]interface{}); ok {
+		if sourceMap, ok := specMap["source"].(map[string]interface{}); ok {
+			if inlineCode, ok := sourceMap["inline"].(string); ok {
+				code = inlineCode
+				// Remove the code from the input to avoid duplication
+				delete(sourceMap, "inline")
+				// Re-serialize the input without the code
+				newInputJSON, err := json.Marshal(inputData)
+				if err != nil {
+					s.logger.Errorf("Error re-serializing input JSON: %v", err)
+					return &fnv1beta1.RunFunctionResponse{
+						Meta: &fnv1beta1.ResponseMeta{},
+						Results: []*fnv1beta1.Result{
+							{
+								Severity: fnv1beta1.Severity_SEVERITY_FATAL,
+								Message:  fmt.Sprintf("Failed to re-serialize input JSON: %v", err),
 							},
-						}, nil
-					}
-					extractedInputJSON = string(newInputJSON)
+						},
+					}, nil
 				}
+				extractedInputJSON = string(newInputJSON)
 			}
 		}
 	}

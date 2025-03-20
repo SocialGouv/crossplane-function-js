@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net"
 
+	fnv1beta1 "github.com/crossplane/function-sdk-go/proto/v1beta1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
@@ -86,29 +87,17 @@ func (s *Server) Start(address string, tlsEnabled bool, certFile, keyFile string
 func (s *Server) runFunctionHandler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	s.logger.Info("Handling Crossplane FunctionRunnerService.RunFunction request")
 
-	// For Crossplane functions, we need to handle the raw bytes directly
-	// Create a simple struct to decode the request
-	var req struct {
-		Input []byte `protobuf:"bytes,1,opt,name=input,proto3" json:"input,omitempty"`
-	}
-
-	// Decode the request
-	if err := dec(&req); err != nil {
+	// Use the Crossplane Function SDK to decode the request
+	req := &fnv1beta1.RunFunctionRequest{}
+	if err := dec(req); err != nil {
 		s.logger.Errorf("Error decoding request: %v", err)
 		return nil, status.Errorf(codes.Internal, "Error decoding request: %v", err)
 	}
 
-	s.logger.Infof("Received request with input length: %d", len(req.Input))
-
-	// If the input is empty, use a default input
-	input := req.Input
-	if len(input) == 0 {
-		s.logger.Warn("Empty input received, using default input")
-		input = []byte("{}")
-	}
+	s.logger.Info("Received Crossplane function request")
 
 	// Process the request
-	result, err := s.runFunctionCrossplane(ctx, input)
+	result, err := s.runFunctionCrossplane(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -201,36 +190,27 @@ func (s *Server) RunFunction(ctx context.Context, req *RunFunctionRequest) (*Run
 }
 
 // runFunctionCrossplane implements the RunFunction method for the Crossplane FunctionRunnerService
-func (s *Server) runFunctionCrossplane(ctx context.Context, input []byte) (interface{}, error) {
+func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1beta1.RunFunctionRequest) (*fnv1beta1.RunFunctionResponse, error) {
 	// Log request details
 	s.logger.Debug("Crossplane FunctionRunnerService.RunFunction request received")
 
-	// Extract the input data
-	inputJSON := string(input)
-	s.logger.WithField("input_length", len(inputJSON)).Debug("Input JSON received")
-
-	// Parse the input to extract the code
-	var inputStruct struct {
-		Observed struct {
-			Composite struct {
-				Resource struct {
-				} `json:"resource"`
-			} `json:"composite"`
-		} `json:"observed"`
-		Desired struct {
-		} `json:"desired"`
-	}
-
-	if err := json.Unmarshal(input, &inputStruct); err != nil {
-		s.logger.Errorf("Error parsing input JSON: %v", err)
-		return &RunFunctionResponse{
-			Error: &ErrorInfo{
-				Code:       int32(codes.InvalidArgument),
-				Message:    fmt.Sprintf("Failed to parse input JSON: %v", err),
-				StackTrace: "",
+	// Convert the input to JSON
+	inputBytes, err := json.Marshal(req.Input)
+	if err != nil {
+		s.logger.Errorf("Error marshaling input to JSON: %v", err)
+		return &fnv1beta1.RunFunctionResponse{
+			Meta: &fnv1beta1.ResponseMeta{},
+			Results: []*fnv1beta1.Result{
+				{
+					Severity: fnv1beta1.Severity_SEVERITY_FATAL,
+					Message:  fmt.Sprintf("Failed to marshal input to JSON: %v", err),
+				},
 			},
 		}, nil
 	}
+
+	s.logger.WithField("input_length", len(inputBytes)).Debug("Input received")
+	s.logger.WithField("raw_input", string(inputBytes)).Debug("Raw input")
 
 	// Extract the code from the input
 	// For Crossplane functions, the code is typically provided in the composition
@@ -242,13 +222,15 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, input []byte) (inter
 	// This is a simplified approach - in a real implementation, you would need to
 	// parse the Crossplane function input format to extract the code
 	var inputData map[string]interface{}
-	if err := json.Unmarshal(input, &inputData); err != nil {
+	if err := json.Unmarshal(inputBytes, &inputData); err != nil {
 		s.logger.Errorf("Error parsing input JSON: %v", err)
-		return &RunFunctionResponse{
-			Error: &ErrorInfo{
-				Code:       int32(codes.InvalidArgument),
-				Message:    fmt.Sprintf("Failed to parse input JSON: %v", err),
-				StackTrace: "",
+		return &fnv1beta1.RunFunctionResponse{
+			Meta: &fnv1beta1.ResponseMeta{},
+			Results: []*fnv1beta1.Result{
+				{
+					Severity: fnv1beta1.Severity_SEVERITY_FATAL,
+					Message:  fmt.Sprintf("Failed to parse input JSON: %v", err),
+				},
 			},
 		}, nil
 	}
@@ -267,11 +249,13 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, input []byte) (inter
 					newInputJSON, err := json.Marshal(inputData)
 					if err != nil {
 						s.logger.Errorf("Error re-serializing input JSON: %v", err)
-						return &RunFunctionResponse{
-							Error: &ErrorInfo{
-								Code:       int32(codes.Internal),
-								Message:    fmt.Sprintf("Failed to re-serialize input JSON: %v", err),
-								StackTrace: "",
+						return &fnv1beta1.RunFunctionResponse{
+							Meta: &fnv1beta1.ResponseMeta{},
+							Results: []*fnv1beta1.Result{
+								{
+									Severity: fnv1beta1.Severity_SEVERITY_FATAL,
+									Message:  fmt.Sprintf("Failed to re-serialize input JSON: %v", err),
+								},
 							},
 						}, nil
 					}
@@ -283,11 +267,13 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, input []byte) (inter
 
 	if code == "" {
 		s.logger.Error("No code found in the input")
-		return &RunFunctionResponse{
-			Error: &ErrorInfo{
-				Code:       int32(codes.InvalidArgument),
-				Message:    "No code found in the input",
-				StackTrace: "",
+		return &fnv1beta1.RunFunctionResponse{
+			Meta: &fnv1beta1.ResponseMeta{},
+			Results: []*fnv1beta1.Result{
+				{
+					Severity: fnv1beta1.Severity_SEVERITY_FATAL,
+					Message:  "No code found in the input",
+				},
 			},
 		}, nil
 	}
@@ -296,11 +282,13 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, input []byte) (inter
 	result, err := s.processManager.ExecuteFunction(ctx, code, extractedInputJSON)
 	if err != nil {
 		s.logger.Errorf("Error executing function: %v", err)
-		return &RunFunctionResponse{
-			Error: &ErrorInfo{
-				Code:       int32(codes.Internal),
-				Message:    err.Error(),
-				StackTrace: "",
+		return &fnv1beta1.RunFunctionResponse{
+			Meta: &fnv1beta1.ResponseMeta{},
+			Results: []*fnv1beta1.Result{
+				{
+					Severity: fnv1beta1.Severity_SEVERITY_FATAL,
+					Message:  err.Error(),
+				},
 			},
 		}, nil
 	}
@@ -317,27 +305,33 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, input []byte) (inter
 
 	if err := json.Unmarshal([]byte(result), &nodeResp); err != nil {
 		s.logger.Errorf("Error parsing Node.js response: %v", err)
-		return &RunFunctionResponse{
-			Error: &ErrorInfo{
-				Code:       int32(codes.Internal),
-				Message:    fmt.Sprintf("Failed to parse Node.js response: %v", err),
-				StackTrace: "",
+		return &fnv1beta1.RunFunctionResponse{
+			Meta: &fnv1beta1.ResponseMeta{},
+			Results: []*fnv1beta1.Result{
+				{
+					Severity: fnv1beta1.Severity_SEVERITY_FATAL,
+					Message:  fmt.Sprintf("Failed to parse Node.js response: %v", err),
+				},
 			},
 		}, nil
 	}
 
 	if nodeResp.Error != nil {
-		return &RunFunctionResponse{
-			Error: &ErrorInfo{
-				Code:       int32(nodeResp.Error.Code),
-				Message:    nodeResp.Error.Message,
-				StackTrace: nodeResp.Error.Stack,
+		return &fnv1beta1.RunFunctionResponse{
+			Meta: &fnv1beta1.ResponseMeta{},
+			Results: []*fnv1beta1.Result{
+				{
+					Severity: fnv1beta1.Severity_SEVERITY_FATAL,
+					Message:  nodeResp.Error.Message,
+				},
 			},
 		}, nil
 	}
 
 	// Return the result as a proper protobuf message
-	return &RunFunctionResponse{
-		OutputJson: string(nodeResp.Result),
+	return &fnv1beta1.RunFunctionResponse{
+		Meta: &fnv1beta1.ResponseMeta{},
+		// We don't need to set the Desired field, as it's not required
+		// The JavaScript function has already processed the input and returned the result
 	}, nil
 }

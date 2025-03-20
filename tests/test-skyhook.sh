@@ -33,8 +33,8 @@ kubectl wait --for=condition=established xrd/simpleconfigmaps.test.crossplane.io
   exit 1
 }
 
-# Create a test SimpleConfigMapClaim
-echo "Creating test SimpleConfigMapClaim..."
+# Create a test SimpleConfigMap
+echo "Creating test SimpleConfigMap..."
 kubectl apply -f test/fixtures/sample.yaml
 
 # Wait for the ConfigMap to be created
@@ -48,10 +48,10 @@ for i in {1..30}; do
   fi
   echo "Waiting for ConfigMap to be created... ($i/30)"
   
-  # Check the status of the SimpleConfigMapClaim
+  # Check the status of the SimpleConfigMap
   if [ $((i % 5)) -eq 0 ]; then
-    echo "SimpleConfigMapClaim status:"
-    kubectl get simpleconfigmapclaims.test.crossplane.io -n test-skyhook -o yaml || true
+    echo "SimpleConfigMap status:"
+    kubectl get simpleconfigmaps.test.crossplane.io -o yaml || true
     echo "Crossplane Function status:"
     kubectl get functions.pkg.crossplane.io || true
     echo "FunctionRuntime status:"
@@ -63,8 +63,8 @@ done
 
 if [ "$configmap_created" = false ]; then
   echo "ConfigMap was not created within timeout"
-  echo "Final SimpleConfigMapClaim status:"
-  kubectl get simpleconfigmapclaims.test.crossplane.io -n test-skyhook -o yaml || true
+  echo "Final SimpleConfigMap status:"
+  kubectl get simpleconfigmaps.test.crossplane.io -o yaml || true
   echo "Final Crossplane Function status:"
   kubectl get functions.pkg.crossplane.io || true
   echo "Final FunctionRuntime status:"

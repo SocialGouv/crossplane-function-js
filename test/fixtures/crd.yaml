@@ -8,9 +8,6 @@ spec:
     kind: SimpleConfigMap
     plural: simpleconfigmaps
     singular: simpleconfigmap
-  claimNames:
-    kind: SimpleConfigMapClaim
-    plural: simpleconfigmapclaims
   versions:
     - name: v1beta1
       served: true

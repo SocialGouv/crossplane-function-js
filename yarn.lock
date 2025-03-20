@@ -5,12 +5,12 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
-"@types/node@npm:^20.10.0":
-  version: 20.17.24
-  resolution: "@types/node@npm:20.17.24"
+"@types/node@npm:^22.13.10":
+  version: 22.13.10
+  resolution: "@types/node@npm:22.13.10"
   dependencies:
-    undici-types: "npm:~6.19.2"
-  checksum: 10c0/2a39ce4c4cd4588a05b2a485cc0a1407cbea608dd1ab03e36add59d61712718d95c84b492ca5190753f0be2bce748aeeb0f2a1412e712775462befe3820b3ff9
+    undici-types: "npm:~6.20.0"
+  checksum: 10c0/a3865f9503d6f718002374f7b87efaadfae62faa499c1a33b12c527cfb9fd86f733e1a1b026b80c5a0e4a965701174bc3305595a7d36078aa1abcf09daa5dee9
   languageName: node
   linkType: hard
 
@@ -18,12 +18,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "crossplane-skyhook@workspace:."
   dependencies:
-    "@types/node": "npm:^20.10.0"
-    typescript: "npm:^5.3.0"
+    "@types/node": "npm:^22.13.10"
+    typescript: "npm:^5.8.2"
   languageName: unknown
   linkType: soft
 
-"typescript@npm:^5.3.0":
+"typescript@npm:^5.8.2":
   version: 5.8.2
   resolution: "typescript@npm:5.8.2"
   bin:
@@ -33,7 +33,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5.3.0#optional!builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A^5.8.2#optional!builtin<compat/typescript>":
   version: 5.8.2
   resolution: "typescript@patch:typescript@npm%3A5.8.2#optional!builtin<compat/typescript>::version=5.8.2&hash=5786d5"
   bin:
@@ -43,9 +43,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici-types@npm:~6.19.2":
-  version: 6.19.8
-  resolution: "undici-types@npm:6.19.8"
-  checksum: 10c0/078afa5990fba110f6824823ace86073b4638f1d5112ee26e790155f481f2a868cc3e0615505b6f4282bdf74a3d8caad715fd809e870c2bb0704e3ea6082f344
+"undici-types@npm:~6.20.0":
+  version: 6.20.0
+  resolution: "undici-types@npm:6.20.0"
+  checksum: 10c0/68e659a98898d6a836a9a59e6adf14a5d799707f5ea629433e025ac90d239f75e408e2e5ff086afc3cace26f8b26ee52155293564593fbb4a2f666af57fc59bf
   languageName: node
   linkType: hard

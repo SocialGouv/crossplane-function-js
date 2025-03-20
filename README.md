@@ -137,7 +137,7 @@ The e2e tests:
 5. Create a test SimpleConfigMap resource
 6. Verify that the resulting ConfigMap is created with the expected data
 
-The `test/fixtures` directory contains sample Kubernetes manifests for testing with Crossplane:
+The `tests/fixtures` directory contains sample Kubernetes manifests for testing with Crossplane:
 
 - `crd.yaml`: A simple CRD that defines a `SimpleConfigMap` resource
 - `composition.yaml`: A Composition that uses the Skyhook function to transform data

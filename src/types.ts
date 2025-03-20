@@ -11,6 +11,11 @@ export interface NodeResponse {
    * Error information if the code execution failed
    */
   error?: NodeError;
+  
+  /**
+   * Captured console logs from the code execution
+   */
+  logs?: Array<any>;
 }
 
 /**

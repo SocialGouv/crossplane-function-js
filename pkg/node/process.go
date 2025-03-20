@@ -8,7 +8,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"sync"
 	"time"
 
@@ -247,43 +246,16 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, code string) (
 	// Determine the correct path to the index file
 	var indexPath string
 
-	// Check if we're running the simple_test.go test
-	if strings.Contains(cwd, "test/e2e") {
-		// We're in the test/e2e directory, look for index.js in the same directory
-		testIndexPath := filepath.Join(cwd, "index.js")
-		if _, err := os.Stat(testIndexPath); err == nil {
-			indexPath = testIndexPath
-			pm.logger.Infof("Using test index file: %s", indexPath)
-		} else {
-			// Try the project root
-			rootPath := filepath.Join(cwd, "..", "..")
-			testIndexPath = filepath.Join(rootPath, "test", "e2e", "index.js")
-			if _, err := os.Stat(testIndexPath); err == nil {
-				indexPath = testIndexPath
-				pm.logger.Infof("Using test index file from project root: %s", indexPath)
-			} else {
-				return nil, fmt.Errorf("could not find test index file at %s or %s", filepath.Join(cwd, "index.js"), testIndexPath)
-			}
-		}
-	} else {
-		// We're in the main project, look for index.ts/js in src directory
-		rootPath := cwd
-		tsPath := filepath.Join(rootPath, "src", "index.ts")
-		jsPath := filepath.Join(rootPath, "src", "index.js")
+	// We're in the main project, prioritize TypeScript files in src directory
+	rootPath := cwd
+	srcTsPath := filepath.Join(rootPath, "src", "index.ts")
 
-		if _, err := os.Stat(tsPath); err == nil {
-			indexPath = tsPath
-		} else if _, err := os.Stat(jsPath); err == nil {
-			indexPath = jsPath
-		} else {
-			return nil, fmt.Errorf("could not find index file at %s or %s", tsPath, jsPath)
-		}
-		pm.logger.Infof("Using main index file: %s", indexPath)
-	}
+	indexPath = srcTsPath
+	pm.logger.Infof("Using TypeScript source file: %s", indexPath)
 
 	// Create the Node.js process with the appropriate path to the index file
-	cmd := exec.CommandContext(ctx, "node", "--no-warnings", "--experimental-strip-types", indexPath, tempFilePath)
-	cmd.Env = append(os.Environ(), "NODE_OPTIONS=--no-warnings --experimental-strip-types")
+	cmd := exec.CommandContext(ctx, "node", indexPath, tempFilePath)
+	cmd.Env = append(os.Environ(), "NODE_OPTIONS=--no-warnings --experimental-strip-types ")
 
 	// Set up stdin and stdout
 	stdin, err := cmd.StdinPipe()

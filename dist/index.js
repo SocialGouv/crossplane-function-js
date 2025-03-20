@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import fs from 'fs';
-import { runCode } from './runner.js';
+import { runCode } from './runner';
 // Check if a file path was provided
 if (process.argv.length < 3) {
     console.error('Usage: node index.js <code-file-path>');

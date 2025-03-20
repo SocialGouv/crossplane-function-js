@@ -1,4 +1,7 @@
-import { NodeResponse, NodeError } from './types';
+import type { NodeResponse, NodeError } from './types.ts';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import * as os from 'os';
 
 /**
  * Runs the provided JavaScript/TypeScript code with the given input
@@ -8,33 +11,59 @@ import { NodeResponse, NodeError } from './types';
  */
 export async function runCode(code: string, input: any): Promise<NodeResponse> {
   try {
-    // Add a wrapper around the code to provide better error handling
-    const wrappedCode = `
-      try {
-        // Validate input structure before executing user code
-        if (!input) {
-          throw new Error('Input is undefined or null');
-        }
+    // Validate input
+    if (!input) {
+      throw new Error('Input is undefined or null');
+    }
+
+    // Create a temporary dir
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'crossplane-skyhook'));
+    
+    const tempFilePath = path.join(tempDir, `module-${Date.now()}.mjs`);
+    
+    try {
+      // Modify the code to capture console.log output
+      const moduleCode = `
+        // Capture console output
+        const logs = [];
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
         
-        // Wrap the user code in a try-catch block
+        console.log = function(...args) {
+          logs.push(['log', ...args]);
+          // originalConsoleLog(...args);
+        };
+        
+        console.error = function(...args) {
+          logs.push(['error', ...args]);
+          originalConsoleError(...args);
+        };
+        
         ${code}
-      } catch (err) {
-        // Provide detailed error information
-        if (err.message && err.message.includes('Cannot read properties')) {
-          // Enhance error message for property access errors
-          throw new Error(\`Property access error: \${err.message}. This may be due to missing properties in the input structure.\`);
-        }
-        throw err;
-      }
-    `;
-    
-    // Create a function from the wrapped code
-    const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
-    const fn = new AsyncFunction('input', wrappedCode);
-    
-    // Execute the function with the input
-    const result = await fn(input);
-    return { result };
+        
+        // Export the logs array
+        export const capturedLogs = logs;
+      `;
+      
+      // Write the module to a temporary file
+      await fs.writeFile(tempFilePath, moduleCode);
+      
+      // Import the module dynamically
+      const moduleUrl = `file://${tempFilePath}`;
+      const module = await import(moduleUrl);
+      
+      // Execute the default exported function with the input
+      const result = await module.default(input);
+      
+      // Return the result along with any captured logs
+      return { 
+        result,
+        logs: module.capturedLogs || []
+      };
+    } finally {
+      // Clean up the temporary file
+      await fs.unlink(tempFilePath).catch(() => void 0);
+    }
   } catch (err: unknown) {
     // Format the error
     const error = err as Error;

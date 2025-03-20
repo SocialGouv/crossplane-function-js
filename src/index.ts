@@ -1,9 +1,7 @@
-#!/usr/bin/env node
-
 import fs from 'fs';
 import path from 'path';
-import { runCode } from './runner.js';
-import { NodeRequest, NodeResponse, NodeError } from './types.js';
+import { runCode } from './runner.ts';
+import type { NodeRequest, NodeResponse, NodeError } from './types.ts';
 
 // Check if a file path was provided
 if (process.argv.length < 3) {
@@ -37,10 +35,29 @@ process.on('unhandledRejection', (reason, promise) => {
   // Don't exit the process, just log the error
 });
 
-// Process stdin for requests
-process.stdin.on('data', async (data) => {
+// Create a queue for processing requests
+const requestQueue: { data: Buffer, processed: boolean }[] = [];
+let isProcessing = false;
+
+// Function to process the next request in the queue
+async function processNextRequest() {
+  if (isProcessing || requestQueue.length === 0) {
+    return;
+  }
+  
+  isProcessing = true;
+  const nextRequest = requestQueue.find(req => !req.processed);
+  
+  if (!nextRequest) {
+    isProcessing = false;
+    return;
+  }
+  
+  nextRequest.processed = true;
+  
   try {
-    console.error(`Received data of length: ${data.length}`);
+    const data = nextRequest.data;
+    console.error(`Processing request of length: ${data.length}`);
     
     // Parse the request
     const requestStr = data.toString();
@@ -60,11 +77,20 @@ process.stdin.on('data', async (data) => {
     const result = await runCode(codeToRun, input);
     console.error('Code execution completed');
 
+    // Filter out logs from the result to avoid JSON parsing issues
+    const resultToSend = {
+      result: result.result,
+      error: result.error
+    };
+    
     // Send the result back
-    const resultStr = JSON.stringify(result);
+    const resultStr = JSON.stringify(resultToSend);
     console.error(`Sending result: ${resultStr.substring(0, 100)}...`);
-    process.stdout.write(resultStr + '\n');
-    console.error('Result sent successfully');
+    
+    // Ensure we flush the output before sending more data
+    process.stdout.write(resultStr + '\n', () => {
+      console.error('Result sent successfully');
+    });
   } catch (err: unknown) {
     // Send error back
     const error = err as Error;
@@ -83,6 +109,31 @@ process.stdin.on('data', async (data) => {
     } catch (writeErr) {
       console.error('Failed to write error response:', writeErr);
     }
+  } finally {
+    isProcessing = false;
+    
+    // Remove processed requests from the queue
+    while (requestQueue.length > 0 && requestQueue[0].processed) {
+      requestQueue.shift();
+    }
+    
+    // Process the next request if there are any
+    if (requestQueue.length > 0) {
+      setImmediate(processNextRequest);
+    }
+  }
+}
+
+// Process stdin for requests
+process.stdin.on('data', (data) => {
+  console.error(`Received data of length: ${data.length}`);
+  
+  // Add the request to the queue
+  requestQueue.push({ data, processed: false });
+  
+  // Process the next request if we're not already processing one
+  if (!isProcessing) {
+    processNextRequest();
   }
 });
 

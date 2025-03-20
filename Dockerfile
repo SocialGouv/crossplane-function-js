@@ -9,26 +9,35 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -mod=ve
 
 FROM node:22-alpine
 
+EXPOSE 9443
+
+ENTRYPOINT ["/app/skyhook-server"]
+
 # Install certificates for HTTPS requests
 RUN apk --no-cache add ca-certificates
 
 WORKDIR /app
 
-# Copy the Go binary
-COPY --from=builder /app/skyhook-server /app/skyhook-server
+RUN corepack enable
 
-# Copy Node.js files
-COPY src/ /app/src/
-COPY package.json yarn.lock .yarnrc.yml ./
-COPY .yarn/ /app/.yarn/
+# Install JS dependencies
+COPY yarn.lock .yarnrc.yml ./
+COPY .yarn .yarn
+RUN yarn fetch
+
+# Copy TypeScript source files directly
+COPY src/ ./src/
+COPY package.json tsconfig.json ./
+
+# Install Node.js dependencies (production only)
+RUN yarn workspaces focus --production && yarn cache clean
+
+# Set NODE_OPTIONS to enable running TypeScript directly
+ENV NODE_OPTIONS="--no-warnings --experimental-strip-types "
 
 # Copy crossplane files
 COPY crossplane.yaml package.yaml /
 
-# Install Node.js dependencies
-RUN corepack enable
-RUN yarn workspaces focus --production && yarn cache clean
+# Copy the Go binary
+COPY --from=builder /app/skyhook-server /app/skyhook-server
 
-EXPOSE 9443
-
-ENTRYPOINT ["/app/skyhook-server"]

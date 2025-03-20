@@ -21,8 +21,8 @@ echo "Cleaning up existing CRD..."
 
 # Apply CRDs and Compositions
 echo "Applying CRDs and Compositions..."
-kubectl apply -f test/fixtures/crd.yaml
-kubectl apply -f test/fixtures/composition.yaml
+kubectl apply -f tests/fixtures/crd.yaml
+kubectl apply -f tests/fixtures/composition.yaml
 
 # Wait for XRD to be established
 echo "Waiting for XRD to be established..."
@@ -35,7 +35,7 @@ kubectl wait --for=condition=established xrd/simpleconfigmaps.test.crossplane.io
 
 # Create a test SimpleConfigMap
 echo "Creating test SimpleConfigMap..."
-kubectl apply -f test/fixtures/sample.yaml
+kubectl apply -f tests/fixtures/sample.yaml
 
 # Wait for the ConfigMap to be created
 echo "Waiting for ConfigMap to be created..."

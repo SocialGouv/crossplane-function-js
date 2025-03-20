@@ -328,10 +328,17 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1beta1.RunFu
 		}, nil
 	}
 
+	// Create a new State object
+	state := &fnv1beta1.State{
+		Composite: &fnv1beta1.Resource{
+			Resource: req.Input,
+		},
+		Resources: make(map[string]*fnv1beta1.Resource),
+	}
+
 	// Return the result as a proper protobuf message
 	return &fnv1beta1.RunFunctionResponse{
-		Meta: &fnv1beta1.ResponseMeta{},
-		// We don't need to set the Desired field, as it's not required
-		// The JavaScript function has already processed the input and returned the result
+		Meta:    &fnv1beta1.ResponseMeta{},
+		Desired: state,
 	}, nil
 }

@@ -359,21 +359,17 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, code string) (
 		return nil, fmt.Errorf("failed to get current working directory: %w", err)
 	}
 
-	// Determine the correct path to the index file
-	var indexPath string
-
 	// We're in the main project, prioritize TypeScript files in src directory
 	rootPath := cwd
 	srcTsPath := filepath.Join(rootPath, "src", "index.ts")
-
-	indexPath = srcTsPath
-	pm.logger.Infof("Using TypeScript source file: %s", indexPath)
 
 	// Get a unique port for this Node.js process
 	port := pm.getNextPort()
 
 	// Create the Node.js process with the appropriate path to the index file
-	cmd := exec.CommandContext(ctx, "node", indexPath, tempFilePath)
+	// Use a background context that won't be canceled when the request is done
+	processCtx := context.Background()
+	cmd := exec.CommandContext(processCtx, "node", srcTsPath, tempFilePath)
 	cmd.Env = append(os.Environ(),
 		"NODE_OPTIONS=--no-warnings --experimental-strip-types",
 		// Add environment variables to control Node.js behavior

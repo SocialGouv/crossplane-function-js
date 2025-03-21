@@ -24,14 +24,6 @@ export function createServer(port: number, codeFilePath: string) {
     next();
   });
   
-  // Healthcheck endpoint
-  // app.get('/healthcheck', (req: Request, res: Response) => {
-  //   res.status(200).json({ 
-  //     status: 'ok',
-  //     timestamp: new Date().toISOString()
-  //   });
-  // });
-  
   // Readiness endpoint - used by Go server to check if Node.js server is ready
   app.get('/ready', (req: Request, res: Response) => {
     res.status(200).json({ 
@@ -41,7 +33,7 @@ export function createServer(port: number, codeFilePath: string) {
   });
   
   // Execute code endpoint
-  const executeHandler: RequestHandler = async (req, res) => {
+  const executeHandler: RequestHandler = async (req, res, next) => {
     try {
       const { input } = req.body as NodeRequest;
       
@@ -59,12 +51,12 @@ export function createServer(port: number, codeFilePath: string) {
       // Log the response for debugging
       moduleLogger.debug(`Execute response: ${JSON.stringify(result, null, 2)}`);
       
-      return res.json(result);
+      res.json(result);
     } catch (err: unknown) {
       const error = err as Error;
       moduleLogger.error(`Error executing code: ${error.message}`);
       
-      return res.status(500).json({
+      res.status(500).json({
         error: {
           code: 500,
           message: error.message || 'Unknown error',

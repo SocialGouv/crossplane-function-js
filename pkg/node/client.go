@@ -21,10 +21,18 @@ type NodeClient struct {
 
 // NewNodeClient creates a new Node.js HTTP client
 func NewNodeClient(baseURL string, timeout time.Duration, logger logger.Logger) *NodeClient {
+	transport := &http.Transport{
+		MaxIdleConns:        100,
+		MaxIdleConnsPerHost: 100,
+		IdleConnTimeout:     90 * time.Second,
+		DisableKeepAlives:   false, // Ensure keep-alives are enabled
+	}
+
 	return &NodeClient{
 		baseURL: baseURL,
 		httpClient: &http.Client{
-			Timeout: timeout,
+			Timeout:   timeout,
+			Transport: transport,
 		},
 		logger: logger,
 	}
@@ -74,7 +82,11 @@ func (c *NodeClient) ExecuteFunction(ctx context.Context, inputJSON string) (str
 	if err != nil {
 		return "", fmt.Errorf("failed to send HTTP request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		// Ensure body is fully read before closing to allow connection reuse
+		io.Copy(io.Discard, resp.Body)
+		resp.Body.Close()
+	}()
 
 	// Read the response body
 	respBody, err := io.ReadAll(resp.Body)
@@ -110,7 +122,11 @@ func (c *NodeClient) CheckReady(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to send HTTP request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		// Ensure body is fully read before closing to allow connection reuse
+		io.Copy(io.Discard, resp.Body)
+		resp.Body.Close()
+	}()
 
 	// Check the response status
 	if resp.StatusCode != http.StatusOK {

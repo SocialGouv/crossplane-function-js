@@ -77,12 +77,12 @@ process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 // Log memory usage periodically
-setInterval(() => {
-  if (isShuttingDown) return;
+// setInterval(() => {
+//   if (isShuttingDown) return;
   
-  const memoryUsage = process.memoryUsage();
-  moduleLogger.debug(`Memory usage: RSS=${Math.round(memoryUsage.rss / 1024 / 1024)}MB, Heap=${Math.round(memoryUsage.heapUsed / 1024 / 1024)}/${Math.round(memoryUsage.heapTotal / 1024 / 1024)}MB`);
-}, 30000); // Every 30 seconds
+//   const memoryUsage = process.memoryUsage();
+//   moduleLogger.debug(`Memory usage: RSS=${Math.round(memoryUsage.rss / 1024 / 1024)}MB, Heap=${Math.round(memoryUsage.heapUsed / 1024 / 1024)}/${Math.round(memoryUsage.heapTotal / 1024 / 1024)}MB`);
+// }, 30000); // Every 30 seconds
 
 const server = createServer(port, codeFilePath);
 

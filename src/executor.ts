@@ -1,10 +1,5 @@
-import { join } from 'path';
-import { tmpdir } from 'os';
-import { randomBytes } from 'crypto'
-
 import type { NodeResponse, NodeError } from './types.ts';
 import { createLogger } from './logger.ts';
-import { writeFile, mkdtemp } from 'fs/promises';
       
 
 // Create a logger for this module
@@ -68,17 +63,7 @@ export async function executeCode(codeFilePath: string, input: any): Promise<Nod
         }
         throw new Error(`Function execution error: ${(execErr as Error).message}`);
       }
-      
-      // Clean up the temporary file
-      try {
-        const { unlink, rmdir } = await import('fs/promises');
-        await unlink(tempFilePath);
-        await rmdir(tempDir);
-        moduleLogger.debug(`Temporary file and directory cleaned up: ${tempFilePath}`);
-      } catch (cleanupErr) {
-        moduleLogger.warn(`Error cleaning up temporary file: ${(cleanupErr as Error).message}`);
-      }
-      
+
       // Return the result
       return { result };
     })();

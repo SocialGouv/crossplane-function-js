@@ -75,23 +75,47 @@ done
 # Check for the existence of the pod with the latest tag
 echo "Checking for pod with the latest tag..."
 for i in {1..30}; do
-  POD_NAME=$(kubectl get pods -n crossplane-system -l pkg.crossplane.io/function=function-skyhook -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+  # List all pods with the function-skyhook label
+  echo "Listing all function-skyhook pods..."
+  kubectl get pods -n crossplane-system -l pkg.crossplane.io/function=function-skyhook -o wide || true
   
-  if [ -n "$POD_NAME" ]; then
-    # Check if the pod is running and using the correct image
-    POD_IMAGE=$(kubectl get pod $POD_NAME -n crossplane-system -o jsonpath='{.spec.containers[0].image}' 2>/dev/null)
-    POD_STATUS=$(kubectl get pod $POD_NAME -n crossplane-system -o jsonpath='{.status.phase}' 2>/dev/null)
-    
-    if [[ "$POD_IMAGE" == *"${TAG_TIMESTAMP}"* && "$POD_STATUS" == "Running" ]]; then
-      echo "Pod $POD_NAME is running with the correct image: $POD_IMAGE"
-      break
-    else
-      echo "Pod $POD_NAME found but either wrong image or not running yet:"
-      echo "  - Image: $POD_IMAGE"
-      echo "  - Status: $POD_STATUS"
-    fi
+  # Check if any pod has the correct image and is in a valid state
+  # This command will output lines like: "pod-name image-name:tag Running/Succeeded"
+  POD_LIST=$(kubectl get pods -n crossplane-system -l pkg.crossplane.io/function=function-skyhook -o custom-columns=NAME:.metadata.name,IMAGE:.spec.containers[0].image,STATUS:.status.phase --no-headers 2>/dev/null || echo "")
+  
+  if [ -z "$POD_LIST" ]; then
+    echo "No pods found for function-skyhook yet"
   else
-    echo "No pod found for function-skyhook yet"
+    # Check each pod in the list
+    echo "$POD_LIST" | while read -r POD_LINE; do
+      if [ -z "$POD_LINE" ]; then
+        continue
+      fi
+      
+      # Extract pod name, image, and status
+      POD_NAME=$(echo "$POD_LINE" | awk '{print $1}')
+      POD_IMAGE=$(echo "$POD_LINE" | awk '{print $2}')
+      POD_STATUS=$(echo "$POD_LINE" | awk '{print $3}')
+      
+      echo "Checking pod: $POD_NAME, Image: $POD_IMAGE, Status: $POD_STATUS"
+      
+      if [[ "$POD_IMAGE" == *"${TAG_TIMESTAMP}"* && ("$POD_STATUS" == "Running" || "$POD_STATUS" == "Succeeded") ]]; then
+        echo "Pod $POD_NAME is in a valid state with the correct image: $POD_IMAGE (Status: $POD_STATUS)"
+        # Set a flag to indicate we found a valid pod
+        touch /tmp/valid_pod_found
+        break
+      else
+        echo "Pod $POD_NAME found but either wrong image or not in a valid state yet:"
+        echo "  - Image: $POD_IMAGE"
+        echo "  - Status: $POD_STATUS"
+      fi
+    done
+    
+    # Check if we found a valid pod
+    if [ -f /tmp/valid_pod_found ]; then
+      rm /tmp/valid_pod_found
+      break
+    fi
   fi
   
   echo "Waiting for pod with tag ${TAG_TIMESTAMP} to be ready... ($i/30)"

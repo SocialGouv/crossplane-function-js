@@ -10,7 +10,15 @@ export const logger = pino({
     options: { 
       destination: process.stderr.fd,
       sync: true  // Enable sync mode for more reliable flushing
-    }
+    },
+  },
+  formatters: {
+    level: (label) => {
+      return { level: label.toUpperCase() }
+    },
+    bindings (_bindings) {
+      return {}
+    },
   },
   timestamp: false,
 });

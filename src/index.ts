@@ -36,7 +36,6 @@ process.on('unhandledRejection', (reason, promise) => {
 
 // Process state
 let isShuttingDown = false;
-const HEARTBEAT_INTERVAL = 1000; // 1 second
 
 // Function to gracefully shutdown the process
 async function gracefulShutdown(signal: string) {
@@ -89,10 +88,6 @@ setInterval(() => {
   moduleLogger.debug(`Memory usage: RSS=${Math.round(memoryUsage.rss / 1024 / 1024)}MB, Heap=${Math.round(memoryUsage.heapUsed / 1024 / 1024)}/${Math.round(memoryUsage.heapTotal / 1024 / 1024)}MB`);
 }, 30000); // Every 30 seconds
 
-// Create and start the HTTP server
-const server = createServer(port);
+const server = createServer(port, codeFilePath);
 
-moduleLogger.info(`Node.js HTTP server is ready on port ${port}`);
-
-// Log that we're ready
-moduleLogger.info(`Node.js process started for code file: ${codeFilePath} (for backward compatibility)`);
+moduleLogger.info(`Node.js process started for code file: ${codeFilePath}`);

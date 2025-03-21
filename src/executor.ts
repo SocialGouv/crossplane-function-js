@@ -1,5 +1,11 @@
+import { join } from 'path';
+import { tmpdir } from 'os';
+import { randomBytes } from 'crypto'
+
 import type { NodeResponse, NodeError } from './types.ts';
 import { createLogger } from './logger.ts';
+import { writeFile, mkdtemp } from 'fs/promises';
+      
 
 // Create a logger for this module
 const moduleLogger = createLogger('executor');
@@ -10,7 +16,7 @@ const moduleLogger = createLogger('executor');
  * @param input The input data for the code
  * @returns The result of running the code
  */
-export async function executeCode(code: string, input: any): Promise<NodeResponse> {
+export async function executeCode(codeFilePath: string, input: any): Promise<NodeResponse> {
   // Set up a timeout to prevent infinite loops or long-running code
   const executionTimeout = 25000; // 25 seconds (less than the 30s in Go to ensure we can respond)
   let timeoutId: NodeJS.Timeout | null = null;
@@ -30,31 +36,12 @@ export async function executeCode(code: string, input: any): Promise<NodeRespons
         throw new Error('Input is undefined or null');
       }
       
-      if (!code) {
-        throw new Error('Code is required');
-      }
-
-      // Create a temporary file for the code
-      const { writeFile, mkdtemp } = await import('fs/promises');
-      const { join } = await import('path');
-      const { tmpdir } = await import('os');
-      const { randomBytes } = await import('crypto');
-      
-      // Create a temporary directory
-      const tempDir = await mkdtemp(join(tmpdir(), 'skyhook-'));
-      const tempFilePath = join(tempDir, `code-${randomBytes(8).toString('hex')}.ts`);
-      
-      // Write the code to the temporary file
-      await writeFile(tempFilePath, code);
-      moduleLogger.debug(`Code written to temporary file: ${tempFilePath}`);
-      
       // Import the module directly from the file path
-      const fileUrl = `file://${tempFilePath}`;
-      moduleLogger.debug(`Importing module from file: ${fileUrl}`);
+      moduleLogger.debug(`Importing module from file: ${codeFilePath}`);
       
       let module;
       try {
-        module = await import(fileUrl);
+        module = await import(codeFilePath);
       } catch (importErr) {
         moduleLogger.error(`Error importing module: ${(importErr as Error).message}`);
         if ((importErr as Error).stack) {

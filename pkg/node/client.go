@@ -31,10 +31,9 @@ func NewNodeClient(baseURL string, timeout time.Duration, logger logger.Logger) 
 }
 
 // ExecuteFunction sends a request to the Node.js server to execute a function
-func (c *NodeClient) ExecuteFunction(ctx context.Context, code, inputJSON string) (string, error) {
+func (c *NodeClient) ExecuteFunction(ctx context.Context, inputJSON string) (string, error) {
 	// Create the request payload
 	type requestPayload struct {
-		Code  string          `json:"code"`
 		Input json.RawMessage `json:"input"`
 	}
 
@@ -45,7 +44,6 @@ func (c *NodeClient) ExecuteFunction(ctx context.Context, code, inputJSON string
 	}
 
 	payload := requestPayload{
-		Code:  code,
 		Input: inputRaw,
 	}
 
@@ -92,35 +90,6 @@ func (c *NodeClient) ExecuteFunction(ctx context.Context, code, inputJSON string
 
 	// Return the response body as a string
 	return string(respBody), nil
-}
-
-// CheckHealth checks if the Node.js server is healthy
-func (c *NodeClient) CheckHealth(ctx context.Context) error {
-	// Create the HTTP request
-	req, err := http.NewRequestWithContext(
-		ctx,
-		http.MethodGet,
-		fmt.Sprintf("%s/healthcheck", c.baseURL),
-		nil,
-	)
-	if err != nil {
-		return fmt.Errorf("failed to create HTTP request: %w", err)
-	}
-
-	// Send the request
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return fmt.Errorf("failed to send HTTP request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	// Check the response status
-	if resp.StatusCode != http.StatusOK {
-		respBody, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("healthcheck failed with status %d: %s", resp.StatusCode, string(respBody))
-	}
-
-	return nil
 }
 
 // CheckReady checks if the Node.js server is ready

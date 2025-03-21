@@ -12,7 +12,7 @@ const moduleLogger = createLogger('server');
  * @param port The port to listen on
  * @returns The configured Express app
  */
-export function createServer(port: number) {
+export function createServer(port: number, codeFilePath: string) {
   const app = express();
   
   // Configure middleware
@@ -25,12 +25,12 @@ export function createServer(port: number) {
   });
   
   // Healthcheck endpoint
-  app.get('/healthcheck', (req: Request, res: Response) => {
-    res.status(200).json({ 
-      status: 'ok',
-      timestamp: new Date().toISOString()
-    });
-  });
+  // app.get('/healthcheck', (req: Request, res: Response) => {
+  //   res.status(200).json({ 
+  //     status: 'ok',
+  //     timestamp: new Date().toISOString()
+  //   });
+  // });
   
   // Readiness endpoint - used by Go server to check if Node.js server is ready
   app.get('/ready', (req: Request, res: Response) => {
@@ -43,26 +43,16 @@ export function createServer(port: number) {
   // Execute code endpoint
   const executeHandler: RequestHandler = async (req, res) => {
     try {
-      const { code, input } = req.body as NodeRequest;
+      const { input } = req.body as NodeRequest;
       
       // Log the request for debugging
       moduleLogger.debug(`Execute request received: ${JSON.stringify({ 
-        code_length: code?.length || 0,
-        input: input 
+        input 
       }, null, 2)}`);
-      
-      if (!code) {
-        return res.status(400).json({
-          error: {
-            code: 400,
-            message: 'Code is required'
-          }
-        });
-      }
       
       moduleLogger.info(`Executing code with input length: ${JSON.stringify(input).length}`);
 
-      const result = await executeCode(code, input);
+      const result = await executeCode(codeFilePath, input);
       
       moduleLogger.info('Code execution completed');
       

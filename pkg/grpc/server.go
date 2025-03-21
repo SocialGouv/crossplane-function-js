@@ -154,65 +154,6 @@ func (s *Server) Stop() {
 	}
 }
 
-// RunFunction implements the RunFunction RPC method
-func (s *Server) RunFunction(ctx context.Context, req *RunFunctionRequest) (*RunFunctionResponse, error) {
-	if req.Code == "" {
-		return nil, status.Error(codes.InvalidArgument, "code is required")
-	}
-
-	// Log request details (code length only, not the full code)
-	s.logger.WithField("code_length", len(req.Code)).Debug("RunFunction request received")
-
-	// Execute the function using the process manager
-	result, err := s.processManager.ExecuteFunction(ctx, req.Code, req.InputJson)
-	if err != nil {
-		s.logger.Errorf("Error executing function: %v", err)
-		return &RunFunctionResponse{
-			Error: &ErrorInfo{
-				Code:       int32(codes.Internal),
-				Message:    err.Error(),
-				StackTrace: "",
-			},
-		}, nil
-	}
-
-	// Parse the result
-	var nodeResp struct {
-		Result json.RawMessage `json:"result,omitempty"`
-		Error  *struct {
-			Code    int    `json:"code"`
-			Message string `json:"message"`
-			Stack   string `json:"stack,omitempty"`
-		} `json:"error,omitempty"`
-	}
-
-	if err := json.Unmarshal([]byte(result), &nodeResp); err != nil {
-		s.logger.Errorf("Error parsing Node.js response: %v", err)
-		return &RunFunctionResponse{
-			Error: &ErrorInfo{
-				Code:       int32(codes.Internal),
-				Message:    fmt.Sprintf("Failed to parse Node.js response: %v", err),
-				StackTrace: "",
-			},
-		}, nil
-	}
-
-	response := &RunFunctionResponse{}
-
-	if nodeResp.Error != nil {
-		response.Error = &ErrorInfo{
-			Code:       int32(nodeResp.Error.Code),
-			Message:    nodeResp.Error.Message,
-			StackTrace: nodeResp.Error.Stack,
-		}
-		s.logger.Errorf("Node.js execution error: %s", nodeResp.Error.Message)
-	} else {
-		response.OutputJson = string(nodeResp.Result)
-	}
-
-	return response, nil
-}
-
 // runFunctionCrossplane implements the RunFunction method for the Crossplane FunctionRunnerService
 func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1.RunFunctionRequest) (*fnv1.RunFunctionResponse, error) {
 	// Log request details

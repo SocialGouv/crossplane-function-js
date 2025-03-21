@@ -211,7 +211,7 @@ func (pm *ProcessManager) ExecuteFunction(ctx context.Context, code, inputJSON s
 
 		// Execute the function
 		pm.logger.Debug("Sending request to Node.js server")
-		result, err := process.Client.ExecuteFunction(execCtx, code, inputJSON)
+		result, err := process.Client.ExecuteFunction(execCtx, inputJSON)
 
 		// Cleanup
 		cancel() // Cancel the context
@@ -256,15 +256,6 @@ func (pm *ProcessManager) isProcessHealthy(process *ProcessInfo) bool {
 		pm.logger.Warnf("Process has exited with code: %v", exitCode)
 		return false
 	}
-
-	// Check if the HTTP server is responsive
-	// ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	// defer cancel()
-
-	// if err := process.Client.CheckHealth(ctx); err != nil {
-	// 	pm.logger.Warnf("HTTP server health check failed: %v", err)
-	// 	return false
-	// }
 
 	return true
 }

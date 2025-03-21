@@ -1,0 +1,46 @@
+# Infrastructure
+charts/
+Dockerfile
+crossplane.yaml
+.dockerignore
+*.yaml
+*.yml
+
+# CI/Build
+tests/
+test/
+Makefile
+.github/
+.gitlab/
+
+# Package management
+yarn.lock
+package.json
+go.sum
+go.mod
+node_modules/
+vendor/
+.yarnrc.yml
+
+# Build outputs
+bin/
+build/
+dist/
+
+# Documentation
+*.md
+ENV_VARS.md
+BLUEPRINT.md
+README.md
+
+# Tooling configuration
+.editorconfig
+.gitignore
+.gitattributes
+.nvmrc
+.node-version
+tsconfig.json
+.eslintrc*
+.prettierrc*
+.babelrc*
+.yarn

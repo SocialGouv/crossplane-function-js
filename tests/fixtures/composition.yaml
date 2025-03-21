@@ -121,3 +121,6 @@ spec:
                 
                 return desired;
               }
+    - step: automatically-detect-ready-composed-resources
+      functionRef:
+        name: function-auto-ready

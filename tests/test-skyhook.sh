@@ -15,13 +15,10 @@ trap 'handle_error $LINENO' ERR
 echo "Creating test namespace..."
 kubectl create namespace test-skyhook --dry-run=client -o yaml | kubectl apply -f -
 
-# Clean up existing CRD if it exists
-echo "Cleaning up existing CRD..."
-./tests/cleanup-crd.sh
-
 # Apply CRDs and Compositions
 echo "Applying CRDs and Compositions..."
 kubectl apply -f tests/fixtures/provider-in-cluster.yaml
+kubectl apply -f tests/fixtures/functions.yaml
 kubectl apply -f tests/fixtures/crd.yaml
 kubectl apply -f tests/fixtures/composition.yaml
 

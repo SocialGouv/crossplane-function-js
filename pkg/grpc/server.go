@@ -8,7 +8,7 @@ import (
 	"net"
 	"time"
 
-	fnv1beta1 "github.com/crossplane/function-sdk-go/proto/v1beta1"
+	fnv1 "github.com/crossplane/function-sdk-go/proto/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
@@ -112,7 +112,7 @@ func (s *Server) runFunctionHandler(srv interface{}, ctx context.Context, dec fu
 	s.logger.Info("Handling Crossplane FunctionRunnerService.RunFunction request")
 
 	// Use the Crossplane Function SDK to decode the request
-	req := &fnv1beta1.RunFunctionRequest{}
+	req := &fnv1.RunFunctionRequest{}
 	if err := dec(req); err != nil {
 		s.logger.Errorf("Error decoding request: %v", err)
 		return nil, status.Errorf(codes.Internal, "Error decoding request: %v", err)
@@ -214,7 +214,7 @@ func (s *Server) RunFunction(ctx context.Context, req *RunFunctionRequest) (*Run
 }
 
 // runFunctionCrossplane implements the RunFunction method for the Crossplane FunctionRunnerService
-func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1beta1.RunFunctionRequest) (*fnv1beta1.RunFunctionResponse, error) {
+func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1.RunFunctionRequest) (*fnv1.RunFunctionResponse, error) {
 	// Log request details
 	s.logger.Debug("Crossplane FunctionRunnerService.RunFunction request received")
 
@@ -222,11 +222,11 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1beta1.RunFu
 	inputBytes, err := json.Marshal(req.Input)
 	if err != nil {
 		s.logger.Errorf("Error marshaling input to JSON: %v", err)
-		return &fnv1beta1.RunFunctionResponse{
-			Meta: &fnv1beta1.ResponseMeta{},
-			Results: []*fnv1beta1.Result{
+		return &fnv1.RunFunctionResponse{
+			Meta: &fnv1.ResponseMeta{},
+			Results: []*fnv1.Result{
 				{
-					Severity: fnv1beta1.Severity_SEVERITY_FATAL,
+					Severity: fnv1.Severity_SEVERITY_FATAL,
 					Message:  fmt.Sprintf("Failed to marshal input to JSON: %v", err),
 				},
 			},
@@ -247,11 +247,11 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1beta1.RunFu
 	var inputData map[string]interface{}
 	if err := json.Unmarshal(inputBytes, &inputData); err != nil {
 		s.logger.Errorf("Error parsing input JSON: %v", err)
-		return &fnv1beta1.RunFunctionResponse{
-			Meta: &fnv1beta1.ResponseMeta{},
-			Results: []*fnv1beta1.Result{
+		return &fnv1.RunFunctionResponse{
+			Meta: &fnv1.ResponseMeta{},
+			Results: []*fnv1.Result{
 				{
-					Severity: fnv1beta1.Severity_SEVERITY_FATAL,
+					Severity: fnv1.Severity_SEVERITY_FATAL,
 					Message:  fmt.Sprintf("Failed to parse input JSON: %v", err),
 				},
 			},
@@ -277,11 +277,11 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1beta1.RunFu
 
 	if code == "" {
 		s.logger.Error("No code found in the input")
-		return &fnv1beta1.RunFunctionResponse{
-			Meta: &fnv1beta1.ResponseMeta{},
-			Results: []*fnv1beta1.Result{
+		return &fnv1.RunFunctionResponse{
+			Meta: &fnv1.ResponseMeta{},
+			Results: []*fnv1.Result{
 				{
-					Severity: fnv1beta1.Severity_SEVERITY_FATAL,
+					Severity: fnv1.Severity_SEVERITY_FATAL,
 					Message:  "No code found in the input",
 				},
 			},
@@ -293,11 +293,11 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1beta1.RunFu
 	result, err := s.processManager.ExecuteFunction(ctx, code, string(inputBytes))
 	if err != nil {
 		s.logger.Errorf("Error executing function: %v", err)
-		return &fnv1beta1.RunFunctionResponse{
-			Meta: &fnv1beta1.ResponseMeta{},
-			Results: []*fnv1beta1.Result{
+		return &fnv1.RunFunctionResponse{
+			Meta: &fnv1.ResponseMeta{},
+			Results: []*fnv1.Result{
 				{
-					Severity: fnv1beta1.Severity_SEVERITY_FATAL,
+					Severity: fnv1.Severity_SEVERITY_FATAL,
 					Message:  err.Error(),
 				},
 			},
@@ -316,11 +316,11 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1beta1.RunFu
 
 	if err := json.Unmarshal([]byte(result), &nodeResp); err != nil {
 		s.logger.Errorf("Error parsing Node.js response: %v", err)
-		return &fnv1beta1.RunFunctionResponse{
-			Meta: &fnv1beta1.ResponseMeta{},
-			Results: []*fnv1beta1.Result{
+		return &fnv1.RunFunctionResponse{
+			Meta: &fnv1.ResponseMeta{},
+			Results: []*fnv1.Result{
 				{
-					Severity: fnv1beta1.Severity_SEVERITY_FATAL,
+					Severity: fnv1.Severity_SEVERITY_FATAL,
 					Message:  fmt.Sprintf("Failed to parse Node.js response: %v", err),
 				},
 			},
@@ -328,11 +328,11 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1beta1.RunFu
 	}
 
 	if nodeResp.Error != nil {
-		return &fnv1beta1.RunFunctionResponse{
-			Meta: &fnv1beta1.ResponseMeta{},
-			Results: []*fnv1beta1.Result{
+		return &fnv1.RunFunctionResponse{
+			Meta: &fnv1.ResponseMeta{},
+			Results: []*fnv1.Result{
 				{
-					Severity: fnv1beta1.Severity_SEVERITY_FATAL,
+					Severity: fnv1.Severity_SEVERITY_FATAL,
 					Message:  nodeResp.Error.Message,
 				},
 			},
@@ -348,11 +348,11 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1beta1.RunFu
 
 	if err := json.Unmarshal(nodeResp.Result, &jsResponse); err != nil {
 		s.logger.Errorf("Error parsing JavaScript function response: %v", err)
-		return &fnv1beta1.RunFunctionResponse{
-			Meta: &fnv1beta1.ResponseMeta{},
-			Results: []*fnv1beta1.Result{
+		return &fnv1.RunFunctionResponse{
+			Meta: &fnv1.ResponseMeta{},
+			Results: []*fnv1.Result{
 				{
-					Severity: fnv1beta1.Severity_SEVERITY_FATAL,
+					Severity: fnv1.Severity_SEVERITY_FATAL,
 					Message:  fmt.Sprintf("Failed to parse JavaScript function response: %v", err),
 				},
 			},
@@ -360,8 +360,8 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1beta1.RunFu
 	}
 
 	// Create a new State object
-	state := &fnv1beta1.State{
-		Resources: make(map[string]*fnv1beta1.Resource),
+	state := &fnv1.State{
+		Resources: make(map[string]*fnv1.Resource),
 	}
 
 	// Create a copy of the input struct
@@ -375,7 +375,7 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1beta1.RunFu
 	}
 
 	// Set the cleaned composite resource
-	state.Composite = &fnv1beta1.Resource{
+	state.Composite = &fnv1.Resource{
 		Resource: compositeResource,
 	}
 
@@ -404,7 +404,7 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1beta1.RunFu
 		}
 
 		// Create a resource without namespace in resourceRefs
-		state.Resources[name] = &fnv1beta1.Resource{
+		state.Resources[name] = &fnv1.Resource{
 			Resource: resourceStruct,
 		}
 	}
@@ -414,8 +414,8 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1beta1.RunFu
 	s.logger.Debugf("Final state being returned to Crossplane: %s", string(stateJSON))
 
 	// Return the result as a proper protobuf message
-	response := &fnv1beta1.RunFunctionResponse{
-		Meta:    &fnv1beta1.ResponseMeta{},
+	response := &fnv1.RunFunctionResponse{
+		Meta:    &fnv1.ResponseMeta{},
 		Desired: state,
 	}
 

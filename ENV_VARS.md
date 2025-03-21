@@ -2,12 +2,16 @@
 
 This document describes the environment variables that can be used to configure the Crossplane Skyhook server.
 
+## Configuration Library
+
+The server uses the [envconfig](https://github.com/kelseyhightower/envconfig) library to handle environment variable configuration. This library automatically maps environment variables to struct fields based on struct tags, providing a more robust and maintainable configuration system.
+
 ## Configuration Hierarchy
 
 The configuration is loaded in the following order, with later sources taking precedence:
 
-1. Default values
-2. Environment variables
+1. Default values (defined in struct tags)
+2. Environment variables (processed by envconfig)
 3. Command-line flags
 
 ## Available Environment Variables

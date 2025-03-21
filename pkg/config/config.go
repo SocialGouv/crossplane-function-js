@@ -4,125 +4,62 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strconv"
-	"strings"
 	"time"
+
+	"github.com/kelseyhightower/envconfig"
 )
 
 // Config holds the configuration for the server
 type Config struct {
 	// Server configuration
-	GRPCAddress string        // Address for the gRPC server
-	TempDir     string        // Directory for temporary files
-	GCInterval  time.Duration // Interval for garbage collection
-	IdleTimeout time.Duration // Timeout for idle processes
+	GRPCAddress string        `envconfig:"GRPC_ADDRESS" default:":9443" description:"gRPC server address"`
+	TempDir     string        `envconfig:"TEMP_DIR" description:"Temporary directory for code files"`
+	GCInterval  time.Duration `envconfig:"GC_INTERVAL" default:"5m" description:"Garbage collection interval"`
+	IdleTimeout time.Duration `envconfig:"IDLE_TIMEOUT" default:"30m" description:"Idle process timeout"`
 
 	// TLS configuration
-	TLSEnabled  bool   // Whether TLS is enabled
-	TLSCertFile string // Path to the TLS certificate file
-	TLSKeyFile  string // Path to the TLS key file
+	TLSEnabled  bool   `envconfig:"TLS_ENABLED" default:"false" description:"Enable TLS"`
+	TLSCertFile string `envconfig:"TLS_CERT_FILE" description:"Path to TLS certificate file"`
+	TLSKeyFile  string `envconfig:"TLS_KEY_FILE" description:"Path to TLS key file"`
 
 	// Logging configuration
-	LogLevel  string // Log level (debug, info, warn, error)
-	LogFormat string // Log format (auto, text, json)
+	LogLevel  string `envconfig:"LOG_LEVEL" default:"info" description:"Log level (debug, info, warn, error)"`
+	LogFormat string `envconfig:"LOG_FORMAT" default:"auto" description:"Log format (auto, text, json)"`
 
 	// Node.js server configuration
-	NodeServerPort      int           // Port for the Node.js HTTP server
-	HealthCheckWait     time.Duration // Timeout for health check
-	HealthCheckInterval time.Duration // Interval for health check polling
-	NodeRequestTimeout  time.Duration // Timeout for Node.js requests
+	NodeServerPort      int           `envconfig:"NODE_SERVER_PORT" default:"3000" description:"Port for the Node.js HTTP server"`
+	HealthCheckWait     time.Duration `envconfig:"HEALTH_CHECK_WAIT" default:"30s" description:"Timeout for health check"`
+	HealthCheckInterval time.Duration `envconfig:"HEALTH_CHECK_INTERVAL" default:"500ms" description:"Interval for health check polling"`
+	NodeRequestTimeout  time.Duration `envconfig:"NODE_REQUEST_TIMEOUT" default:"30s" description:"Timeout for Node.js requests"`
 }
 
-// DefaultConfig returns the default configuration
-func DefaultConfig() *Config {
-	return &Config{
-		// Server defaults
-		GRPCAddress: ":9443",
-		TempDir:     filepath.Join(os.TempDir(), "crossplane-skyhook"),
-		GCInterval:  5 * time.Minute,
-		IdleTimeout: 30 * time.Minute,
+// LoadConfig loads configuration from environment variables and returns a Config
+func LoadConfig() (*Config, error) {
+	config := &Config{}
 
-		// TLS defaults (disabled by default)
-		TLSEnabled: false,
-
-		// Logging defaults
-		LogLevel:  "info",
-		LogFormat: "auto",
-
-		// Node.js server defaults
-		NodeServerPort:      3000,
-		HealthCheckWait:     30 * time.Second,
-		HealthCheckInterval: 500 * time.Millisecond,
-		NodeRequestTimeout:  30 * time.Second,
-	}
-}
-
-// LoadFromEnv loads configuration from environment variables
-func (c *Config) LoadFromEnv() {
-	// Server configuration
-	if val := os.Getenv("SKYHOOK_GRPC_ADDRESS"); val != "" {
-		c.GRPCAddress = val
-	}
-	if val := os.Getenv("SKYHOOK_TEMP_DIR"); val != "" {
-		c.TempDir = val
-	}
-	if val := os.Getenv("SKYHOOK_GC_INTERVAL"); val != "" {
-		if duration, err := time.ParseDuration(val); err == nil {
-			c.GCInterval = duration
-		}
-	}
-	if val := os.Getenv("SKYHOOK_IDLE_TIMEOUT"); val != "" {
-		if duration, err := time.ParseDuration(val); err == nil {
-			c.IdleTimeout = duration
-		}
+	// Process environment variables
+	if err := envconfig.Process("SKYHOOK", config); err != nil {
+		return nil, fmt.Errorf("failed to process environment variables: %w", err)
 	}
 
-	// TLS configuration
-	if val := os.Getenv("SKYHOOK_TLS_ENABLED"); val != "" {
-		c.TLSEnabled = strings.ToLower(val) == "true" || val == "1"
+	// Set default temp dir if not specified
+	if config.TempDir == "" {
+		config.TempDir = filepath.Join(os.TempDir(), "crossplane-skyhook")
 	}
-	// For backward compatibility
+
+	// Handle legacy env var for backward compatibility
 	if tlsCertsDir := os.Getenv("TLS_SERVER_CERTS_DIR"); tlsCertsDir != "" {
-		c.TLSEnabled = true
-		c.TLSCertFile = filepath.Join(tlsCertsDir, "tls.crt")
-		c.TLSKeyFile = filepath.Join(tlsCertsDir, "tls.key")
-	}
-	if val := os.Getenv("SKYHOOK_TLS_CERT_FILE"); val != "" {
-		c.TLSCertFile = val
-	}
-	if val := os.Getenv("SKYHOOK_TLS_KEY_FILE"); val != "" {
-		c.TLSKeyFile = val
+		config.TLSEnabled = true
+		config.TLSCertFile = filepath.Join(tlsCertsDir, "tls.crt")
+		config.TLSKeyFile = filepath.Join(tlsCertsDir, "tls.key")
 	}
 
-	// Logging configuration
-	if val := os.Getenv("SKYHOOK_LOG_LEVEL"); val != "" {
-		c.LogLevel = val
-	}
-	if val := os.Getenv("SKYHOOK_LOG_FORMAT"); val != "" {
-		c.LogFormat = val
+	// Validate configuration
+	if err := config.Validate(); err != nil {
+		return nil, err
 	}
 
-	// Node.js server configuration
-	if val := os.Getenv("SKYHOOK_NODE_SERVER_PORT"); val != "" {
-		if port, err := strconv.Atoi(val); err == nil {
-			c.NodeServerPort = port
-		}
-	}
-	if val := os.Getenv("SKYHOOK_HEALTH_CHECK_WAIT"); val != "" {
-		if duration, err := time.ParseDuration(val); err == nil {
-			c.HealthCheckWait = duration
-		}
-	}
-	if val := os.Getenv("SKYHOOK_HEALTH_CHECK_INTERVAL"); val != "" {
-		if duration, err := time.ParseDuration(val); err == nil {
-			c.HealthCheckInterval = duration
-		}
-	}
-	if val := os.Getenv("SKYHOOK_NODE_REQUEST_TIMEOUT"); val != "" {
-		if duration, err := time.ParseDuration(val); err == nil {
-			c.NodeRequestTimeout = duration
-		}
-	}
+	return config, nil
 }
 
 // Validate validates the configuration

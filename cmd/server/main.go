@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,11 +14,12 @@ import (
 )
 
 func main() {
-	// Create default configuration
-	cfg := config.DefaultConfig()
-
 	// Load configuration from environment variables
-	cfg.LoadFromEnv()
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to load configuration: %v\n", err)
+		os.Exit(1)
+	}
 
 	// Define command line flags with current config values as defaults
 	grpcAddr := flag.String("grpc-addr", cfg.GRPCAddress, "gRPC server address")
@@ -60,7 +62,7 @@ func main() {
 	log := logger.NewLogrusLogger(cfg.LogLevel, cfg.LogFormat)
 
 	// Log configuration source information
-	log.Info("Configuration loaded from defaults, environment variables, and command line flags")
+	log.Info("Configuration loaded from environment variables and command line flags")
 
 	// Validate configuration
 	if err := cfg.Validate(); err != nil {

@@ -1,14 +1,17 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/socialgouv/crossplane-skyhook/pkg/config"
 	"github.com/socialgouv/crossplane-skyhook/pkg/grpc"
+	"github.com/socialgouv/crossplane-skyhook/pkg/http"
 	"github.com/socialgouv/crossplane-skyhook/pkg/logger"
 	"github.com/socialgouv/crossplane-skyhook/pkg/node"
 )
@@ -23,6 +26,7 @@ func main() {
 
 	// Define command line flags with current config values as defaults
 	grpcAddr := flag.String("grpc-addr", cfg.GRPCAddress, "gRPC server address")
+	httpAddr := flag.String("http-addr", ":8080", "HTTP server address for health checks")
 	tempDir := flag.String("temp-dir", cfg.TempDir, "Temporary directory for code files")
 	gcInterval := flag.Duration("gc-interval", cfg.GCInterval, "Garbage collection interval")
 	idleTimeout := flag.Duration("idle-timeout", cfg.IdleTimeout, "Idle process timeout")
@@ -85,23 +89,45 @@ func main() {
 	}
 
 	// Create gRPC server
-	server := grpc.NewServer(processManager, log)
+	grpcServer := grpc.NewServer(processManager, log)
+
+	// Create HTTP server for health checks
+	httpServer := http.NewServer(processManager, log)
 
 	// Start gRPC server
 	go func() {
-		if err := server.Start(cfg.GRPCAddress, cfg.TLSEnabled, cfg.TLSCertFile, cfg.TLSKeyFile); err != nil {
+		if err := grpcServer.Start(cfg.GRPCAddress, cfg.TLSEnabled, cfg.TLSCertFile, cfg.TLSKeyFile); err != nil {
 			log.Fatalf("Failed to start gRPC server: %v", err)
 		}
 	}()
 
-	log.Infof("Server started on %s", cfg.GRPCAddress)
+	// Start HTTP server for health checks
+	go func() {
+		if err := httpServer.Start(*httpAddr); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Failed to start HTTP server: %v", err)
+		}
+	}()
+
+	log.Infof("gRPC server started on %s", cfg.GRPCAddress)
+	log.Infof("HTTP server started on %s", *httpAddr)
 
 	// Wait for termination signal
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 	<-sigCh
 
-	// Stop the server
+	// Stop the servers
 	log.Info("Shutting down...")
-	server.Stop()
+
+	// Create a context with timeout for graceful shutdown
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Stop the HTTP server
+	if err := httpServer.Stop(ctx); err != nil {
+		log.Errorf("Error stopping HTTP server: %v", err)
+	}
+
+	// Stop the gRPC server
+	grpcServer.Stop()
 }

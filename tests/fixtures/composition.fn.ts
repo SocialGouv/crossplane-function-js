@@ -49,6 +49,8 @@ export default function transformToUppercase(input: any): any {
       role: "tester"
     };
   }
+
+  console.log("input", input)
   
   // Create a new object with uppercase values
   const uppercaseData: Record<string, string> = {};

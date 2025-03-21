@@ -81,30 +81,17 @@ async function gracefulShutdown(signal: string) {
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
-// Set up a heartbeat to monitor process health
-const heartbeatInterval = setInterval(() => {
+// Log memory usage periodically
+setInterval(() => {
   if (isShuttingDown) return;
   
-  // Log memory usage periodically
   const memoryUsage = process.memoryUsage();
   moduleLogger.debug(`Memory usage: RSS=${Math.round(memoryUsage.rss / 1024 / 1024)}MB, Heap=${Math.round(memoryUsage.heapUsed / 1024 / 1024)}/${Math.round(memoryUsage.heapTotal / 1024 / 1024)}MB`);
-  
-  // Send a heartbeat message to stderr to indicate the process is alive
-  try {
-    process.stderr.write('HEARTBEAT\n'); // This will be captured by the Go process
-  } catch (err) {
-    moduleLogger.error(`Error writing heartbeat: ${err}`);
-  }
-}, HEARTBEAT_INTERVAL);
-
-// Keep the heartbeat interval active (don't unref it)
-// This helps keep the process alive
+}, 30000); // Every 30 seconds
 
 // Create and start the HTTP server
 const server = createServer(port);
 
-// Signal to the Go process that we're ready
-process.stderr.write('READY\n');
 moduleLogger.info(`Node.js HTTP server is ready on port ${port}`);
 
 // Log that we're ready

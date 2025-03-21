@@ -2,6 +2,7 @@ package node
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -244,12 +245,6 @@ func (pm *ProcessManager) isProcessHealthy(process *ProcessInfo) bool {
 		return false
 	}
 
-	// Check if the process has exited
-	if err := process.Process.Process.Signal(syscall.Signal(0)); err != nil {
-		pm.logger.Warnf("Process health check failed: %v", err)
-		return false
-	}
-
 	// Check if the client is valid
 	if process.Client == nil {
 		return false
@@ -263,13 +258,13 @@ func (pm *ProcessManager) isProcessHealthy(process *ProcessInfo) bool {
 	}
 
 	// Check if the HTTP server is responsive
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	// ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	// defer cancel()
 
-	if err := process.Client.CheckHealth(ctx); err != nil {
-		pm.logger.Warnf("HTTP server health check failed: %v", err)
-		return false
-	}
+	// if err := process.Client.CheckHealth(ctx); err != nil {
+	// 	pm.logger.Warnf("HTTP server health check failed: %v", err)
+	// 	return false
+	// }
 
 	return true
 }
@@ -378,12 +373,10 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, code string) (
 		fmt.Sprintf("PORT=%d", pm.nodeServerPort),
 	)
 
-	// Create a custom logWriter that can detect ready signals
-	readyChannel := make(chan struct{})
+	// Create a custom logWriter
 	stderrWriter := &logWriter{
-		logger:       pm.logger,
-		prefix:       fmt.Sprintf("node[%s]: ", codeHash[:8]),
-		readyChannel: readyChannel,
+		logger: pm.logger,
+		prefix: fmt.Sprintf("node[%s]: ", codeHash[:8]),
 	}
 
 	// Redirect stderr to our logger
@@ -410,19 +403,8 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, code string) (
 	// Store the process
 	pm.processes[codeHash] = process
 
-	// Wait for the process to signal it's ready
-	pm.logger.Info("Waiting for Node.js process to be ready...")
-
-	// Set up a timeout for the ready signal
-	readyTimeout := 10 * time.Second
-	select {
-	case <-readyChannel:
-		pm.logger.Info("Node.js process signaled it's ready via stderr")
-	case <-time.After(readyTimeout):
-		pm.logger.Warn("Timeout waiting for Node.js process ready signal, checking HTTP healthcheck")
-	}
-
 	// Wait for the HTTP server to be ready
+	pm.logger.Info("Waiting for Node.js HTTP server to be ready...")
 	waitCtx, cancel := context.WithTimeout(ctx, pm.healthCheckWait)
 	defer cancel()
 
@@ -448,12 +430,10 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, code string) (
 
 // logWriter is a io.Writer that writes to a logger with buffering for partial lines
 type logWriter struct {
-	logger       logger.Logger
-	prefix       string
-	buffer       []byte
-	bufferLock   sync.Mutex
-	readyChannel chan struct{}
-	isReady      bool
+	logger     logger.Logger
+	prefix     string
+	buffer     []byte
+	bufferLock sync.Mutex
 }
 
 func (w *logWriter) Write(p []byte) (n int, err error) {
@@ -466,24 +446,24 @@ func (w *logWriter) Write(p []byte) (n int, err error) {
 	// Process complete lines from the buffer
 	lines := w.processBuffer()
 
-	// Log each complete line and check for special signals
+	// Log each complete line
 	for _, line := range lines {
-		// Check for special signals
-		if line == "READY" {
-			w.logger.Info("Received READY signal from Node.js process")
-			if w.readyChannel != nil && !w.isReady {
-				close(w.readyChannel)
-				w.isReady = true
-			}
-			continue
-		} else if line == "HEARTBEAT" {
-			// Just a heartbeat, don't log it to avoid noise
-			continue
-		}
-
-		// Regular log line
 		if line != "" {
-			w.logger.WithField("component", "node").Infof("%s%s", w.prefix, line)
+			// Try to parse the line as JSON
+			var jsonData map[string]interface{}
+			if err := json.Unmarshal([]byte(line), &jsonData); err == nil {
+				// Successfully parsed as JSON
+				// Create a new map with "js-" prefix for each key
+				prefixedData := make(map[string]interface{})
+				for k, v := range jsonData {
+					prefixedData["js-"+k] = v
+				}
+				// Log with fields
+				w.logger.WithFields(prefixedData).WithField("component", "node").Info(w.prefix)
+			} else {
+				// Failed to parse as JSON, log as plain text
+				w.logger.WithField("component", "node").Infof("%s%s", w.prefix, line)
+			}
 		}
 	}
 

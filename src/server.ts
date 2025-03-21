@@ -1,7 +1,8 @@
 import express from 'express';
-import type { Request, Response } from 'express';
+import type { Request, Response, NextFunction, RequestHandler } from 'express';
 import { createLogger } from './logger.ts';
 import type { NodeRequest, NodeResponse } from './types.ts';
+import { executeCode } from './executor.ts';
 
 // Create a logger for this module
 const moduleLogger = createLogger('server');
@@ -18,7 +19,7 @@ export function createServer(port: number) {
   app.use(express.json({ limit: '10mb' }));
   
   // Add request logging
-  app.use((req: Request, res: Response, next) => {
+  app.use((req: Request, res: Response, next: NextFunction) => {
     moduleLogger.debug(`${req.method} ${req.path}`);
     next();
   });
@@ -31,8 +32,16 @@ export function createServer(port: number) {
     });
   });
   
+  // Readiness endpoint - used by Go server to check if Node.js server is ready
+  app.get('/ready', (req: Request, res: Response) => {
+    res.status(200).json({ 
+      status: 'ready',
+      timestamp: new Date().toISOString()
+    });
+  });
+  
   // Execute code endpoint
-  app.post('/execute', async (req: Request, res: Response) => {
+  const executeHandler: RequestHandler = async (req, res) => {
     try {
       const { code, input } = req.body as NodeRequest;
       
@@ -52,9 +61,7 @@ export function createServer(port: number) {
       }
       
       moduleLogger.info(`Executing code with input length: ${JSON.stringify(input).length}`);
-      
-      // Import the executor dynamically to avoid circular dependencies
-      const { executeCode } = await import('./executor.ts');
+
       const result = await executeCode(code, input);
       
       moduleLogger.info('Code execution completed');
@@ -75,10 +82,12 @@ export function createServer(port: number) {
         }
       });
     }
-  });
+  };
+  
+  app.post('/execute', executeHandler);
   
   // Error handling middleware
-  app.use((err: any, req: Request, res: Response, next: Function) => {
+  app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     moduleLogger.error(`Unhandled error: ${err.message}`);
     res.status(500).json({
       error: {

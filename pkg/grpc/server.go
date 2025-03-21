@@ -233,8 +233,8 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1.RunFunctio
 		}, nil
 	}
 
-	s.logger.WithField("input_length", len(inputBytes)).Debug("Input received")
-	s.logger.WithField("raw_input", string(inputBytes)).Debug("Raw input")
+	// s.logger.WithField("input_length", len(inputBytes)).Debug("Input received")
+	// s.logger.WithField("raw_input", string(inputBytes)).Debug("Raw input")
 
 	// Extract the code from the input
 	// For Crossplane functions, the code is typically provided in the composition
@@ -260,7 +260,7 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1.RunFunctio
 
 	// Log the input data for debugging
 	inputJSON, _ := json.MarshalIndent(inputData, "", "  ")
-	s.logger.Infof("Input data: %s", string(inputJSON))
+	s.logger.Debugf("Input data: %s", string(inputJSON))
 
 	// Look for the code in the input
 	// In a real implementation, you would need to know the exact path to the code

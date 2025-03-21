@@ -123,6 +123,35 @@ func (c *NodeClient) CheckHealth(ctx context.Context) error {
 	return nil
 }
 
+// CheckReady checks if the Node.js server is ready
+func (c *NodeClient) CheckReady(ctx context.Context) error {
+	// Create the HTTP request
+	req, err := http.NewRequestWithContext(
+		ctx,
+		http.MethodGet,
+		fmt.Sprintf("%s/ready", c.baseURL),
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create HTTP request: %w", err)
+	}
+
+	// Send the request
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send HTTP request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Check the response status
+	if resp.StatusCode != http.StatusOK {
+		respBody, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("readiness check failed with status %d: %s", resp.StatusCode, string(respBody))
+	}
+
+	return nil
+}
+
 // WaitForReady waits for the Node.js server to be ready
 func (c *NodeClient) WaitForReady(ctx context.Context, timeout, interval time.Duration) error {
 	// Create a context with timeout
@@ -133,13 +162,13 @@ func (c *NodeClient) WaitForReady(ctx context.Context, timeout, interval time.Du
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
-	// Poll the healthcheck endpoint until it's ready or times out
+	// Poll the ready endpoint until it's ready or times out
 	for {
 		select {
 		case <-ctx.Done():
 			return fmt.Errorf("timeout waiting for Node.js server to be ready: %w", ctx.Err())
 		case <-ticker.C:
-			if err := c.CheckHealth(ctx); err != nil {
+			if err := c.CheckReady(ctx); err != nil {
 				c.logger.Debugf("Node.js server not ready yet: %v", err)
 			} else {
 				c.logger.Info("Node.js server is ready")

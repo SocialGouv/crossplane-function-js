@@ -4,7 +4,7 @@ import pino from 'pino';
 // Create a Pino logger that writes to stderr with sync flush on exit
 export const logger = pino({
   name: 'skyhook',
-  level: process.env.LOG_LEVEL || 'info',
+  level: process.env.SKYHOOK_LOG_LEVEL || process.env.LOG_LEVEL || 'info',
   transport: {
     target: 'pino/file',
     options: { 

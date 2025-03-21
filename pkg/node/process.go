@@ -168,10 +168,6 @@ func (pm *ProcessManager) collectGarbage() {
 				info.Process.Process.Signal(syscall.SIGTERM)
 			}
 
-			// Add a longer delay to allow pino async logger to flush logs before killing the process
-			pm.logger.Infof("Waiting for logs to flush before killing idle process: %s", id)
-			time.Sleep(2 * time.Second)
-
 			// Flush any buffered stderr data
 			if stderrWriter, ok := info.Process.Stderr.(*logWriter); ok {
 				stderrWriter.Flush()
@@ -297,10 +293,6 @@ func (pm *ProcessManager) restartProcess(process *ProcessInfo, code string) {
 		if process.Process.Process != nil {
 			process.Process.Process.Signal(syscall.SIGTERM)
 		}
-
-		// Add a longer delay to allow pino async logger to flush logs before killing the process
-		pm.logger.Infof("Waiting for logs to flush before killing process: %s", codeHash[:8])
-		time.Sleep(2 * time.Second)
 
 		// Flush any buffered stderr data
 		if stderrWriter, ok := process.Process.Stderr.(*logWriter); ok {

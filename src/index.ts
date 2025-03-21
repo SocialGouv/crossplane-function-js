@@ -1,5 +1,5 @@
 import { createServer, shutdownServer } from './server.ts';
-import { createLogger, flushLogs } from './logger.ts';
+import { createLogger } from './logger.ts';
 
 // Create a logger for this module
 const moduleLogger = createLogger('index');
@@ -59,10 +59,6 @@ async function gracefulShutdown(signal: string) {
     if (server) {
       await shutdownServer(server);
     }
-    
-    // Explicitly flush logs
-    moduleLogger.info('Explicitly flushing logs before shutdown...');
-    await flushLogs();
     
     // Additional delay to ensure everything is written
     await new Promise(resolve => setTimeout(resolve, 1000));

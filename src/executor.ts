@@ -107,14 +107,6 @@ export async function executeCode(codeFilePath: string, input: any): Promise<Nod
       moduleLogger.debug(`Stack trace: ${error.stack}`);
     }
     
-    // Ensure logs are flushed for errors
-    try {
-      const { flushLogs } = await import('./logger.ts');
-      await flushLogs();
-    } catch (flushErr) {
-      moduleLogger.error(`Error flushing logs: ${(flushErr as Error).message}`);
-    }
-    
     // Categorize the error
     let errorCode = 500;
     if (error.message.includes('timed out')) {

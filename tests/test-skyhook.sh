@@ -17,10 +17,15 @@ kubectl create namespace test-skyhook --dry-run=client -o yaml | kubectl apply -
 
 # Apply CRDs and Compositions
 echo "Applying CRDs and Compositions..."
+echo "Preparing composition with function code..."
+# Create composition.out.yaml by replacing __FUNCTION_CODE__ with the content of composition.fn.ts
+# source_inline="$(cat tests/fixtures/composition.fn.ts)" yq e '(.spec.pipeline[0].input.spec.source.inline = strenv(source_inline))' tests/fixtures/composition.yaml > tests/fixtures/composition.out.yaml
+node tests/fixtures/composition.out.js > tests/fixtures/composition.out.yaml
+
 kubectl apply -f tests/fixtures/provider-in-cluster.yaml
 kubectl apply -f tests/fixtures/functions.yaml
 kubectl apply -f tests/fixtures/crd.yaml
-kubectl apply -f tests/fixtures/composition.yaml
+kubectl apply -f tests/fixtures/composition.out.yaml
 
 # Wait for XRD to be established
 echo "Waiting for XRD to be established..."

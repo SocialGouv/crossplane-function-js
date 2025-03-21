@@ -37,16 +37,37 @@ export function createServer(port: number, codeFilePath: string) {
     try {
       const { input } = req.body as NodeRequest;
       
-      // Log the request for debugging
-      moduleLogger.debug(`Execute request received: ${JSON.stringify({ 
-        input 
-      }, null, 2)}`);
+      // Enhanced logging of the full request body
+      moduleLogger.debug({body: req.body},'=== REQUEST RECEIVED ===');
       
-      moduleLogger.info(`Executing code with input length: ${JSON.stringify(input).length}`);
+      // Specifically log observed resources if present
+      if (req.body.observed) {
+        moduleLogger.debug('=== OBSERVED RESOURCES ===');
+        
+        // Log composite resource if present
+        if (req.body.observed.composite) {
+          moduleLogger.debug({composite: req.body.observed.composite}, 'Composite Resource:');
+        }
+        
+        // Log individual resources if present
+        if (req.body.observed.resources) {
+          moduleLogger.info('Resources:');
+          const resourceNames = Object.keys(req.body.observed.resources);
+          moduleLogger.info(`Found ${resourceNames.length} resources: ${resourceNames.join(', ')}`);
+          
+          // Log each resource
+          for (const [name, resource] of Object.entries(req.body.observed.resources)) {
+            moduleLogger.info({resource},`Resource "${name}"`);
+          }
+        }
+      }
+      
+      moduleLogger.info('=== EXECUTING CODE ===');
+      moduleLogger.info(`Input length: ${JSON.stringify(input).length}`);
 
       const result = await executeCode(codeFilePath, input);
       
-      moduleLogger.info('Code execution completed');
+      moduleLogger.info('=== CODE EXECUTION COMPLETED ===');
       
       // Log the response for debugging
       moduleLogger.debug(`Execute response: ${JSON.stringify(result, null, 2)}`);

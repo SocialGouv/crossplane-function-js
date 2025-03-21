@@ -154,6 +154,44 @@ func (s *Server) Stop() {
 	}
 }
 
+// Helper function to convert structpb.Struct to map[string]interface{}
+func structpbToMap(s *structpb.Struct) map[string]interface{} {
+	if s == nil || s.Fields == nil {
+		return nil
+	}
+
+	result := make(map[string]interface{})
+	for k, v := range s.Fields {
+		result[k] = structpbValueToInterface(v)
+	}
+	return result
+}
+
+// Helper function to convert structpb.Value to interface{}
+func structpbValueToInterface(v *structpb.Value) interface{} {
+	switch v.Kind.(type) {
+	case *structpb.Value_NullValue:
+		return nil
+	case *structpb.Value_NumberValue:
+		return v.GetNumberValue()
+	case *structpb.Value_StringValue:
+		return v.GetStringValue()
+	case *structpb.Value_BoolValue:
+		return v.GetBoolValue()
+	case *structpb.Value_StructValue:
+		return structpbToMap(v.GetStructValue())
+	case *structpb.Value_ListValue:
+		list := v.GetListValue()
+		result := make([]interface{}, len(list.Values))
+		for i, item := range list.Values {
+			result[i] = structpbValueToInterface(item)
+		}
+		return result
+	default:
+		return nil
+	}
+}
+
 // runFunctionCrossplane implements the RunFunction method for the Crossplane FunctionRunnerService
 func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1.RunFunctionRequest) (*fnv1.RunFunctionResponse, error) {
 	// Log request details
@@ -229,9 +267,60 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1.RunFunctio
 		}, nil
 	}
 
-	// Execute the function using the process manager with the original input
-	// This preserves the structure that the JavaScript code expects
-	result, err := s.processManager.ExecuteFunction(ctx, code, string(inputBytes))
+	// Extract the observed state from the RunFunctionRequest
+	var enhancedInput map[string]interface{}
+
+	// Create a structured input that includes both the original input and the observed state
+	enhancedInput = map[string]interface{}{
+		"input": inputData,
+	}
+
+	// Add observed state if available
+	if req.Observed != nil {
+		observed := make(map[string]interface{})
+
+		// Add observed composite resource if available
+		if req.Observed.Composite != nil && req.Observed.Composite.Resource != nil {
+			compositeMap := structpbToMap(req.Observed.Composite.Resource)
+			observed["composite"] = map[string]interface{}{
+				"resource": compositeMap,
+			}
+		}
+
+		// Add observed resources if available
+		if len(req.Observed.Resources) > 0 {
+			resources := make(map[string]interface{})
+			for name, resource := range req.Observed.Resources {
+				if resource != nil && resource.Resource != nil {
+					resourceMap := structpbToMap(resource.Resource)
+					resources[name] = map[string]interface{}{
+						"resource": resourceMap,
+					}
+				}
+			}
+			observed["resources"] = resources
+		}
+
+		enhancedInput["observed"] = observed
+	}
+
+	// Convert the enhanced input to JSON
+	enhancedInputJSON, err := json.Marshal(enhancedInput)
+	if err != nil {
+		s.logger.Errorf("Error marshaling enhanced input to JSON: %v", err)
+		return &fnv1.RunFunctionResponse{
+			Meta: &fnv1.ResponseMeta{},
+			Results: []*fnv1.Result{
+				{
+					Severity: fnv1.Severity_SEVERITY_FATAL,
+					Message:  fmt.Sprintf("Failed to marshal enhanced input to JSON: %v", err),
+				},
+			},
+		}, nil
+	}
+
+	// Execute the function using the process manager with the enhanced input
+	result, err := s.processManager.ExecuteFunction(ctx, code, string(enhancedInputJSON))
 	if err != nil {
 		s.logger.Errorf("Error executing function: %v", err)
 		return &fnv1.RunFunctionResponse{

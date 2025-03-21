@@ -22,6 +22,7 @@ type ProcessInfo struct {
 	Client   *NodeClient
 	LastUsed time.Time
 	Lock     sync.Mutex
+	Port     int // Store the assigned port for this process
 }
 
 // ProcessManager manages Node.js processes
@@ -32,7 +33,9 @@ type ProcessManager struct {
 	idleTimeout         time.Duration
 	tempDir             string
 	logger              logger.Logger
-	nodeServerPort      int
+	nodeServerPort      int        // Base port for Node.js servers
+	nextPort            int        // Next port to assign
+	portMutex           sync.Mutex // Mutex for port assignment
 	healthCheckWait     time.Duration
 	healthCheckInterval time.Duration
 	requestTimeout      time.Duration
@@ -52,6 +55,7 @@ func NewProcessManager(gcInterval, idleTimeout time.Duration, tempDir string, lo
 		tempDir:             tempDir,
 		logger:              logger,
 		nodeServerPort:      3000,                   // Default port
+		nextPort:            3000,                   // Initialize next port to the default port
 		healthCheckWait:     30 * time.Second,       // Default timeout for health check
 		healthCheckInterval: 500 * time.Millisecond, // Default interval for health check polling
 		requestTimeout:      30 * time.Second,       // Default timeout for requests
@@ -71,10 +75,11 @@ func NewProcessManager(gcInterval, idleTimeout time.Duration, tempDir string, lo
 // ProcessManagerOption is a function that configures a ProcessManager
 type ProcessManagerOption func(*ProcessManager)
 
-// WithNodeServerPort sets the port for the Node.js HTTP server
+// WithNodeServerPort sets the base port for the Node.js HTTP servers
 func WithNodeServerPort(port int) ProcessManagerOption {
 	return func(pm *ProcessManager) {
 		pm.nodeServerPort = port
+		pm.nextPort = port // Also update the next port to be assigned
 	}
 }
 
@@ -99,9 +104,10 @@ func WithRequestTimeout(timeout time.Duration) ProcessManagerOption {
 	}
 }
 
-// SetNodeServerPort sets the port for the Node.js HTTP server
+// SetNodeServerPort sets the base port for the Node.js HTTP servers
 func (pm *ProcessManager) SetNodeServerPort(port int) {
 	pm.nodeServerPort = port
+	pm.nextPort = port // Also update the next port to be assigned
 }
 
 // SetHealthCheckWait sets the timeout for health check
@@ -117,6 +123,23 @@ func (pm *ProcessManager) SetHealthCheckInterval(interval time.Duration) {
 // SetRequestTimeout sets the timeout for requests
 func (pm *ProcessManager) SetRequestTimeout(timeout time.Duration) {
 	pm.requestTimeout = timeout
+}
+
+// getNextPort returns the next available port and increments the counter
+func (pm *ProcessManager) getNextPort() int {
+	pm.portMutex.Lock()
+	defer pm.portMutex.Unlock()
+
+	port := pm.nextPort
+	pm.nextPort++
+
+	// If we've gone too high, wrap around to the base port + 1000
+	// This gives a range of 1000 ports (e.g., 3000-3999)
+	if pm.nextPort >= pm.nodeServerPort+1000 {
+		pm.nextPort = pm.nodeServerPort
+	}
+
+	return port
 }
 
 // startGarbageCollector starts a goroutine that periodically collects garbage
@@ -354,6 +377,9 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, code string) (
 	indexPath = srcTsPath
 	pm.logger.Infof("Using TypeScript source file: %s", indexPath)
 
+	// Get a unique port for this Node.js process
+	port := pm.getNextPort()
+
 	// Create the Node.js process with the appropriate path to the index file
 	cmd := exec.CommandContext(ctx, "node", indexPath, tempFilePath)
 	cmd.Env = append(os.Environ(),
@@ -361,7 +387,7 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, code string) (
 		// Add environment variables to control Node.js behavior
 		"NODE_NO_WARNINGS=1",
 		// Set the port for the HTTP server
-		fmt.Sprintf("PORT=%d", pm.nodeServerPort),
+		fmt.Sprintf("PORT=%d", port),
 	)
 
 	// Create a custom logWriter
@@ -378,10 +404,10 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, code string) (
 		return nil, fmt.Errorf("failed to start Node.js process: %w", err)
 	}
 
-	pm.logger.Infof("Started Node.js process for code hash: %s", codeHash[:8])
+	pm.logger.Infof("Started Node.js process for code hash: %s on port %d", codeHash[:8], port)
 
 	// Create the HTTP client
-	baseURL := fmt.Sprintf("http://127.0.0.1:%d", pm.nodeServerPort)
+	baseURL := fmt.Sprintf("http://127.0.0.1:%d", port)
 	client := NewNodeClient(baseURL, pm.requestTimeout, pm.logger)
 
 	// Create the process info
@@ -389,6 +415,7 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, code string) (
 		Process:  cmd,
 		Client:   client,
 		LastUsed: time.Now(),
+		Port:     port,
 	}
 
 	// Store the process

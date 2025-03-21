@@ -32,7 +32,8 @@ kubectl wait --for=condition=established xrd/simpleconfigmaps.test.crossplane.io
 }
 
 # Create a test SimpleConfigMap
-echo "Creating test SimpleConfigMap..."
+echo "(Re)Creating test SimpleConfigMap..."
+kubectl delete -f tests/fixtures/sample.yaml
 kubectl apply -f tests/fixtures/sample.yaml
 
 # Wait for the ConfigMap to be created

@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "..",
+    "paths": {
+      "skyhook-libs": ["../packages/skyhook-libs"]
+    }
+  },
+  "include": ["./**/*.ts", "../packages/skyhook-libs/**/*.ts"]
+}

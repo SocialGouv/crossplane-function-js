@@ -1,0 +1,103 @@
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+  name: {{ .Values.runtimeConfig.name }}
+spec:
+  serviceConfig:
+    name: {{ .Values.runtimeConfig.service.name }}
+    namespace: {{ .Values.runtimeConfig.service.namespace }}
+    port: 9443
+  deploymentTemplate:
+    spec:
+      selector:
+        matchLabels:
+          pkg.crossplane.io/function: function-skyhook
+      template:
+        metadata:
+          labels:
+            pkg.crossplane.io/function: function-skyhook
+        spec:
+          volumes:
+            - name: tmp
+              emptyDir: {}
+          containers:
+            - name: package-runtime
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+              env:
+                - name: SKYHOOK_LOG_LEVEL
+                  value: {{ .Values.config.logLevel | default "info" }}
+                - name: SKYHOOK_LOG_FORMAT
+                  value: {{ .Values.config.logFormat | default "auto" }}
+                - name: SKYHOOK_GRPC_ADDRESS
+                  value: ":{{ .Values.runtimeConfig.service.port }}"
+                {{- if .Values.config.tempDir }}
+                - name: SKYHOOK_TEMP_DIR
+                  value: {{ .Values.config.tempDir }}
+                {{- end }}
+                {{- if .Values.config.gcInterval }}
+                - name: SKYHOOK_GC_INTERVAL
+                  value: {{ .Values.config.gcInterval }}
+                {{- end }}
+                {{- if .Values.config.idleTimeout }}
+                - name: SKYHOOK_IDLE_TIMEOUT
+                  value: {{ .Values.config.idleTimeout }}
+                {{- end }}
+                {{- if .Values.config.nodeServerPort }}
+                - name: SKYHOOK_NODE_SERVER_PORT
+                  value: "{{ .Values.config.nodeServerPort }}"
+                {{- end }}
+                {{- if .Values.config.healthCheckWait }}
+                - name: SKYHOOK_HEALTH_CHECK_WAIT
+                  value: {{ .Values.config.healthCheckWait }}
+                {{- end }}
+                {{- if .Values.config.healthCheckInterval }}
+                - name: SKYHOOK_HEALTH_CHECK_INTERVAL
+                  value: {{ .Values.config.healthCheckInterval }}
+                {{- end }}
+                {{- if .Values.config.nodeRequestTimeout }}
+                - name: SKYHOOK_NODE_REQUEST_TIMEOUT
+                  value: {{ .Values.config.nodeRequestTimeout }}
+                {{- end }}
+                {{- if .Values.config.tls.enabled }}
+                - name: SKYHOOK_TLS_ENABLED
+                  value: "{{ .Values.config.tls.enabled }}"
+                {{- end }}
+                {{- if and .Values.config.tls.enabled .Values.config.tls.certFile }}
+                - name: SKYHOOK_TLS_CERT_FILE
+                  value: {{ .Values.config.tls.certFile }}
+                {{- end }}
+                {{- if and .Values.config.tls.enabled .Values.config.tls.keyFile }}
+                - name: SKYHOOK_TLS_KEY_FILE
+                  value: {{ .Values.config.tls.keyFile }}
+                {{- end }}
+              ports:
+                - containerPort: 9443
+                  name: grpc
+                - containerPort: 8080
+                  name: http
+              readinessProbe:
+                failureThreshold: 15
+                httpGet:
+                  path: /healthz
+                  port: http
+                initialDelaySeconds: 1
+                periodSeconds: 2
+                successThreshold: 1
+                timeoutSeconds: 1
+              livenessProbe:
+                failureThreshold: 3
+                httpGet:
+                  path: /healthz
+                  port: http
+                initialDelaySeconds: 30
+                periodSeconds: 10
+                timeoutSeconds: 5
+              resources:
+                limits:
+                  cpu: 1
+                  memory: 2Gi
+                requests:
+                  cpu: 300m
+                  memory: 1Gi

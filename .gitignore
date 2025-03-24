@@ -1,0 +1,26 @@
+node_modules
+.cjs
+
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+/build
+/bin
+/dist
+packages/*/dist
+
+/codebase.md
+
+# Generated files
+*.out.yaml
+/tmp.json
+/tests/fixtures/domain-sdk/manifests
+
+# Kubernetes configuration
+.kubeconfig
+.direnv

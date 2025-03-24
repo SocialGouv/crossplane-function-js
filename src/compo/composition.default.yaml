@@ -1,0 +1,25 @@
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: __FUNCTION_NAME__.test.crossplane.io
+spec:
+  compositeTypeRef:
+    apiVersion: test.crossplane.io/v1beta1
+    kind: __FUNCTION_NAME__
+  mode: Pipeline
+  pipeline:
+    - step: skyhook-function-__FUNCTION_NAME__
+      functionRef:
+        name: function-skyhook
+      input:
+        apiVersion: skyhook.fn.crossplane.io/v1beta1
+        kind: Input
+        spec:
+          source:
+            dependencies: __DEPENDENCIES__
+            yarnLock: __YARN_LOCK__
+            inline: __FUNCTION_CODE__
+    - step: automatically-detect-ready-composed-resources
+      functionRef:
+        name: function-auto-ready

@@ -1,0 +1,19 @@
+Thank you for installing {{ .Chart.Name }}.
+
+The Crossplane Skyhook Function and DeploymentRuntimeConfig have been deployed.
+
+Function name: {{ .Values.function.name }}
+DeploymentRuntimeConfig name: {{ .Values.runtimeConfig.name }}
+
+To verify the installation, run:
+
+  kubectl get functions.pkg.crossplane.io {{ .Values.function.name }}
+  kubectl get deploymentruntimeconfigs.pkg.crossplane.io {{ .Values.runtimeConfig.name }}
+
+To use the Skyhook function in your compositions, reference it with:
+
+  functionRef:
+    name: {{ .Values.function.name }}
+
+For more information, see the chart documentation at:
+https://github.com/socialgouv/crossplane-skyhook

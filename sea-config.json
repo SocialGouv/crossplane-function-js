@@ -1,0 +1,10 @@
+{
+  "main": "build/ncc/index.js",
+  "output": "build/crossplane-skyhook.blob",
+  "disableExperimentalSEAWarning": true,
+  "useSnapshot": false,
+  "useCodeCache": true,
+  "assets": {
+    "src/compo/composition.default.yaml": "src/compo/composition.default.yaml"
+  }
+}

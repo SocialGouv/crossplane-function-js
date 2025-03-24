@@ -1,0 +1,43 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Binaries
+bin/
+dist/
+
+# Tests
+tests/
+
+# Misc
+.editorconfig
+README.md
+Makefile
+
+charts
+node_modules
+tests
+test
+/*.md
+.editorconfig
+.nvmrc
+.node-version
+
+.direnv
+.kubeconfig
+flake.nix
+flake.lock
+shell.nix
+
+
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

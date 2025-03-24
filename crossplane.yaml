@@ -1,0 +1,6 @@
+apiVersion: meta.pkg.crossplane.io/v1alpha1
+kind: Function
+metadata:
+  name: function-skyhook
+spec:
+  runtime: External

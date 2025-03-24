@@ -1,0 +1,25 @@
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: simpleconfigmaps.test.crossplane.io
+spec:
+  compositeTypeRef:
+    apiVersion: test.crossplane.io/v1beta1
+    kind: SimpleConfigMap
+  mode: Pipeline
+  pipeline:
+    - step: transform-to-uppercase
+      functionRef:
+        name: function-skyhook
+      input:
+        apiVersion: skyhook.fn.crossplane.io/v1beta1
+        kind: Input
+        spec:
+          source:
+            # dependencies: __DEPENDENCIES__
+            # yarnLock: __YARN_LOCK__
+            inline: __FUNCTION_CODE__
+    - step: automatically-detect-ready-composed-resources
+      functionRef:
+        name: function-auto-ready

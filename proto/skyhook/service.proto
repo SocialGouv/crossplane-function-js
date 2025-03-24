@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package skyhook;
+
+option go_package = "github.com/socialgouv/crossplane-skyhook/pkg/grpc";
+
+service SkyhookService {
+  // RunFunction executes a JavaScript/TypeScript function with the provided input
+  rpc RunFunction(RunFunctionRequest) returns (RunFunctionResponse) {}
+}
+
+message RunFunctionRequest {
+  // The JavaScript/TypeScript code to execute
+  string code = 1;
+  
+  // The input data for the function
+  string input_json = 2;
+}
+
+message RunFunctionResponse {
+  // The output data from the function
+  string output_json = 1;
+  
+  // Error information if execution failed
+  ErrorInfo error = 2;
+}
+
+message ErrorInfo {
+  // Error code
+  int32 code = 1;
+  
+  // Error message
+  string message = 2;
+  
+  // Stack trace if available
+  string stack_trace = 3;
+}

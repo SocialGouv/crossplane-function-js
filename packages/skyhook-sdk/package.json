@@ -1,0 +1,14 @@
+{
+  "name": "skyhook-sdk",
+  "main": "index.ts",
+  "packageManager": "yarn@4.7.0",
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "pino": "^9.6.0",
+    "skyhook-libs": "workspace:^",
+    "yaml": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "skyhook-libs",
+  "version": "0.0.1",
+  "description": "Shared libraries for Crossplane Skyhook",
+  "type": "module",
+  "main": "index.ts",
+  "dependencies": {
+    "fs-extra": "^11.3.0",
+    "pino": "^9.6.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11"
+  }
+}

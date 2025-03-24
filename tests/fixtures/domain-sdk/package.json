@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "chalk": "^5.0.1",
+    "crossplane-skyhook": "link:../../.."
+  },
+  "scripts": {
+    "compo": "node_modules/crossplane-skyhook/build/crossplane-skyhook compo"
+  },
+  "packageManager": "yarn@4.7.0"
+}

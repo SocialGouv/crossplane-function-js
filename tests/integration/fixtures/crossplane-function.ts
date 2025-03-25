@@ -1,6 +1,15 @@
-export default function(input: any): any {
+import {
+  FunctionInput,
+  CrossplaneDesiredResources,
+  KubernetesResource
+} from '../../../src/types.js';
+
+export default function(input: FunctionInput): CrossplaneDesiredResources {
+  // Use type assertion to access properties safely
+  const inputAny = input as any;
+  
   // Extract data from the observed composite resource
-  const data = input.observed.composite.resource.spec.data;
+  const data = inputAny.observed?.composite?.resource?.spec?.data || {};
   
   // Convert data keys and values to uppercase
   const uppercaseData: Record<string, string> = {};

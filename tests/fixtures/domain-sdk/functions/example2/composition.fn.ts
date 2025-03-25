@@ -1,9 +1,15 @@
-import { logger } from "skyhook-sdk"
+import {
+  logger,
+  FunctionInput,
+  CrossplaneDesiredResources
+} from "skyhook-sdk"
 
-export default function(input: any): any {
+export default function(input: FunctionInput): CrossplaneDesiredResources {
   logger.info("Example2 composition function started")
   
-  const data = input.observed?.composite?.resource?.spec?.data || {};
+  // Use type assertion to access properties safely
+  const inputAny = input as any;
+  const data = inputAny.observed?.composite?.resource?.spec?.data || {};
   logger.debug({ data }, "Input data")
   
   // Just return the data as is

@@ -4,6 +4,13 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { executeCodeForTest } from './helpers/test-executor.js';
 
+// Helper function to safely access nested properties
+function assertHasResources(result: any): asserts result is { resources: Record<string, any> } {
+  if (!result || typeof result !== 'object' || !('resources' in result)) {
+    throw new Error('Result does not have resources property');
+  }
+}
+
 // Get the directory name of the current module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,12 +37,16 @@ describe('JavaScript Code Execution', () => {
     
     // Verify the result
     expect(result).to.have.property('result');
-    expect(result.result).to.have.property('resources');
-    expect(result.result.resources).to.have.property('configmap');
-    expect(result.result.resources.configmap).to.have.property('resource');
+    
+    // Use type assertion to safely access nested properties
+    const resultObj = result.result as Record<string, any>;
+    assertHasResources(resultObj);
+    
+    expect(resultObj.resources).to.have.property('configmap');
+    expect(resultObj.resources.configmap).to.have.property('resource');
     
     // Verify the resource has the expected structure
-    const resource = result.result.resources.configmap.resource;
+    const resource = resultObj.resources.configmap.resource;
     expect(resource).to.have.property('apiVersion', 'v1');
     expect(resource).to.have.property('kind', 'ConfigMap');
     expect(resource).to.have.property('metadata');
@@ -64,11 +75,15 @@ describe('JavaScript Code Execution', () => {
     
     // Verify the result
     expect(result).to.have.property('result');
-    expect(result.result).to.have.property('resources');
-    expect(result.result.resources).to.have.property('delayed');
-    expect(result.result.resources.delayed.resource).to.have.property('data');
-    expect(result.result.resources.delayed.resource.data).to.have.property('message', 'HELLO WORLD');
-    expect(result.result.resources.delayed.resource.data).to.have.property('processed', true);
+    
+    // Use type assertion to safely access nested properties
+    const resultObj = result.result as Record<string, any>;
+    assertHasResources(resultObj);
+    
+    expect(resultObj.resources).to.have.property('delayed');
+    expect(resultObj.resources.delayed.resource).to.have.property('data');
+    expect(resultObj.resources.delayed.resource.data).to.have.property('message', 'HELLO WORLD');
+    expect(resultObj.resources.delayed.resource.data).to.have.property('processed', true);
   });
 
   it('should handle errors in the code correctly', async () => {
@@ -141,11 +156,14 @@ describe('JavaScript Code Execution', () => {
     
     // Verify the result has the expected Crossplane structure
     expect(result).to.have.property('result');
-    expect(result.result).to.have.property('resources');
+    
+    // Use type assertion to safely access nested properties
+    const resultObj = result.result as Record<string, any>;
+    assertHasResources(resultObj);
     
     // Check the Crossplane Object resource
-    expect(result.result.resources).to.have.property('configmap');
-    const crossplaneObj = result.result.resources.configmap.resource;
+    expect(resultObj.resources).to.have.property('configmap');
+    const crossplaneObj = resultObj.resources.configmap.resource;
     expect(crossplaneObj).to.have.property('apiVersion', 'kubernetes.crossplane.io/v1alpha2');
     expect(crossplaneObj).to.have.property('kind', 'Object');
     expect(crossplaneObj).to.have.property('metadata');
@@ -189,14 +207,18 @@ describe('JavaScript Code Execution', () => {
     
     // Verify the result
     expect(result).to.have.property('result');
-    expect(result.result).to.have.property('resources');
-    expect(result.result.resources).to.have.property('large');
-    expect(result.result.resources.large.resource).to.have.property('metadata');
-    expect(result.result.resources.large.resource.metadata).to.have.property('name', 'large-data');
-    expect(result.result.resources.large.resource).to.have.property('data');
+    
+    // Use type assertion to safely access nested properties
+    const resultObj = result.result as Record<string, any>;
+    assertHasResources(resultObj);
+    
+    expect(resultObj.resources).to.have.property('large');
+    expect(resultObj.resources.large.resource).to.have.property('metadata');
+    expect(resultObj.resources.large.resource.metadata).to.have.property('name', 'large-data');
+    expect(resultObj.resources.large.resource).to.have.property('data');
     
     // Verify the data was processed correctly
-    const resultData = result.result.resources.large.resource.data;
+    const resultData = resultObj.resources.large.resource.data;
     expect(Object.keys(resultData).length).to.equal(100);
     expect(resultData.KEY0).to.equal('VALUE0'.repeat(100));
   });

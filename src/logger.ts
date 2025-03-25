@@ -8,7 +8,7 @@ export const logger = pino(
       level: (label: string) => {
         return { level: label.toUpperCase() }
       },
-      bindings (_bindings: any) {
+      bindings (_bindings: Record<string, unknown>) {
         return {}
       },
     },

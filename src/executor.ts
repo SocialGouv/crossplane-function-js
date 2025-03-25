@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 
-import type { NodeResponse, NodeError } from './types.ts';
+import type { NodeResponse, NodeError, FunctionInput } from './types.ts';
 import { createLogger } from 'skyhook-libs';
       
 
@@ -14,7 +14,7 @@ const moduleLogger = createLogger('executor');
  * @param input The input data for the code
  * @returns The result of running the code
  */
-export async function executeCode(codeFilePath: string, input: any): Promise<NodeResponse> {
+export async function executeCode(codeFilePath: string, input: FunctionInput): Promise<NodeResponse> {
   // Set up a timeout to prevent infinite loops or long-running code
   const executionTimeout = 25000; // 25 seconds (less than the 30s in Go to ensure we can respond)
   let timeoutId: NodeJS.Timeout | null = null;

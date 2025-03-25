@@ -1,5 +1,14 @@
-export default function(input: any): any {
-  const data = input.input.spec.data;
+import {
+  FunctionInput,
+  CrossplaneDesiredResources
+} from '../../../src/types.js';
+
+export default function(input: FunctionInput): CrossplaneDesiredResources {
+  // Use type assertion to access properties safely
+  const inputAny = input as any;
+  
+  // Extract data from input
+  const data = inputAny.input?.spec?.data || {};
   
   // Process the large data
   const processedData: Record<string, string> = {};

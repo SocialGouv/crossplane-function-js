@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { NodeResponse, NodeError } from '../../../src/types.js';
+import { NodeResponse, NodeError, FunctionInput } from '../../../src/types.js';
 
 // Create a simple logger for testing
 const logger = {
@@ -14,7 +14,7 @@ const logger = {
  * Test version of executeCode that uses ES modules instead of CommonJS
  * This is specifically for testing purposes
  */
-export async function executeCodeForTest(codeFilePath: string, input: any): Promise<NodeResponse> {
+export async function executeCodeForTest(codeFilePath: string, input: FunctionInput): Promise<NodeResponse> {
   const executionTimeout = 5000; // Shorter timeout for tests
   let timeoutId: NodeJS.Timeout | null = null;
   

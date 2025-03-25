@@ -1,5 +1,14 @@
-export default function(input: any): any {
-  const { shouldError } = input.input.spec;
+import {
+  FunctionInput,
+  CrossplaneDesiredResources
+} from '../../../src/types.js';
+
+export default function(input: FunctionInput): CrossplaneDesiredResources {
+  // Use type assertion to access properties safely
+  const inputAny = input as any;
+  
+  // Extract shouldError flag from input
+  const shouldError = inputAny.input?.spec?.shouldError || false;
   
   // Throw an error if shouldError is true
   if (shouldError) {

@@ -1,13 +1,14 @@
 import lodash from "lodash"
+import type { CrossplaneDesiredResources, FunctionInput } from "skyhook-sdk"
 import { logger } from "skyhook-sdk"
 import chalk from "chalk"
 
-
-export default function(input: any): any {
+export default function(input: FunctionInput): CrossplaneDesiredResources {
   logger.info(chalk.red("Hello, world!"))
 
   logger.info("Composition function started")
-  const data = lodash.get(input, 'observed.composite.resource.spec.data');
+  // Use lodash.get with a default value and type assertion for safety
+  const data = (lodash.get(input, 'observed.composite.resource.spec.data', {}) as Record<string, string>);
   logger.debug({ data }, "Input data")
   
   const uppercaseData: Record<string, string> = {};

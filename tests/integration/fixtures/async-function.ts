@@ -1,5 +1,15 @@
-export default async function(input: any): Promise<any> {
-  const { delay, message } = input.input.spec;
+import {
+  FunctionInput,
+  CrossplaneDesiredResources
+} from '../../../src/types.js';
+
+export default async function(input: FunctionInput): Promise<CrossplaneDesiredResources> {
+  // Use type assertion to access properties safely
+  const inputAny = input as any;
+  
+  // Extract delay and message from input
+  const delay = inputAny.input?.spec?.delay || 0;
+  const message = inputAny.input?.spec?.message || '';
   
   // Simulate an async operation with a delay
   await new Promise(resolve => setTimeout(resolve, delay));

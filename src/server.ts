@@ -1,7 +1,7 @@
 import express from 'express';
 import type { Request, Response, NextFunction, RequestHandler } from 'express';
 import { createLogger } from 'skyhook-libs';
-import type { NodeRequest, NodeResponse } from './types.ts';
+import type { NodeRequest, NodeResponse, FunctionInput } from './types.ts';
 import { executeCode } from './executor.ts';
 import path from 'path';
 import fs from 'fs-extra';
@@ -92,13 +92,13 @@ export function createServer(port: number, codeFilePath: string) {
   app.post('/execute', executeHandler);
   
   // Error handling middleware
-  app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-    moduleLogger.error(`Unhandled error: ${err.message}`);
+  app.use((err: Error | Record<string, unknown>, req: Request, res: Response, next: NextFunction) => {
+    moduleLogger.error(`Unhandled error: ${err instanceof Error ? err.message : JSON.stringify(err)}`);
     res.status(500).json({
       error: {
         code: 500,
-        message: err.message || 'Internal server error',
-        stack: err.stack
+        message: err instanceof Error ? err.message : 'Internal server error',
+        stack: err instanceof Error ? err.stack : undefined
       }
     });
   });

@@ -1,9 +1,14 @@
 {
   "name": "skyhook-sdk",
+  "version": "0.0.1",
   "main": "index.ts",
   "packageManager": "yarn@4.7.0",
+  "scripts": {
+    "postinstall": "node-ts-modules-postinstall"
+  },
   "dependencies": {
     "lodash": "^4.17.21",
+    "node-ts-modules": "0.0.1",
     "pino": "^9.6.0",
     "skyhook-libs": "workspace:^",
     "yaml": "^2.7.0"

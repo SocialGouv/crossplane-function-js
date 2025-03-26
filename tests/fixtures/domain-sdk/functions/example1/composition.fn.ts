@@ -1,8 +1,5 @@
-import {
-  logger,
-  FunctionInput,
-  CrossplaneDesiredResources
-} from "skyhook-sdk"
+import type { CrossplaneDesiredResources, FunctionInput } from "skyhook-sdk"
+import { logger } from "skyhook-sdk"
 
 export default function(input: FunctionInput): CrossplaneDesiredResources {
   logger.info("Example1 composition function started")

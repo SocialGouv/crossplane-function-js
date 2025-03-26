@@ -13,7 +13,7 @@
   },
   "bin": "build/crossplane-skyhook",
   "scripts": {
-    "dev": "node --no-warnings --experimental-strip-types src/index.ts",
+    "dev": "node --no-warnings --experimental-strip-types --experimental-loader ./node_modules/node-ts-modules/ts-module-loader.mjs src/index.ts",
     "dev:start": "NODE_OPTIONS='--no-warnings --experimental-strip-types' build/crossplane-skyhook",
     "build": "yarn build:clean && yarn build:ncc:begin && yarn build:ncc && yarn build:ncc:end && yarn build:blob && yarn build:node && yarn build:postject",
     "build:clean": "rm -rf ./build && mkdir -p build",
@@ -24,8 +24,7 @@
     "build:node": "node -e \"require('fs').copyFileSync(process.execPath, 'build/crossplane-skyhook')\" && chmod 0755 build/crossplane-skyhook",
     "build:postject": "npx postject build/crossplane-skyhook NODE_SEA_BLOB build/crossplane-skyhook.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2",
     "test": "mocha --require ts-node/register 'tests/**/*.test.ts'",
-    "test:integration": "mocha --require ts-node/register 'tests/integration/**/*.test.ts'",
-    "postinstall": "yarn build"
+    "test:integration": "mocha --require ts-node/register 'tests/integration/**/*.test.ts'"
   },
   "engines": {
     "node": ">=22"

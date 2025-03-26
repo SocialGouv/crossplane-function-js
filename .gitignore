@@ -20,6 +20,7 @@ packages/*/dist
 *.out.yaml
 /tmp.json
 /tests/fixtures/domain-sdk/manifests
+ts_modules
 
 # Kubernetes configuration
 .kubeconfig

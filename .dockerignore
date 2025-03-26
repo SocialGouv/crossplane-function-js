@@ -20,7 +20,8 @@ README.md
 Makefile
 
 charts
-node_modules
+**/node_modules
+**/ts_modules
 tests
 test
 /*.md

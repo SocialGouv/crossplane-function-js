@@ -3088,6 +3088,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"node-ts-modules@npm:0.0.1":
+  version: 0.0.1
+  resolution: "node-ts-modules@npm:0.0.1"
+  bin:
+    node-ts-modules-postinstall: postinstall.js
+  checksum: 10c0/345fa3e3b549b2c815decf514873f7f8a39325112b57c9e5b7c6c6a21fe033dc1638c3113cd9e742b5c234872b271d675e1dc396d3a69f0541da0bcf1c763091
+  languageName: node
+  linkType: hard
+
 "node-watch@npm:0.7.3":
   version: 0.7.3
   resolution: "node-watch@npm:0.7.3"
@@ -3813,6 +3822,7 @@ __metadata:
   dependencies:
     "@types/lodash": "npm:^4"
     lodash: "npm:^4.17.21"
+    node-ts-modules: "npm:0.0.1"
     pino: "npm:^9.6.0"
     skyhook-libs: "workspace:^"
     yaml: "npm:^2.7.0"

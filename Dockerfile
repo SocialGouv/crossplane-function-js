@@ -32,7 +32,7 @@ COPY --chown=1000:1000 src/ ./src/
 COPY --chown=1000:1000 packages/ ./packages/
 RUN yarn build
 
-RUN yarn fetch-tools production crossplane-skyhook skyhook-sdk --production && yarn cache clean
+RUN yarn workspaces focus crossplane-skyhook skyhook-sdk --production && yarn cache clean
 
 # Collect platform-specific dependencies # see also https://dev.to/zavoloklom/how-to-build-multi-platform-executable-binaries-in-nodejs-with-sea-rollup-docker-and-github-d0g
 USER root
@@ -62,7 +62,8 @@ USER 1000
 WORKDIR /app
 ENTRYPOINT ["/app/skyhook-server"]
 
-ENV NODE_OPTIONS="--no-warnings --experimental-strip-types "
+# ENV NODE_OPTIONS="--no-warnings --experimental-strip-types "
+ENV NODE_OPTIONS="--experimental-loader ./node_modules/node-ts-modules/ts-module-loader.mjs --no-warnings --experimental-strip-types "
 ENV NODE_NO_WARNINGS=1
 ENV YARN_CACHE_FOLDER=/tmp/yarn-cache
 ENV HOME=/tmp

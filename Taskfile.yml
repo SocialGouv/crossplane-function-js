@@ -1,0 +1,69 @@
+version: '3'
+
+vars:
+  GO: go
+  PROJECT_NAME: crossplane-skyhook
+  VERSION:
+    sh: git describe --tags 2>/dev/null || echo "v0.1.0"
+  DOCKER_IMAGE: localhost:5001/{{.PROJECT_NAME}}
+
+tasks:
+  # default:
+  #   deps: [build]
+
+  # Refresh dependencies
+  deps:
+    desc: Refresh dependencies
+    cmds:
+      - "{{.GO}} mod tidy"
+      - "{{.GO}} mod vendor"
+
+  # Update dependencies
+  update-deps:
+    desc: Update dependencies
+    cmds:
+      - "{{.GO}} get -u ./..."
+
+  # Build the project
+  build:
+    desc: Build the project
+    cmds:
+      - "{{.GO}} build -o bin/skyhook-server cmd/server/main.go"
+
+  # Build a static binary
+  build-static:
+    desc: Build a static binary
+    cmds:
+      - "CGO_ENABLED=0 {{.GO}} build -a -installsuffix cgo -o bin/skyhook-server cmd/server/main.go"
+
+  # Clean build artifacts
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - "rm -f bin/skyhook-server"
+      - "{{.GO}} clean"
+
+  # Run unit tests
+  test:
+    desc: Run unit tests
+    cmds:
+      - "{{.GO}} test -v ./..."
+
+  # Set up test environment
+  setup-test-env:
+    desc: Set up test environment
+    cmds:
+      - "./tests/kind-with-registry.sh"
+      - "./tests/install-crossplane.sh"
+
+  # Run e2e tests
+  e2e-test:
+    desc: Run e2e tests
+    cmds:
+      - "./tests/e2e.sh"
+
+  # Clean up test environment
+  clean-test-env:
+    desc: Clean up test environment
+    cmds:
+      - "kind delete cluster || true"

@@ -18,6 +18,8 @@
         {
           default = pkgs.mkShell {
             packages = with pkgs; [
+              docker
+              git
               nodejs_22
               yarn
               jq
@@ -25,6 +27,8 @@
               kubernetes-helm
               kind
               k9s
+              go_1_23
+              go-task
             ];
             
             shellHook = ''
@@ -38,6 +42,10 @@
               fi
               
               echo "KUBECONFIG set to $KUBECONFIG"
+              
+              # Set GOROOT to the Go installation path
+              export GOROOT="${pkgs.go_1_23}/share/go"
+              echo "GOROOT set to $GOROOT"
             '';
           };
         }

@@ -1,13 +1,12 @@
-import express from 'express';
-import type { Request, Response, NextFunction, RequestHandler } from 'express';
-import { createLogger } from 'skyhook-libs';
-import type { NodeRequest, NodeResponse, FunctionInput } from './types.ts';
-import { executeCode } from './executor.ts';
-import path from 'path';
-import fs from 'fs-extra';
+import express from "express"
+import type { Request, Response, NextFunction, RequestHandler } from "express"
+import { createLogger } from "skyhook-libs"
+
+import { executeCode } from "./executor.ts"
+import type { NodeRequest } from "./types.ts"
 
 // Create a logger for this module
-const moduleLogger = createLogger('server');
+const moduleLogger = createLogger("server")
 
 /**
  * Creates and configures an Express server
@@ -15,105 +14,109 @@ const moduleLogger = createLogger('server');
  * @returns The configured Express app
  */
 export function createServer(port: number, codeFilePath: string) {
-  const app = express();
-  
+  const app = express()
+
   // Configure middleware
-  app.use(express.json({ limit: '10mb' }));
-  
+  app.use(express.json({ limit: "10mb" }))
+
   // Add request logging
   app.use((req: Request, res: Response, next: NextFunction) => {
-    moduleLogger.debug(`${req.method} ${req.path}`);
-    next();
-  });
-  
+    moduleLogger.debug(`${req.method} ${req.path}`)
+    next()
+  })
+
   // Readiness endpoint - used by Go server to check if Node.js server is ready
-  app.get('/ready', (req: Request, res: Response) => {
-    res.status(200).json({ 
-      status: 'ready',
-      timestamp: new Date().toISOString()
-    });
-  });
-  
+  app.get("/ready", (req: Request, res: Response) => {
+    res.status(200).json({
+      status: "ready",
+      timestamp: new Date().toISOString(),
+    })
+  })
+
   // Execute code endpoint
-  const executeHandler: RequestHandler = async (req, res, next) => {
+  const executeHandler: RequestHandler = async (req, res, _next) => {
     try {
-      const { input } = req.body as NodeRequest;
-      
+      const { input } = req.body as NodeRequest
+
       // Enhanced logging of the full request body
-      moduleLogger.debug({body: req.body},'=== REQUEST RECEIVED ===');
-      
+      moduleLogger.debug({ body: req.body }, "=== REQUEST RECEIVED ===")
+
       // Specifically log observed resources if present
       if (req.body.observed) {
-        moduleLogger.debug('=== OBSERVED RESOURCES ===');
-        
+        moduleLogger.debug("=== OBSERVED RESOURCES ===")
+
         // Log composite resource if present
         if (req.body.observed.composite) {
-          moduleLogger.debug({composite: req.body.observed.composite}, 'Composite Resource:');
+          moduleLogger.debug({ composite: req.body.observed.composite }, "Composite Resource:")
         }
-        
+
         // Log individual resources if present
         if (req.body.observed.resources) {
-          moduleLogger.info('Resources:');
-          const resourceNames = Object.keys(req.body.observed.resources);
-          moduleLogger.info(`Found ${resourceNames.length} resources: ${resourceNames.join(', ')}`);
-          
+          moduleLogger.info("Resources:")
+          const resourceNames = Object.keys(req.body.observed.resources)
+          moduleLogger.info(`Found ${resourceNames.length} resources: ${resourceNames.join(", ")}`)
+
           // Log each resource
           for (const [name, resource] of Object.entries(req.body.observed.resources)) {
-            moduleLogger.info({resource},`Resource "${name}"`);
+            moduleLogger.info({ resource }, `Resource "${name}"`)
           }
         }
       }
-      
-      moduleLogger.info('=== EXECUTING CODE ===');
-      moduleLogger.info(`Input length: ${JSON.stringify(input).length}`);
 
-      const result = await executeCode(codeFilePath, input);
-      
-      moduleLogger.info('=== CODE EXECUTION COMPLETED ===');
-      
+      moduleLogger.info("=== EXECUTING CODE ===")
+      moduleLogger.info(`Input length: ${JSON.stringify(input).length}`)
+
+      const result = await executeCode(codeFilePath, input)
+
+      moduleLogger.info("=== CODE EXECUTION COMPLETED ===")
+
       // Log the response for debugging
-      moduleLogger.debug(`Execute response: ${JSON.stringify(result, null, 2)}`);
-      
-      res.json(result);
+      moduleLogger.debug(`Execute response: ${JSON.stringify(result, null, 2)}`)
+
+      res.json(result)
     } catch (err: unknown) {
-      const error = err as Error;
-      moduleLogger.error(`Error executing code: ${error.message}`);
-      
+      const error = err as Error
+      moduleLogger.error(`Error executing code: ${error.message}`)
+
       res.status(500).json({
         error: {
           code: 500,
-          message: error.message || 'Unknown error',
-          stack: error.stack
-        }
-      });
+          message: error.message || "Unknown error",
+          stack: error.stack,
+        },
+      })
     }
-  };
-  
-  app.post('/execute', executeHandler);
-  
+  }
+
+  app.post("/execute", executeHandler)
+
   // Error handling middleware
-  app.use((err: Error | Record<string, unknown>, req: Request, res: Response, next: NextFunction) => {
-    moduleLogger.error(`Unhandled error: ${err instanceof Error ? err.message : JSON.stringify(err)}`);
-    res.status(500).json({
-      error: {
-        code: 500,
-        message: err instanceof Error ? err.message : 'Internal server error',
-        stack: err instanceof Error ? err.stack : undefined
-      }
-    });
-  });
-  
+  app.use(
+    (err: Error | Record<string, unknown>, req: Request, res: Response, _next: NextFunction) => {
+      moduleLogger.error(
+        `Unhandled error: ${err instanceof Error ? err.message : JSON.stringify(err)}`
+      )
+      res.status(500).json({
+        error: {
+          code: 500,
+          message: err instanceof Error ? err.message : "Internal server error",
+          stack: err instanceof Error ? err.stack : undefined,
+        },
+      })
+    }
+  )
+
   // Start the server - bind to all interfaces (0.0.0.0) to ensure it's accessible
-  const server = app.listen(port, '0.0.0.0', () => {
-    moduleLogger.info(`Server listening on port ${port} on all interfaces`);
-  });
-  
+  const server = app.listen(port, "0.0.0.0", () => {
+    moduleLogger.info(`Server listening on port ${port} on all interfaces`)
+  })
+
   // Handle server errors
-  server.on('error', (err: Error) => {
-    moduleLogger.error(`Server error: ${err.message}`);
-  });
-  
-  return server;
+  server.on("error", (err: Error) => {
+    moduleLogger.error(`Server error: ${err.message}`)
+  })
+
+  return server
 }
 
 /**
@@ -123,22 +126,22 @@ export function createServer(port: number, codeFilePath: string) {
  */
 export async function shutdownServer(server: ReturnType<typeof createServer>): Promise<void> {
   return new Promise((resolve, reject) => {
-    moduleLogger.info('Shutting down server...');
-    
-    server.close((err) => {
+    moduleLogger.info("Shutting down server...")
+
+    server.close(err => {
       if (err) {
-        moduleLogger.error(`Error shutting down server: ${err.message}`);
-        reject(err);
+        moduleLogger.error(`Error shutting down server: ${err.message}`)
+        reject(err)
       } else {
-        moduleLogger.info('Server shut down successfully');
-        resolve();
+        moduleLogger.info("Server shut down successfully")
+        resolve()
       }
-    });
-    
+    })
+
     // Force close after timeout
     setTimeout(() => {
-      moduleLogger.warn('Forcing server shutdown after timeout');
-      resolve();
-    }, 5000);
-  });
+      moduleLogger.warn("Forcing server shutdown after timeout")
+      resolve()
+    }, 5000)
+  })
 }

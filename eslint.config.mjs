@@ -34,6 +34,7 @@ export default defineConfig([
     "tests",
     ".lintstagedrc.js",
     "eslint.config.mjs",
+    ".versionrc.cjs",
   ]),
   {
     extends: fixupConfigRules(

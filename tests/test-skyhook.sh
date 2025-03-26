@@ -22,7 +22,7 @@ echo "Applying CRDs and Compositions..."
 echo "Applying Provider Kubernetes..."
 kubectl apply -f tests/fixtures/provider-in-cluster.yaml
 kubectl apply -f tests/fixtures/functions.yaml
-kubectl apply -f tests/fixtures/crd.yaml
+kubectl apply -f tests/fixtures/simpleconfigmaps.compositeresourcedefinition.yaml
 
 # Create composition outputs
 echo "Preparing composition with function code..."

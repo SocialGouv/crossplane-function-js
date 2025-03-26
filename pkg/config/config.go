@@ -38,13 +38,13 @@ func LoadConfig() (*Config, error) {
 	config := &Config{}
 
 	// Process environment variables
-	if err := envconfig.Process("SKYHOOK", config); err != nil {
+	if err := envconfig.Process("XFUNCJS", config); err != nil {
 		return nil, fmt.Errorf("failed to process environment variables: %w", err)
 	}
 
 	// Set default temp dir if not specified
 	if config.TempDir == "" {
-		config.TempDir = filepath.Join(os.TempDir(), "crossplane-skyhook")
+		config.TempDir = filepath.Join(os.TempDir(), "xfuncjs-server")
 	}
 
 	// Handle legacy env var for backward compatibility

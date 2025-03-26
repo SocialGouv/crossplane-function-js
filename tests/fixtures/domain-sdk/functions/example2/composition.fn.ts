@@ -1,5 +1,5 @@
-import type { CrossplaneDesiredResources, FunctionInput } from "skyhook-sdk"
-import { logger } from "skyhook-sdk"
+import type { CrossplaneDesiredResources, FunctionInput } from "@xfuncjs/sdk"
+import { logger } from "@xfuncjs/sdk"
 
 export default function(input: FunctionInput): CrossplaneDesiredResources {
   logger.info("Example2 composition function started")
@@ -15,7 +15,7 @@ export default function(input: FunctionInput): CrossplaneDesiredResources {
     kind: "ConfigMap",
     metadata: {
       name: "example2-configmap",
-      namespace: "test-skyhook"
+      namespace: "test-xfuncjs"
     },
     data: data
   };

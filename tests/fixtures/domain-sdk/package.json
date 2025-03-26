@@ -1,10 +1,10 @@
 {
   "dependencies": {
-    "chalk": "^5.0.1",
-    "crossplane-skyhook": "link:../../.."
+    "@xfuncjs/server": "link:../../..",
+    "chalk": "^5.0.1"
   },
   "scripts": {
-    "compo": "node_modules/crossplane-skyhook/build/crossplane-skyhook compo"
+    "compo": "node_modules/@xfuncjs/server/build/xfuncjs-server-js compo"
   },
   "packageManager": "yarn@4.7.0"
 }

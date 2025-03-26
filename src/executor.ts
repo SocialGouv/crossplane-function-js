@@ -1,6 +1,6 @@
 import fs from "fs"
 
-import { createLogger } from "skyhook-libs"
+import { createLogger } from "@xfuncjs/libs"
 
 import type { NodeResponse, NodeError, FunctionInput } from "./types.ts"
 

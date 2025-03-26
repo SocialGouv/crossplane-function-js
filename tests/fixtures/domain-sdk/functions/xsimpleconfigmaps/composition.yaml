@@ -11,9 +11,9 @@ spec:
   pipeline:
     - step: transform-to-uppercase
       functionRef:
-        name: function-skyhook
+        name: function-xfuncjs
       input:
-        apiVersion: skyhook.fn.crossplane.io/v1beta1
+        apiVersion: xfuncjs.fn.crossplane.io/v1beta1
         kind: Input
         spec:
           source:

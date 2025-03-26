@@ -1,5 +1,5 @@
 /**
- * Type definitions for skyhook-sdk
+ * Type definitions for @xfuncjs/sdk
  */
 
 // Kubernetes resource metadata

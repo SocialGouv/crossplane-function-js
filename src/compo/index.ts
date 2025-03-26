@@ -1,7 +1,7 @@
 import path from "path"
 
+import { createLogger } from "@xfuncjs/libs"
 import fs from "fs-extra"
-import { createLogger } from "skyhook-libs"
 import YAML from "yaml"
 
 // Create a logger for this module
@@ -55,7 +55,7 @@ interface Manifest {
  */
 export default async function (): Promise<void> {
   const cwd = () => `${process.cwd()}`
-  const skyhookRootPath =
+  const xfuncjsRootPath =
     path.basename(__dirname) === "build" ? path.join(__dirname, "..") : __dirname
   try {
     // Find the functions directory in the current working directory
@@ -101,7 +101,7 @@ export default async function (): Promise<void> {
         manifest = YAML.parse(yamlContent)
       } else {
         // Use the generic template from src/compo/template.yaml
-        const genericTemplatePath = path.join(skyhookRootPath, "src/compo/composition.default.yaml")
+        const genericTemplatePath = path.join(xfuncjsRootPath, "src/compo/composition.default.yaml")
 
         if (!fs.existsSync(genericTemplatePath)) {
           moduleLogger.error(`Generic template not found: ${genericTemplatePath}`)
@@ -154,23 +154,23 @@ export default async function (): Promise<void> {
         continue
       }
 
-      // Find the first step with a functionRef to function-skyhook
-      const skyhookStep = manifest.spec.pipeline.find(
-        (step: PipelineStep) => step.functionRef && step.functionRef.name === "function-skyhook"
+      // Find the first step with a functionRef to function-xfuncjs
+      const xfuncjsStep = manifest.spec.pipeline.find(
+        (step: PipelineStep) => step.functionRef && step.functionRef.name === "function-xfuncjs"
       )
 
-      if (!skyhookStep) {
-        moduleLogger.error(`No skyhook function step found in manifest for ${functionName}`)
+      if (!xfuncjsStep) {
+        moduleLogger.error(`No xfuncjs function step found in manifest for ${functionName}`)
         continue
       }
 
       // Ensure the input structure exists
-      if (!skyhookStep.input || !skyhookStep.input.spec || !skyhookStep.input.spec.source) {
-        moduleLogger.error(`Invalid input structure in skyhook step for ${functionName}`)
+      if (!xfuncjsStep.input || !xfuncjsStep.input.spec || !xfuncjsStep.input.spec.source) {
+        moduleLogger.error(`Invalid input structure in xfuncjs step for ${functionName}`)
         continue
       }
 
-      if (skyhookStep.input.spec.source.inline === "__FUNCTION_CODE__") {
+      if (xfuncjsStep.input.spec.source.inline === "__FUNCTION_CODE__") {
         // Check if composition.fn.ts exists
         const fnFilePath = path.join(functionDir, "composition.fn.ts")
         if (!fs.existsSync(fnFilePath)) {
@@ -180,10 +180,10 @@ export default async function (): Promise<void> {
         // Read the function code
         const fnCode = fs.readFileSync(fnFilePath, { encoding: "utf8" })
         // Set the inline code
-        skyhookStep.input.spec.source.inline = fnCode
+        xfuncjsStep.input.spec.source.inline = fnCode
       }
 
-      if (skyhookStep.input.spec.dependencies === "__DEPENDENCIES__") {
+      if (xfuncjsStep.input.spec.dependencies === "__DEPENDENCIES__") {
         // Check for package.json in the function directory
         let dependencies: Record<string, string> = {}
         const packageJsonPath = path.join(functionDir, "package.json")
@@ -217,17 +217,17 @@ export default async function (): Promise<void> {
         // Add dependencies to the manifest if any were found
         if (Object.keys(dependencies).length > 0) {
           dependencies = Object.keys(dependencies).reduce<Record<string, string>>((obj, key) => {
-            if (key === "crossplane-skyhook") {
+            if (key === "xfuncjs-server") {
               return obj
             }
             obj[key] = dependencies[key]
             return obj
           }, {})
-          skyhookStep.input.spec.source.dependencies = dependencies
+          xfuncjsStep.input.spec.source.dependencies = dependencies
         }
       }
 
-      if (skyhookStep.input.spec.source.yarnLock === "__YARN_LOCK__") {
+      if (xfuncjsStep.input.spec.source.yarnLock === "__YARN_LOCK__") {
         // Check for yarn.lock in the function directory
         const functionYarnLockPath = path.join(functionDir, "yarn.lock")
         const rootYarnLockPath = path.join(cwd(), "yarn.lock")
@@ -255,7 +255,7 @@ export default async function (): Promise<void> {
 
         // Add yarn.lock to the manifest if found
         if (yarnLock) {
-          skyhookStep.input.spec.source.yarnLock = yarnLock
+          xfuncjsStep.input.spec.source.yarnLock = yarnLock
         }
       }
 

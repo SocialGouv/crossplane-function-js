@@ -10,9 +10,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/socialgouv/crossplane-skyhook/pkg/hash"
-	"github.com/socialgouv/crossplane-skyhook/pkg/logger"
-	"github.com/socialgouv/crossplane-skyhook/pkg/types"
+	"github.com/socialgouv/xfuncjs-server/pkg/hash"
+	"github.com/socialgouv/xfuncjs-server/pkg/logger"
+	"github.com/socialgouv/xfuncjs-server/pkg/types"
 	"sigs.k8s.io/yaml"
 )
 
@@ -64,7 +64,7 @@ func NewProcessManager(gcInterval, idleTimeout time.Duration, tempDir string, lo
 }
 
 // getOrCreateProcess gets an existing process for the given input or creates a new one
-func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, input *types.SkyhookInput) (*ProcessInfo, error) {
+func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, input *types.XFuncJSInput) (*ProcessInfo, error) {
 	// Generate hash based on the entire input spec
 	specBytes, err := json.Marshal(input.Spec)
 	if err != nil {
@@ -179,12 +179,12 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, input *types.S
 					}
 				}
 
-				// Create a minimal copy of /app for crossplane-skyhook
+				// Create a minimal copy of /app for xfuncjs-server
 				// We only need to copy essential files, not the entire /app directory
-				appDstPath := filepath.Join(packagesDir, "crossplane-skyhook")
+				appDstPath := filepath.Join(packagesDir, "xfuncjs-server")
 				if err := os.MkdirAll(appDstPath, 0755); err != nil {
 					procLogger.WithField(logger.FieldError, err.Error()).
-						Warn("Failed to create crossplane-skyhook directory")
+						Warn("Failed to create xfuncjs-server directory")
 				} else {
 					// Copy package.json and other essential files
 					essentialFiles := []string{"package.json", "tsconfig.json"}
@@ -194,17 +194,17 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, input *types.S
 						if err := copyFile(srcFilePath, dstFilePath); err != nil {
 							procLogger.WithField(logger.FieldError, err.Error()).
 								WithField("file", file).
-								Warn("Failed to copy essential file to crossplane-skyhook directory")
+								Warn("Failed to copy essential file to xfuncjs-server directory")
 						}
 					}
-					procLogger.Info("Created crossplane-skyhook directory with essential files")
+					procLogger.Info("Created xfuncjs-server directory with essential files")
 				}
 			}
 		}
 
 		dependencies := make(map[string]interface{})
 
-		dependencies["skyhook-sdk"] = "workspace:^"
+		dependencies["@xfuncjs/sdk"] = "workspace:^"
 
 		// Create a copy of the dependencies map from the input
 		for k, v := range input.Spec.Source.Dependencies {
@@ -215,7 +215,7 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, input *types.S
 		workspaces["packages"] = []string{"packages/*"}
 
 		packageJSON := map[string]interface{}{
-			"name":         "skyhook-function",
+			"name":         "xfuncjs-function",
 			"version":      "0.0.0",
 			"private":      true,
 			"dependencies": dependencies,
@@ -316,7 +316,7 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, input *types.S
 		// Run yarn install using the extracted yarn executable
 		procLogger.Info("Running yarn install")
 		// yarnCmd := exec.Command(yarnExecPath)
-		yarnCmd := exec.Command("/app/crossplane-skyhook", "yarn", "workspaces", "focus", "--production")
+		yarnCmd := exec.Command("/app/xfuncjs-server-js", "yarn", "workspaces", "focus", "--production")
 		yarnCmd.Dir = uniqueDirPath // Set the working directory
 
 		// Create a custom logWriter for yarn output
@@ -349,7 +349,7 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, input *types.S
 	processCtx := context.Background()
 
 	// NODE-SEA
-	cmd := exec.CommandContext(processCtx, "/app/crossplane-skyhook", "-c", tempFilePath)
+	cmd := exec.CommandContext(processCtx, "/app/xfuncjs-server-js", "--code-file-path", tempFilePath)
 
 	cmd.Env = append(os.Environ(),
 		fmt.Sprintf("PORT=%d", port),

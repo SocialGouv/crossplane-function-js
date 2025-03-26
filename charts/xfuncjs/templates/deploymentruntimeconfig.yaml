@@ -11,11 +11,11 @@ spec:
     spec:
       selector:
         matchLabels:
-          pkg.crossplane.io/function: function-skyhook
+          pkg.crossplane.io/function: function-xfuncjs
       template:
         metadata:
           labels:
-            pkg.crossplane.io/function: function-skyhook
+            pkg.crossplane.io/function: function-xfuncjs
         spec:
           volumes:
             - name: tmp
@@ -26,50 +26,50 @@ spec:
                 - name: tmp
                   mountPath: /tmp
               env:
-                - name: SKYHOOK_LOG_LEVEL
+                - name: XFUNCJS_LOG_LEVEL
                   value: {{ .Values.config.logLevel | default "info" }}
-                - name: SKYHOOK_LOG_FORMAT
+                - name: XFUNCJS_LOG_FORMAT
                   value: {{ .Values.config.logFormat | default "auto" }}
-                - name: SKYHOOK_GRPC_ADDRESS
+                - name: XFUNCJS_GRPC_ADDRESS
                   value: ":{{ .Values.runtimeConfig.service.port }}"
                 {{- if .Values.config.tempDir }}
-                - name: SKYHOOK_TEMP_DIR
+                - name: XFUNCJS_TEMP_DIR
                   value: {{ .Values.config.tempDir }}
                 {{- end }}
                 {{- if .Values.config.gcInterval }}
-                - name: SKYHOOK_GC_INTERVAL
+                - name: XFUNCJS_GC_INTERVAL
                   value: {{ .Values.config.gcInterval }}
                 {{- end }}
                 {{- if .Values.config.idleTimeout }}
-                - name: SKYHOOK_IDLE_TIMEOUT
+                - name: XFUNCJS_IDLE_TIMEOUT
                   value: {{ .Values.config.idleTimeout }}
                 {{- end }}
                 {{- if .Values.config.nodeServerPort }}
-                - name: SKYHOOK_NODE_SERVER_PORT
+                - name: XFUNCJS_NODE_SERVER_PORT
                   value: "{{ .Values.config.nodeServerPort }}"
                 {{- end }}
                 {{- if .Values.config.healthCheckWait }}
-                - name: SKYHOOK_HEALTH_CHECK_WAIT
+                - name: XFUNCJS_HEALTH_CHECK_WAIT
                   value: {{ .Values.config.healthCheckWait }}
                 {{- end }}
                 {{- if .Values.config.healthCheckInterval }}
-                - name: SKYHOOK_HEALTH_CHECK_INTERVAL
+                - name: XFUNCJS_HEALTH_CHECK_INTERVAL
                   value: {{ .Values.config.healthCheckInterval }}
                 {{- end }}
                 {{- if .Values.config.nodeRequestTimeout }}
-                - name: SKYHOOK_NODE_REQUEST_TIMEOUT
+                - name: XFUNCJS_NODE_REQUEST_TIMEOUT
                   value: {{ .Values.config.nodeRequestTimeout }}
                 {{- end }}
                 {{- if .Values.config.tls.enabled }}
-                - name: SKYHOOK_TLS_ENABLED
+                - name: XFUNCJS_TLS_ENABLED
                   value: "{{ .Values.config.tls.enabled }}"
                 {{- end }}
                 {{- if and .Values.config.tls.enabled .Values.config.tls.certFile }}
-                - name: SKYHOOK_TLS_CERT_FILE
+                - name: XFUNCJS_TLS_CERT_FILE
                   value: {{ .Values.config.tls.certFile }}
                 {{- end }}
                 {{- if and .Values.config.tls.enabled .Values.config.tls.keyFile }}
-                - name: SKYHOOK_TLS_KEY_FILE
+                - name: XFUNCJS_TLS_KEY_FILE
                   value: {{ .Values.config.tls.keyFile }}
                 {{- end }}
               ports:

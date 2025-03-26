@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/socialgouv/crossplane-skyhook/pkg/logger"
+	"github.com/socialgouv/xfuncjs-server/pkg/logger"
 )
 
 // NodeClient communicates with the Node.js HTTP server

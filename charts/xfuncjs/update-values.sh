@@ -12,13 +12,13 @@ handle_error() {
 trap 'handle_error $LINENO' ERR
 
 # Default values
-FUNCTION_NAME="function-skyhook"
+FUNCTION_NAME="function-xfuncjs"
 REPOSITORY="localhost:5001"
-IMAGE_NAME="crossplane-skyhook"
+IMAGE_NAME="xfuncjs-server"
 IMAGE_TAG="test"
 PULL_POLICY="Always"
-RUNTIME_CONFIG_NAME="skyhook-runtime-config"
-SERVICE_NAME="skyhook-server"
+RUNTIME_CONFIG_NAME="xfuncjs-runtime-config"
+SERVICE_NAME="xfuncjs-server"
 SERVICE_NAMESPACE="crossplane-system"
 SERVICE_PORT="9443"
 
@@ -70,7 +70,7 @@ done
 
 # Update values.yaml
 cat > values.yaml << EOF
-# Default values for skyhook chart
+# Default values for xfuncjs chart
 
 # Function configuration
 function:
@@ -91,4 +91,4 @@ runtimeConfig:
 EOF
 
 echo "values.yaml updated successfully!"
-echo "You can now deploy the chart with: helm install skyhook ."
+echo "You can now deploy the chart with: helm install xfuncjs ."

@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"github.com/socialgouv/crossplane-skyhook/pkg/types"
+	"github.com/socialgouv/xfuncjs-server/pkg/types"
 )
 
 // Standard field names for structured logging

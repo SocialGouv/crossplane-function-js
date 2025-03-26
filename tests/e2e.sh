@@ -30,10 +30,10 @@ else
   fi
 fi
 
-echo "=== Deploying Skyhook server ==="
-"$SCRIPT_DIR/deploy-skyhook.sh"
+echo "=== Deploying XFuncJS server ==="
+"$SCRIPT_DIR/deploy-xfuncjs.sh"
 
 echo "=== Running tests ==="
-"$SCRIPT_DIR/test-skyhook.sh" "$@"
+"$SCRIPT_DIR/test-xfuncjs.sh" "$@"
 
 echo "=== E2E tests completed successfully! ==="

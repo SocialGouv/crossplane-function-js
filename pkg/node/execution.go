@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/socialgouv/crossplane-skyhook/pkg/hash"
-	"github.com/socialgouv/crossplane-skyhook/pkg/logger"
-	"github.com/socialgouv/crossplane-skyhook/pkg/types"
+	"github.com/socialgouv/xfuncjs-server/pkg/hash"
+	"github.com/socialgouv/xfuncjs-server/pkg/logger"
+	"github.com/socialgouv/xfuncjs-server/pkg/types"
 )
 
 // ExecuteFunction executes a JavaScript/TypeScript function with the given input
-func (pm *ProcessManager) ExecuteFunction(ctx context.Context, input *types.SkyhookInput, inputJSON string) (string, error) {
+func (pm *ProcessManager) ExecuteFunction(ctx context.Context, input *types.XFuncJSInput, inputJSON string) (string, error) {
 	// Maximum number of retries
 	const maxRetries = 3
 

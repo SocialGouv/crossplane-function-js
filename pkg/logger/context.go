@@ -3,7 +3,7 @@ package logger
 import (
 	"context"
 
-	pkgcontext "github.com/socialgouv/crossplane-skyhook/pkg/context"
+	pkgcontext "github.com/socialgouv/xfuncjs-server/pkg/context"
 )
 
 // LoggerFromContext creates a logger with context information

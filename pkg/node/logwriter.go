@@ -5,7 +5,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/socialgouv/crossplane-skyhook/pkg/logger"
+	"github.com/socialgouv/xfuncjs-server/pkg/logger"
 )
 
 // logWriter is a io.Writer that writes to a logger with buffering for partial lines

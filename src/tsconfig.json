@@ -3,8 +3,8 @@
   "compilerOptions": {
     "rootDir": "..",
     "paths": {
-      "skyhook-libs": ["../packages/skyhook-libs"]
+      "@xfuncjs/libs": ["../packages/@xfuncjs/libs"]
     }
   },
-  "include": ["./**/*.ts", "../packages/skyhook-libs/**/*.ts"]
+  "include": ["./**/*.ts", "../packages/@xfuncjs/libs/**/*.ts"]
 }

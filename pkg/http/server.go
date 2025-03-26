@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/socialgouv/crossplane-skyhook/pkg/logger"
-	"github.com/socialgouv/crossplane-skyhook/pkg/node"
+	"github.com/socialgouv/xfuncjs-server/pkg/logger"
+	"github.com/socialgouv/xfuncjs-server/pkg/node"
 )
 
 // ErrServerClosed is returned by the Server's Start method after a call to Stop.

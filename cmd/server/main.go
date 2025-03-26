@@ -9,12 +9,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/socialgouv/crossplane-skyhook/pkg/config"
-	pkgerrors "github.com/socialgouv/crossplane-skyhook/pkg/errors"
-	"github.com/socialgouv/crossplane-skyhook/pkg/grpc"
-	"github.com/socialgouv/crossplane-skyhook/pkg/http"
-	"github.com/socialgouv/crossplane-skyhook/pkg/logger"
-	"github.com/socialgouv/crossplane-skyhook/pkg/node"
+	"github.com/socialgouv/xfuncjs-server/pkg/config"
+	pkgerrors "github.com/socialgouv/xfuncjs-server/pkg/errors"
+	"github.com/socialgouv/xfuncjs-server/pkg/grpc"
+	"github.com/socialgouv/xfuncjs-server/pkg/http"
+	"github.com/socialgouv/xfuncjs-server/pkg/logger"
+	"github.com/socialgouv/xfuncjs-server/pkg/node"
 )
 
 func main() {

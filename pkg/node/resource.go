@@ -1,7 +1,7 @@
 package node
 
 import (
-	"github.com/socialgouv/crossplane-skyhook/pkg/types"
+	"github.com/socialgouv/xfuncjs-server/pkg/types"
 )
 
 // extractResourceInfo extracts resource information from the input data

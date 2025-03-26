@@ -1,5 +1,5 @@
 {
-  description = "Development environment for crossplane-skyhook";
+  description = "Development environment for xfuncjs-server";
   
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";

@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/socialgouv/crossplane-skyhook/pkg/types"
+	"github.com/socialgouv/xfuncjs-server/pkg/types"
 )
 
 // Field names for structured logging

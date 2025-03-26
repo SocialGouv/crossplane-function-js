@@ -1,4 +1,4 @@
-module github.com/socialgouv/crossplane-skyhook
+module github.com/socialgouv/xfuncjs-server
 
 go 1.23.7
 

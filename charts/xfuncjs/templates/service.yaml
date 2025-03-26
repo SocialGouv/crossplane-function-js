@@ -4,10 +4,10 @@ metadata:
   name: {{ .Values.runtimeConfig.service.name }}
   namespace: {{ .Values.runtimeConfig.service.namespace }}
   labels:
-    {{- include "skyhook.labels" . | nindent 4 }}
+    {{- include "xfuncjs.labels" . | nindent 4 }}
 spec:
   selector:
-    pkg.crossplane.io/function: function-skyhook
+    pkg.crossplane.io/function: function-xfuncjs
   ports:
     - port: 9443
       targetPort: grpc

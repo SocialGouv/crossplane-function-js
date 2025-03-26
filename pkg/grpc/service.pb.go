@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.31.0
 // 	protoc        v3.12.4
-// source: proto/skyhook/service.proto
+// source: proto/xfuncjs/service.proto
 
 package grpc
 
@@ -34,7 +34,7 @@ type RunFunctionRequest struct {
 func (x *RunFunctionRequest) Reset() {
 	*x = RunFunctionRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_skyhook_service_proto_msgTypes[0]
+		mi := &file_proto_xfuncjs_service_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -47,7 +47,7 @@ func (x *RunFunctionRequest) String() string {
 func (*RunFunctionRequest) ProtoMessage() {}
 
 func (x *RunFunctionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_skyhook_service_proto_msgTypes[0]
+	mi := &file_proto_xfuncjs_service_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -60,7 +60,7 @@ func (x *RunFunctionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RunFunctionRequest.ProtoReflect.Descriptor instead.
 func (*RunFunctionRequest) Descriptor() ([]byte, []int) {
-	return file_proto_skyhook_service_proto_rawDescGZIP(), []int{0}
+	return file_proto_xfuncjs_service_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *RunFunctionRequest) GetCode() string {
@@ -91,7 +91,7 @@ type RunFunctionResponse struct {
 func (x *RunFunctionResponse) Reset() {
 	*x = RunFunctionResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_skyhook_service_proto_msgTypes[1]
+		mi := &file_proto_xfuncjs_service_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -104,7 +104,7 @@ func (x *RunFunctionResponse) String() string {
 func (*RunFunctionResponse) ProtoMessage() {}
 
 func (x *RunFunctionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_skyhook_service_proto_msgTypes[1]
+	mi := &file_proto_xfuncjs_service_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -117,7 +117,7 @@ func (x *RunFunctionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RunFunctionResponse.ProtoReflect.Descriptor instead.
 func (*RunFunctionResponse) Descriptor() ([]byte, []int) {
-	return file_proto_skyhook_service_proto_rawDescGZIP(), []int{1}
+	return file_proto_xfuncjs_service_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *RunFunctionResponse) GetOutputJson() string {
@@ -150,7 +150,7 @@ type ErrorInfo struct {
 func (x *ErrorInfo) Reset() {
 	*x = ErrorInfo{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_skyhook_service_proto_msgTypes[2]
+		mi := &file_proto_xfuncjs_service_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -163,7 +163,7 @@ func (x *ErrorInfo) String() string {
 func (*ErrorInfo) ProtoMessage() {}
 
 func (x *ErrorInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_skyhook_service_proto_msgTypes[2]
+	mi := &file_proto_xfuncjs_service_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -176,7 +176,7 @@ func (x *ErrorInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ErrorInfo.ProtoReflect.Descriptor instead.
 func (*ErrorInfo) Descriptor() ([]byte, []int) {
-	return file_proto_skyhook_service_proto_rawDescGZIP(), []int{2}
+	return file_proto_xfuncjs_service_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ErrorInfo) GetCode() int32 {
@@ -200,9 +200,9 @@ func (x *ErrorInfo) GetStackTrace() string {
 	return ""
 }
 
-var File_proto_skyhook_service_proto protoreflect.FileDescriptor
+var File_proto_xfuncjs_service_proto protoreflect.FileDescriptor
 
-var file_proto_skyhook_service_proto_rawDesc = []byte{
+var file_proto_xfuncjs_service_proto_rawDesc = []byte{
 	0x0a, 0x1b, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x73, 0x6b, 0x79, 0x68, 0x6f, 0x6f, 0x6b, 0x2f,
 	0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x07, 0x73,
 	0x6b, 0x79, 0x68, 0x6f, 0x6f, 0x6b, 0x22, 0x47, 0x0a, 0x12, 0x52, 0x75, 0x6e, 0x46, 0x75, 0x6e,
@@ -235,27 +235,27 @@ var file_proto_skyhook_service_proto_rawDesc = []byte{
 }
 
 var (
-	file_proto_skyhook_service_proto_rawDescOnce sync.Once
-	file_proto_skyhook_service_proto_rawDescData = file_proto_skyhook_service_proto_rawDesc
+	file_proto_xfuncjs_service_proto_rawDescOnce sync.Once
+	file_proto_xfuncjs_service_proto_rawDescData = file_proto_xfuncjs_service_proto_rawDesc
 )
 
-func file_proto_skyhook_service_proto_rawDescGZIP() []byte {
-	file_proto_skyhook_service_proto_rawDescOnce.Do(func() {
-		file_proto_skyhook_service_proto_rawDescData = protoimpl.X.CompressGZIP(file_proto_skyhook_service_proto_rawDescData)
+func file_proto_xfuncjs_service_proto_rawDescGZIP() []byte {
+	file_proto_xfuncjs_service_proto_rawDescOnce.Do(func() {
+		file_proto_xfuncjs_service_proto_rawDescData = protoimpl.X.CompressGZIP(file_proto_xfuncjs_service_proto_rawDescData)
 	})
-	return file_proto_skyhook_service_proto_rawDescData
+	return file_proto_xfuncjs_service_proto_rawDescData
 }
 
-var file_proto_skyhook_service_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
-var file_proto_skyhook_service_proto_goTypes = []interface{}{
-	(*RunFunctionRequest)(nil),  // 0: skyhook.RunFunctionRequest
-	(*RunFunctionResponse)(nil), // 1: skyhook.RunFunctionResponse
-	(*ErrorInfo)(nil),           // 2: skyhook.ErrorInfo
+var file_proto_xfuncjs_service_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_proto_xfuncjs_service_proto_goTypes = []interface{}{
+	(*RunFunctionRequest)(nil),  // 0: xfuncjs.RunFunctionRequest
+	(*RunFunctionResponse)(nil), // 1: xfuncjs.RunFunctionResponse
+	(*ErrorInfo)(nil),           // 2: xfuncjs.ErrorInfo
 }
-var file_proto_skyhook_service_proto_depIdxs = []int32{
-	2, // 0: skyhook.RunFunctionResponse.error:type_name -> skyhook.ErrorInfo
-	0, // 1: skyhook.SkyhookService.RunFunction:input_type -> skyhook.RunFunctionRequest
-	1, // 2: skyhook.SkyhookService.RunFunction:output_type -> skyhook.RunFunctionResponse
+var file_proto_xfuncjs_service_proto_depIdxs = []int32{
+	2, // 0: xfuncjs.RunFunctionResponse.error:type_name -> xfuncjs.ErrorInfo
+	0, // 1: xfuncjs.XFuncJSService.RunFunction:input_type -> xfuncjs.RunFunctionRequest
+	1, // 2: xfuncjs.XFuncJSService.RunFunction:output_type -> xfuncjs.RunFunctionResponse
 	2, // [2:3] is the sub-list for method output_type
 	1, // [1:2] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -263,13 +263,13 @@ var file_proto_skyhook_service_proto_depIdxs = []int32{
 	0, // [0:1] is the sub-list for field type_name
 }
 
-func init() { file_proto_skyhook_service_proto_init() }
-func file_proto_skyhook_service_proto_init() {
-	if File_proto_skyhook_service_proto != nil {
+func init() { file_proto_xfuncjs_service_proto_init() }
+func file_proto_xfuncjs_service_proto_init() {
+	if File_proto_xfuncjs_service_proto != nil {
 		return
 	}
 	if !protoimpl.UnsafeEnabled {
-		file_proto_skyhook_service_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+		file_proto_xfuncjs_service_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*RunFunctionRequest); i {
 			case 0:
 				return &v.state
@@ -281,7 +281,7 @@ func file_proto_skyhook_service_proto_init() {
 				return nil
 			}
 		}
-		file_proto_skyhook_service_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_proto_xfuncjs_service_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*RunFunctionResponse); i {
 			case 0:
 				return &v.state
@@ -293,7 +293,7 @@ func file_proto_skyhook_service_proto_init() {
 				return nil
 			}
 		}
-		file_proto_skyhook_service_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+		file_proto_xfuncjs_service_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ErrorInfo); i {
 			case 0:
 				return &v.state
@@ -310,18 +310,18 @@ func file_proto_skyhook_service_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: file_proto_skyhook_service_proto_rawDesc,
+			RawDescriptor: file_proto_xfuncjs_service_proto_rawDesc,
 			NumEnums:      0,
 			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_proto_skyhook_service_proto_goTypes,
-		DependencyIndexes: file_proto_skyhook_service_proto_depIdxs,
-		MessageInfos:      file_proto_skyhook_service_proto_msgTypes,
+		GoTypes:           file_proto_xfuncjs_service_proto_goTypes,
+		DependencyIndexes: file_proto_xfuncjs_service_proto_depIdxs,
+		MessageInfos:      file_proto_xfuncjs_service_proto_msgTypes,
 	}.Build()
-	File_proto_skyhook_service_proto = out.File
-	file_proto_skyhook_service_proto_rawDesc = nil
-	file_proto_skyhook_service_proto_goTypes = nil
-	file_proto_skyhook_service_proto_depIdxs = nil
+	File_proto_xfuncjs_service_proto = out.File
+	file_proto_xfuncjs_service_proto_rawDesc = nil
+	file_proto_xfuncjs_service_proto_goTypes = nil
+	file_proto_xfuncjs_service_proto_depIdxs = nil
 }

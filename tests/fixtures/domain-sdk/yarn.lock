@@ -5,6 +5,12 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
+"@xfuncjs/server@link:../../..::locator=root-workspace-0b6124%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@xfuncjs/server@link:../../..::locator=root-workspace-0b6124%40workspace%3A."
+  languageName: node
+  linkType: soft
+
 "chalk@npm:^5.0.1":
   version: 5.4.1
   resolution: "chalk@npm:5.4.1"
@@ -12,17 +18,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"crossplane-skyhook@link:../../..::locator=root-workspace-0b6124%40workspace%3A.":
-  version: 0.0.0-use.local
-  resolution: "crossplane-skyhook@link:../../..::locator=root-workspace-0b6124%40workspace%3A."
-  languageName: node
-  linkType: soft
-
 "root-workspace-0b6124@workspace:.":
   version: 0.0.0-use.local
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
+    "@xfuncjs/server": "link:../../.."
     chalk: "npm:^5.0.1"
-    crossplane-skyhook: "link:../../.."
   languageName: unknown
   linkType: soft

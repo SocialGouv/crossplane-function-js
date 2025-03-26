@@ -1142,6 +1142,74 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@xfuncjs/libs@workspace:^, @xfuncjs/libs@workspace:packages/libs":
+  version: 0.0.0-use.local
+  resolution: "@xfuncjs/libs@workspace:packages/libs"
+  dependencies:
+    "@types/fs-extra": "npm:^11"
+    fs-extra: "npm:^11.3.0"
+    pino: "npm:^9.6.0"
+  languageName: unknown
+  linkType: soft
+
+"@xfuncjs/sdk@workspace:packages/sdk":
+  version: 0.0.0-use.local
+  resolution: "@xfuncjs/sdk@workspace:packages/sdk"
+  dependencies:
+    "@types/lodash": "npm:^4"
+    "@xfuncjs/libs": "workspace:^"
+    lodash: "npm:^4.17.21"
+    node-ts-modules: "npm:0.0.2"
+    pino: "npm:^9.6.0"
+    yaml: "npm:^2.7.0"
+  languageName: unknown
+  linkType: soft
+
+"@xfuncjs/server@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "@xfuncjs/server@workspace:."
+  dependencies:
+    "@eslint/compat": "npm:^1.2.7"
+    "@eslint/eslintrc": "npm:^3.3.1"
+    "@eslint/js": "npm:^9.23.0"
+    "@kubernetes-models/crd-generate": "npm:^5.0.2"
+    "@types/chai": "npm:^5.2.0"
+    "@types/express": "npm:^5.0.1"
+    "@types/fs-extra": "npm:^11"
+    "@types/mocha": "npm:^10.0.10"
+    "@types/node": "npm:^22.13.10"
+    "@typescript-eslint/eslint-plugin": "npm:^8.28.0"
+    "@typescript-eslint/parser": "npm:^8.28.0"
+    "@vercel/ncc": "npm:^0.38.3"
+    "@xfuncjs/libs": "workspace:^"
+    "@yarnpkg/cli": "npm:^4.7.0"
+    "@yarnpkg/core": "npm:^4.2.1"
+    "@yarnpkg/plugin-essentials": "npm:^4.3.1"
+    chai: "npm:^5.2.0"
+    commander: "npm:^13.1.0"
+    commit-and-tag-version: "npm:^12.5.0"
+    eslint: "npm:^9.23.0"
+    eslint-config-prettier: "npm:^10.1.1"
+    eslint-plugin-import: "npm:^2.31.0"
+    eslint-plugin-prettier: "npm:^5.2.5"
+    express: "npm:^5"
+    fs-extra: "npm:^11.3.0"
+    globals: "npm:^16.0.0"
+    husky: "npm:^9.1.7"
+    lint-staged: "npm:^15.5.0"
+    mocha: "npm:11.1.0"
+    node-ts-modules: "npm:^0.0.2"
+    pino: "npm:^9.6.0"
+    postject: "npm:^1.0.0-alpha.6"
+    prettier: "npm:^3.5.3"
+    ts-node: "npm:^10.9.2"
+    typescript: "npm:^5.8.2"
+    yaml: "npm:^2.7.0"
+  bin:
+    server: build/xfuncjs-server-js
+  languageName: unknown
+  linkType: soft
+
 "@yarnpkg/cli@npm:^4.7.0":
   version: 4.7.0
   resolution: "@yarnpkg/cli@npm:4.7.0"
@@ -2955,51 +3023,6 @@ __metadata:
   checksum: 10c0/053ea8b2135caff68a9e81470e845613e374e7309a47731e81639de3eaeb90c3d01af0e0b44d2ab9d50b43467223b88567dfeb3262db942dc063b9976718ffc1
   languageName: node
   linkType: hard
-
-"crossplane-skyhook@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "crossplane-skyhook@workspace:."
-  dependencies:
-    "@eslint/compat": "npm:^1.2.7"
-    "@eslint/eslintrc": "npm:^3.3.1"
-    "@eslint/js": "npm:^9.23.0"
-    "@kubernetes-models/crd-generate": "npm:^5.0.2"
-    "@types/chai": "npm:^5.2.0"
-    "@types/express": "npm:^5.0.1"
-    "@types/fs-extra": "npm:^11"
-    "@types/mocha": "npm:^10.0.10"
-    "@types/node": "npm:^22.13.10"
-    "@typescript-eslint/eslint-plugin": "npm:^8.28.0"
-    "@typescript-eslint/parser": "npm:^8.28.0"
-    "@vercel/ncc": "npm:^0.38.3"
-    "@yarnpkg/cli": "npm:^4.7.0"
-    "@yarnpkg/core": "npm:^4.2.1"
-    "@yarnpkg/plugin-essentials": "npm:^4.3.1"
-    chai: "npm:^5.2.0"
-    commander: "npm:^13.1.0"
-    commit-and-tag-version: "npm:^12.5.0"
-    eslint: "npm:^9.23.0"
-    eslint-config-prettier: "npm:^10.1.1"
-    eslint-plugin-import: "npm:^2.31.0"
-    eslint-plugin-prettier: "npm:^5.2.5"
-    express: "npm:^5"
-    fs-extra: "npm:^11.3.0"
-    globals: "npm:^16.0.0"
-    husky: "npm:^9.1.7"
-    lint-staged: "npm:^15.5.0"
-    mocha: "npm:11.1.0"
-    node-ts-modules: "npm:^0.0.1"
-    pino: "npm:^9.6.0"
-    postject: "npm:^1.0.0-alpha.6"
-    prettier: "npm:^3.5.3"
-    skyhook-libs: "workspace:^"
-    ts-node: "npm:^10.9.2"
-    typescript: "npm:^5.8.2"
-    yaml: "npm:^2.7.0"
-  bin:
-    crossplane-skyhook: build/crossplane-skyhook
-  languageName: unknown
-  linkType: soft
 
 "cssstyle@npm:^4.1.0":
   version: 4.3.0
@@ -6179,12 +6202,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-ts-modules@npm:0.0.1, node-ts-modules@npm:^0.0.1":
-  version: 0.0.1
-  resolution: "node-ts-modules@npm:0.0.1"
+"node-ts-modules@npm:0.0.2, node-ts-modules@npm:^0.0.2":
+  version: 0.0.2
+  resolution: "node-ts-modules@npm:0.0.2"
   bin:
     node-ts-modules-postinstall: postinstall.js
-  checksum: 10c0/345fa3e3b549b2c815decf514873f7f8a39325112b57c9e5b7c6c6a21fe033dc1638c3113cd9e742b5c234872b271d675e1dc396d3a69f0541da0bcf1c763091
+  checksum: 10c0/39e63cc105f82a812c5c2b33c9cb44d9eab750c41c89290a9f088b232350e56ffd9eef98d2a012675766a2940d3d3b95e14e2a6de5e6e61e6501cb99acbc6668
   languageName: node
   linkType: hard
 
@@ -7596,29 +7619,6 @@ __metadata:
   checksum: 10c0/41602dce540e46d599edba9d9860193398d135f7ff72cab629db5171516cfae628d21e7bfccde1bbfdf11c48726bc2a6d1a8fb8701125852fbfda7cf19c6aa83
   languageName: node
   linkType: hard
-
-"skyhook-libs@workspace:^, skyhook-libs@workspace:packages/skyhook-libs":
-  version: 0.0.0-use.local
-  resolution: "skyhook-libs@workspace:packages/skyhook-libs"
-  dependencies:
-    "@types/fs-extra": "npm:^11"
-    fs-extra: "npm:^11.3.0"
-    pino: "npm:^9.6.0"
-  languageName: unknown
-  linkType: soft
-
-"skyhook-sdk@workspace:packages/skyhook-sdk":
-  version: 0.0.0-use.local
-  resolution: "skyhook-sdk@workspace:packages/skyhook-sdk"
-  dependencies:
-    "@types/lodash": "npm:^4"
-    lodash: "npm:^4.17.21"
-    node-ts-modules: "npm:0.0.1"
-    pino: "npm:^9.6.0"
-    skyhook-libs: "workspace:^"
-    yaml: "npm:^2.7.0"
-  languageName: unknown
-  linkType: soft
 
 "slice-ansi@npm:^3.0.0":
   version: 3.0.0

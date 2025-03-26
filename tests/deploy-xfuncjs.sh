@@ -18,9 +18,9 @@ TAG_TIMESTAMP="${TIMESTAMP}"
 
 # Build the Docker image with both tags
 echo "Building Docker image..."
-docker build --tag localhost:5001/crossplane-skyhook:${TAG_TEST} --tag localhost:5001/crossplane-skyhook:${TAG_TIMESTAMP} .
-docker push localhost:5001/crossplane-skyhook:${TAG_TEST}
-docker push localhost:5001/crossplane-skyhook:${TAG_TIMESTAMP}
+docker build --tag localhost:5001/xfuncjs-server:${TAG_TEST} --tag localhost:5001/xfuncjs-server:${TAG_TIMESTAMP} .
+docker push localhost:5001/xfuncjs-server:${TAG_TEST}
+docker push localhost:5001/xfuncjs-server:${TAG_TIMESTAMP}
 
 # Get the registry IP address
 REGISTRY_IP=$(docker inspect -f '{{.NetworkSettings.Networks.kind.IPAddress}}' kind-registry)
@@ -37,17 +37,17 @@ for node in $(kind get nodes); do
 EOF
 done
 
-# Deploy the Skyhook Helm chart
-echo "Deploying Skyhook Helm chart..."
-helm upgrade --install skyhook ./charts/skyhook \
+# Deploy the XFuncJS Helm chart
+echo "Deploying XFuncJS Helm chart..."
+helm upgrade --install xfuncjs ./charts/xfuncjs \
   --set function.package.repository=${REGISTRY_IP}:5000 \
-  --set function.package.name=crossplane-skyhook \
+  --set function.package.name=xfuncjs-server \
   --set function.package.tag=${TAG_TIMESTAMP}
 
 # Wait for the Function to be installed
 echo "Waiting for Function to be installed..."
 for i in {1..30}; do
-  if kubectl get functions.pkg.crossplane.io function-skyhook -o jsonpath='{.status.conditions[?(@.type=="Installed")].status}' | grep -q "True"; then
+  if kubectl get functions.pkg.crossplane.io function-xfuncjs -o jsonpath='{.status.conditions[?(@.type=="Installed")].status}' | grep -q "True"; then
     echo "Function installed successfully!"
     break
   fi
@@ -75,16 +75,16 @@ done
 # Check for the existence of the pod with the latest tag
 echo "Checking for pod with the latest tag..."
 for i in {1..30}; do
-  # List all pods with the function-skyhook label
-  echo "Listing all function-skyhook pods..."
-  kubectl get pods -n crossplane-system -l pkg.crossplane.io/function=function-skyhook -o wide || true
+  # List all pods with the function-xfuncjs label
+  echo "Listing all function-xfuncjs pods..."
+  kubectl get pods -n crossplane-system -l pkg.crossplane.io/function=function-xfuncjs -o wide || true
   
   # Check if any pod has the correct image and is in a valid state
   # This command will output lines like: "pod-name image-name:tag Running/Succeeded"
-  POD_LIST=$(kubectl get pods -n crossplane-system -l pkg.crossplane.io/function=function-skyhook -o custom-columns=NAME:.metadata.name,IMAGE:.spec.containers[0].image,STATUS:.status.phase --no-headers 2>/dev/null || echo "")
+  POD_LIST=$(kubectl get pods -n crossplane-system -l pkg.crossplane.io/function=function-xfuncjs -o custom-columns=NAME:.metadata.name,IMAGE:.spec.containers[0].image,STATUS:.status.phase --no-headers 2>/dev/null || echo "")
   
   if [ -z "$POD_LIST" ]; then
-    echo "No pods found for function-skyhook yet"
+    echo "No pods found for function-xfuncjs yet"
   else
     # Check each pod in the list
     echo "$POD_LIST" | while read -r POD_LINE; do
@@ -128,4 +128,4 @@ for i in {1..30}; do
   fi
 done
 
-echo "Skyhook server deployed successfully with tag: ${TAG_TIMESTAMP}!"
+echo "XFuncJS server deployed successfully with tag: ${TAG_TIMESTAMP}!"

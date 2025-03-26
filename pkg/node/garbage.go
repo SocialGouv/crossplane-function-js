@@ -5,7 +5,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/socialgouv/crossplane-skyhook/pkg/logger"
+	"github.com/socialgouv/xfuncjs-server/pkg/logger"
 )
 
 // startGarbageCollector starts a goroutine that periodically collects garbage

@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/socialgouv/crossplane-skyhook/pkg/logger"
+	"github.com/socialgouv/xfuncjs-server/pkg/logger"
 )
 
 // isProcessHealthy checks if a process is healthy and ready to receive input

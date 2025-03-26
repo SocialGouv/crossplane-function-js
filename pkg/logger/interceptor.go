@@ -15,9 +15,9 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 
-	pkgcontext "github.com/socialgouv/crossplane-skyhook/pkg/context"
-	pkgerrors "github.com/socialgouv/crossplane-skyhook/pkg/errors"
-	"github.com/socialgouv/crossplane-skyhook/pkg/types"
+	pkgcontext "github.com/socialgouv/xfuncjs-server/pkg/context"
+	pkgerrors "github.com/socialgouv/xfuncjs-server/pkg/errors"
+	"github.com/socialgouv/xfuncjs-server/pkg/types"
 )
 
 // UnaryServerInterceptor returns a new unary server interceptor that logs requests

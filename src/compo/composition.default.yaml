@@ -9,11 +9,11 @@ spec:
     kind: __FUNCTION_NAME__
   mode: Pipeline
   pipeline:
-    - step: skyhook-function-__FUNCTION_NAME__
+    - step: xfuncjs-function-__FUNCTION_NAME__
       functionRef:
-        name: function-skyhook
+        name: function-xfuncjs
       input:
-        apiVersion: skyhook.fn.crossplane.io/v1beta1
+        apiVersion: xfuncjs.fn.crossplane.io/v1beta1
         kind: Input
         spec:
           source:

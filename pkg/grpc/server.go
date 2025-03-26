@@ -16,21 +16,21 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/structpb"
 
-	"github.com/socialgouv/crossplane-skyhook/pkg/logger"
-	"github.com/socialgouv/crossplane-skyhook/pkg/node"
-	"github.com/socialgouv/crossplane-skyhook/pkg/types"
+	"github.com/socialgouv/xfuncjs-server/pkg/logger"
+	"github.com/socialgouv/xfuncjs-server/pkg/node"
+	"github.com/socialgouv/xfuncjs-server/pkg/types"
 )
 
-// Server is the gRPC server for the Skyhook service
+// Server is the gRPC server for the XFuncJS service
 type Server struct {
-	UnimplementedSkyhookServiceServer
+	UnimplementedXFuncJSServiceServer
 	processManager *node.ProcessManager
 	server         *grpc.Server
 	logger         logger.Logger
 	nodeServerPort int
 }
 
-// NewServer creates a new Skyhook gRPC server
+// NewServer creates a new XFuncJS gRPC server
 func NewServer(processManager *node.ProcessManager, logger logger.Logger) *Server {
 	return &Server{
 		processManager: processManager,
@@ -80,7 +80,7 @@ func (s *Server) Start(address string, tlsEnabled bool, certFile, keyFile string
 
 	// Create a new gRPC server with the options
 	s.server = grpc.NewServer(opts...)
-	RegisterSkyhookServiceServer(s.server, s)
+	RegisterXFuncJSServiceServer(s.server, s)
 
 	// Register the Crossplane FunctionRunnerService
 	// We're using a simpler approach by just registering the service name
@@ -216,7 +216,7 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1.RunFunctio
 	// s.logger.WithField("input_length", len(inputBytes)).Debug("Input received")
 	// s.logger.WithField("raw_input", string(inputBytes)).Debug("Raw input")
 
-	// Parse the input into a SkyhookInput
+	// Parse the input into a XFuncJSInput
 	var inputData map[string]interface{}
 	if err := json.Unmarshal(inputBytes, &inputData); err != nil {
 		s.logger.Errorf("Error parsing input JSON: %v", err)
@@ -235,23 +235,23 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1.RunFunctio
 	inputJSON, _ := json.MarshalIndent(inputData, "", "  ")
 	s.logger.Debugf("Input data: %s", string(inputJSON))
 
-	// Create a SkyhookInput from the input data
-	skyhookInput := &types.SkyhookInput{}
-	if err := json.Unmarshal(inputBytes, skyhookInput); err != nil {
-		s.logger.Errorf("Error parsing input into SkyhookInput: %v", err)
+	// Create a XFuncJSInput from the input data
+	xfuncjsInput := &types.XFuncJSInput{}
+	if err := json.Unmarshal(inputBytes, xfuncjsInput); err != nil {
+		s.logger.Errorf("Error parsing input into XFuncJSInput: %v", err)
 		return &fnv1.RunFunctionResponse{
 			Meta: &fnv1.ResponseMeta{},
 			Results: []*fnv1.Result{
 				{
 					Severity: fnv1.Severity_SEVERITY_FATAL,
-					Message:  fmt.Sprintf("Failed to parse input into SkyhookInput: %v", err),
+					Message:  fmt.Sprintf("Failed to parse input into XFuncJSInput: %v", err),
 				},
 			},
 		}, nil
 	}
 
 	// Validate the input
-	if err := skyhookInput.Validate(); err != nil {
+	if err := xfuncjsInput.Validate(); err != nil {
 		s.logger.Errorf("Invalid input: %v", err)
 		return &fnv1.RunFunctionResponse{
 			Meta: &fnv1.ResponseMeta{},
@@ -317,7 +317,7 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1.RunFunctio
 	}
 
 	// Execute the function using the process manager with the enhanced input
-	result, err := s.processManager.ExecuteFunction(ctx, skyhookInput, string(enhancedInputJSON))
+	result, err := s.processManager.ExecuteFunction(ctx, xfuncjsInput, string(enhancedInputJSON))
 	if err != nil {
 		s.logger.Errorf("Error executing function: %v", err)
 		return &fnv1.RunFunctionResponse{

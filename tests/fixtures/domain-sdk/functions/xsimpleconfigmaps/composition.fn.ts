@@ -1,6 +1,6 @@
 import lodash from "lodash"
-import type { CrossplaneDesiredResources, FunctionInput } from "skyhook-sdk"
-import { logger } from "skyhook-sdk"
+import type { CrossplaneDesiredResources, FunctionInput } from "@xfuncjs/sdk"
+import { logger } from "@xfuncjs/sdk"
 import chalk from "chalk"
 
 export default function(input: FunctionInput): CrossplaneDesiredResources {
@@ -21,7 +21,7 @@ export default function(input: FunctionInput): CrossplaneDesiredResources {
     kind: "ConfigMap",
     metadata: {
       name: "generated-configmap",
-      namespace: "test-skyhook",
+      namespace: "test-xfuncjs",
       labels: {
         example: "true"
       }

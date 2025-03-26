@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-package skyhook;
+package xfuncjs;
 
-option go_package = "github.com/socialgouv/crossplane-skyhook/pkg/grpc";
+option go_package = "github.com/socialgouv/xfuncjs-server/pkg/grpc";
 
-service SkyhookService {
+service XFuncJSService {
   // RunFunction executes a JavaScript/TypeScript function with the provided input
   rpc RunFunction(RunFunctionRequest) returns (RunFunctionResponse) {}
 }

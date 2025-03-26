@@ -13,7 +13,7 @@ trap 'handle_error $LINENO' ERR
 
 # Create a test namespace
 echo "Creating test namespace..."
-kubectl create namespace test-skyhook --dry-run=client -o yaml | kubectl apply -f -
+kubectl create namespace test-xfuncjs --dry-run=client -o yaml | kubectl apply -f -
 
 # Apply CRDs and Compositions
 echo "Applying CRDs and Compositions..."
@@ -72,7 +72,7 @@ kubectl apply -f tests/fixtures/sample.yaml
 echo "Waiting for ConfigMap to be created..."
 configmap_created=false
 for i in {1..30}; do
-  if kubectl get configmap generated-configmap -n test-skyhook &> /dev/null; then
+  if kubectl get configmap generated-configmap -n test-xfuncjs &> /dev/null; then
     echo "ConfigMap created successfully!"
     configmap_created=true
     break
@@ -105,7 +105,7 @@ fi
 
 # Verify the ConfigMap data
 echo "Verifying ConfigMap data..."
-configmap_data=$(kubectl get configmap generated-configmap -n test-skyhook -o jsonpath='{.data}')
+configmap_data=$(kubectl get configmap generated-configmap -n test-xfuncjs -o jsonpath='{.data}')
 echo "ConfigMap data: $configmap_data"
 
 # Check if the data was transformed correctly (uppercase)

@@ -3,7 +3,7 @@ export default {
     'eslint --fix',
   ],
   '**/*.ts': () => 'tsc -p tsconfig.json --noEmit',
-  '**/*.{json,md,yaml,yml}': [
+  '**/*.{json,md}': [
     'prettier --write',
   ],
 }

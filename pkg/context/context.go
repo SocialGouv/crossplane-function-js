@@ -3,7 +3,7 @@ package context
 import (
 	"context"
 
-	"github.com/socialgouv/crossplane-skyhook/pkg/types"
+	"github.com/socialgouv/xfuncjs-server/pkg/types"
 )
 
 type contextKey string

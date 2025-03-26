@@ -3,7 +3,7 @@ kind: Function
 metadata:
   name: {{ .Values.function.name }}
   labels:
-    {{- include "skyhook.labels" . | nindent 4 }}
+    {{- include "xfuncjs.labels" . | nindent 4 }}
 spec:
   package: {{ .Values.function.package.repository }}/{{ .Values.function.package.name }}:{{ .Values.function.package.tag }}
   packagePullPolicy: {{ .Values.function.pullPolicy }}

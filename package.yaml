@@ -1,7 +1,7 @@
 apiVersion: meta.pkg.crossplane.io/v1beta1
 kind: Function
 metadata:
-  name: crossplane-skyhook
+  name: xfuncjs-server
 spec:
   crossplane:
     version: ">=v1.0.0"

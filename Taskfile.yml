@@ -2,7 +2,7 @@ version: '3'
 
 vars:
   GO: go
-  PROJECT_NAME: crossplane-skyhook
+  PROJECT_NAME: xfuncjs-server
   VERSION:
     sh: git describe --tags 2>/dev/null || echo "v0.1.0"
   DOCKER_IMAGE: localhost:5001/{{.PROJECT_NAME}}
@@ -28,19 +28,19 @@ tasks:
   build:
     desc: Build the project
     cmds:
-      - "{{.GO}} build -o bin/skyhook-server cmd/server/main.go"
+      - "{{.GO}} build -o bin/xfuncjs-server cmd/server/main.go"
 
   # Build a static binary
   build-static:
     desc: Build a static binary
     cmds:
-      - "CGO_ENABLED=0 {{.GO}} build -a -installsuffix cgo -o bin/skyhook-server cmd/server/main.go"
+      - "CGO_ENABLED=0 {{.GO}} build -a -installsuffix cgo -o bin/xfuncjs-server cmd/server/main.go"
 
   # Clean build artifacts
   clean:
     desc: Clean build artifacts
     cmds:
-      - "rm -f bin/skyhook-server"
+      - "rm -f bin/xfuncjs-server"
       - "{{.GO}} clean"
 
   # Run unit tests

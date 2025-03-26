@@ -1,8 +1,8 @@
 import path from "path"
 
+import { createLogger } from "@xfuncjs/libs"
 import { Command } from "commander"
 import fs from "fs-extra"
-import { createLogger } from "skyhook-libs"
 import { parse } from "yaml"
 
 import compo from "./compo/index.ts"
@@ -76,11 +76,11 @@ process.on("unhandledRejection", (reason, _promise) => {
 // Create a new command instance
 const program = new Command()
 
-const skyhookRootPath =
+const xfuncjsRootPath =
   path.basename(__dirname) === "build" ? path.join(__dirname, "..") : __dirname
 
 const main = async () => {
-  const pkgFile = path.join(skyhookRootPath, "package.json")
+  const pkgFile = path.join(xfuncjsRootPath, "package.json")
   const pkgJSON = await fs.readFile(pkgFile, { encoding: "utf-8" })
   const pkg = JSON.parse(pkgJSON)
 

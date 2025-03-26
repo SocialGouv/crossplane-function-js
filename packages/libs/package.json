@@ -1,7 +1,7 @@
 {
-  "name": "skyhook-libs",
+  "name": "@xfuncjs/libs",
   "version": "0.0.1",
-  "description": "Shared libraries for Crossplane Skyhook",
+  "description": "Shared libraries for Crossplane XFuncJS",
   "type": "module",
   "main": "index.ts",
   "dependencies": {

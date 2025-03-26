@@ -14,7 +14,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-func TestCrossplaneSkyhook(t *testing.T) {
+func TestCrossplaneXFuncJS(t *testing.T) {
 	// Check if we're running in a Kubernetes environment
 	// We'll check for the KUBERNETES_SERVICE_HOST environment variable
 	// which is set in Kubernetes pods
@@ -54,7 +54,7 @@ func TestCrossplaneSkyhook(t *testing.T) {
 			"apiVersion": "v1",
 			"kind":       "Namespace",
 			"metadata": map[string]interface{}{
-				"name": "test-skyhook",
+				"name": "test-xfuncjs",
 			},
 		},
 	}
@@ -70,7 +70,7 @@ func TestCrossplaneSkyhook(t *testing.T) {
 			"kind":       "XSimpleConfigMap",
 			"metadata": map[string]interface{}{
 				"name":      "test-simple-configmap",
-				"namespace": "test-skyhook",
+				"namespace": "test-xfuncjs",
 			},
 			"spec": map[string]interface{}{
 				"data": map[string]interface{}{
@@ -82,7 +82,7 @@ func TestCrossplaneSkyhook(t *testing.T) {
 		},
 	}
 
-	_, err = client.Resource(xsimpleConfigMapGVR).Namespace("test-skyhook").Create(context.TODO(), xsimpleConfigMap, metav1.CreateOptions{})
+	_, err = client.Resource(xsimpleConfigMapGVR).Namespace("test-xfuncjs").Create(context.TODO(), xsimpleConfigMap, metav1.CreateOptions{})
 	if err != nil {
 		t.Fatalf("Error creating XSimpleConfigMap: %v", err)
 	}
@@ -90,7 +90,7 @@ func TestCrossplaneSkyhook(t *testing.T) {
 	// Wait for ConfigMap to be created
 	var configMap *unstructured.Unstructured
 	for i := 0; i < 30; i++ {
-		configMap, err = client.Resource(configMapGVR).Namespace("test-skyhook").Get(context.TODO(), "generated-configmap", metav1.GetOptions{})
+		configMap, err = client.Resource(configMapGVR).Namespace("test-xfuncjs").Get(context.TODO(), "generated-configmap", metav1.GetOptions{})
 		if err == nil {
 			break
 		}

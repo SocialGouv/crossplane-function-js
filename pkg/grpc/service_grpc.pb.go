@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v3.12.4
-// source: proto/skyhook/service.proto
+// source: proto/xfuncjs/service.proto
 
 package grpc
 
@@ -19,93 +19,93 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	SkyhookService_RunFunction_FullMethodName = "/skyhook.SkyhookService/RunFunction"
+	XFuncJSService_RunFunction_FullMethodName = "/xfuncjs.XFuncJSService/RunFunction"
 )
 
-// SkyhookServiceClient is the client API for SkyhookService service.
+// XFuncJSServiceClient is the client API for XFuncJSService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type SkyhookServiceClient interface {
+type XFuncJSServiceClient interface {
 	// RunFunction executes a JavaScript/TypeScript function with the provided input
 	RunFunction(ctx context.Context, in *RunFunctionRequest, opts ...grpc.CallOption) (*RunFunctionResponse, error)
 }
 
-type skyhookServiceClient struct {
+type xfuncjsServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewSkyhookServiceClient(cc grpc.ClientConnInterface) SkyhookServiceClient {
-	return &skyhookServiceClient{cc}
+func NewXFuncJSServiceClient(cc grpc.ClientConnInterface) XFuncJSServiceClient {
+	return &xfuncjsServiceClient{cc}
 }
 
-func (c *skyhookServiceClient) RunFunction(ctx context.Context, in *RunFunctionRequest, opts ...grpc.CallOption) (*RunFunctionResponse, error) {
+func (c *xfuncjsServiceClient) RunFunction(ctx context.Context, in *RunFunctionRequest, opts ...grpc.CallOption) (*RunFunctionResponse, error) {
 	out := new(RunFunctionResponse)
-	err := c.cc.Invoke(ctx, SkyhookService_RunFunction_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, XFuncJSService_RunFunction_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// SkyhookServiceServer is the server API for SkyhookService service.
-// All implementations must embed UnimplementedSkyhookServiceServer
+// XFuncJSServiceServer is the server API for XFuncJSService service.
+// All implementations must embed UnimplementedXFuncJSServiceServer
 // for forward compatibility
-type SkyhookServiceServer interface {
+type XFuncJSServiceServer interface {
 	// RunFunction executes a JavaScript/TypeScript function with the provided input
 	RunFunction(context.Context, *RunFunctionRequest) (*RunFunctionResponse, error)
-	mustEmbedUnimplementedSkyhookServiceServer()
+	mustEmbedUnimplementedXFuncJSServiceServer()
 }
 
-// UnimplementedSkyhookServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedSkyhookServiceServer struct {
+// UnimplementedXFuncJSServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedXFuncJSServiceServer struct {
 }
 
-func (UnimplementedSkyhookServiceServer) RunFunction(context.Context, *RunFunctionRequest) (*RunFunctionResponse, error) {
+func (UnimplementedXFuncJSServiceServer) RunFunction(context.Context, *RunFunctionRequest) (*RunFunctionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RunFunction not implemented")
 }
-func (UnimplementedSkyhookServiceServer) mustEmbedUnimplementedSkyhookServiceServer() {}
+func (UnimplementedXFuncJSServiceServer) mustEmbedUnimplementedXFuncJSServiceServer() {}
 
-// UnsafeSkyhookServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to SkyhookServiceServer will
+// UnsafeXFuncJSServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to XFuncJSServiceServer will
 // result in compilation errors.
-type UnsafeSkyhookServiceServer interface {
-	mustEmbedUnimplementedSkyhookServiceServer()
+type UnsafeXFuncJSServiceServer interface {
+	mustEmbedUnimplementedXFuncJSServiceServer()
 }
 
-func RegisterSkyhookServiceServer(s grpc.ServiceRegistrar, srv SkyhookServiceServer) {
-	s.RegisterService(&SkyhookService_ServiceDesc, srv)
+func RegisterXFuncJSServiceServer(s grpc.ServiceRegistrar, srv XFuncJSServiceServer) {
+	s.RegisterService(&XFuncJSService_ServiceDesc, srv)
 }
 
-func _SkyhookService_RunFunction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _XFuncJSService_RunFunction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RunFunctionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SkyhookServiceServer).RunFunction(ctx, in)
+		return srv.(XFuncJSServiceServer).RunFunction(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: SkyhookService_RunFunction_FullMethodName,
+		FullMethod: XFuncJSService_RunFunction_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SkyhookServiceServer).RunFunction(ctx, req.(*RunFunctionRequest))
+		return srv.(XFuncJSServiceServer).RunFunction(ctx, req.(*RunFunctionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// SkyhookService_ServiceDesc is the grpc.ServiceDesc for SkyhookService service.
+// XFuncJSService_ServiceDesc is the grpc.ServiceDesc for XFuncJSService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var SkyhookService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "skyhook.SkyhookService",
-	HandlerType: (*SkyhookServiceServer)(nil),
+var XFuncJSService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "xfuncjs.XFuncJSService",
+	HandlerType: (*XFuncJSServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "RunFunction",
-			Handler:    _SkyhookService_RunFunction_Handler,
+			Handler:    _XFuncJSService_RunFunction_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/skyhook/service.proto",
+	Metadata: "proto/xfuncjs/service.proto",
 }

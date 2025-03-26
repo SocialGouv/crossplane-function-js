@@ -30,6 +30,7 @@
     "node": ">=22"
   },
   "devDependencies": {
+    "@kubernetes-models/crd-generate": "^5.0.2",
     "@types/chai": "^5.2.0",
     "@types/fs-extra": "^11",
     "@types/mocha": "^10.0.10",

@@ -35,10 +35,10 @@ func TestCrossplaneSkyhook(t *testing.T) {
 	}
 
 	// Define GVR for SimpleConfigMap
-	simpleConfigMapGVR := schema.GroupVersionResource{
+	xsimpleConfigMapGVR := schema.GroupVersionResource{
 		Group:    "test.crossplane.io",
 		Version:  "v1beta1",
-		Resource: "simpleconfigmaps",
+		Resource: "xsimpleconfigmaps",
 	}
 
 	// Define GVR for ConfigMap
@@ -63,11 +63,11 @@ func TestCrossplaneSkyhook(t *testing.T) {
 		t.Fatalf("Error creating namespace: %v", err)
 	}
 
-	// Create SimpleConfigMap
-	simpleConfigMap := &unstructured.Unstructured{
+	// Create XSimpleConfigMap
+	xsimpleConfigMap := &unstructured.Unstructured{
 		Object: map[string]interface{}{
 			"apiVersion": "test.crossplane.io/v1beta1",
-			"kind":       "SimpleConfigMap",
+			"kind":       "XSimpleConfigMap",
 			"metadata": map[string]interface{}{
 				"name":      "test-simple-configmap",
 				"namespace": "test-skyhook",
@@ -82,9 +82,9 @@ func TestCrossplaneSkyhook(t *testing.T) {
 		},
 	}
 
-	_, err = client.Resource(simpleConfigMapGVR).Namespace("test-skyhook").Create(context.TODO(), simpleConfigMap, metav1.CreateOptions{})
+	_, err = client.Resource(xsimpleConfigMapGVR).Namespace("test-skyhook").Create(context.TODO(), xsimpleConfigMap, metav1.CreateOptions{})
 	if err != nil {
-		t.Fatalf("Error creating SimpleConfigMap: %v", err)
+		t.Fatalf("Error creating XSimpleConfigMap: %v", err)
 	}
 
 	// Wait for ConfigMap to be created

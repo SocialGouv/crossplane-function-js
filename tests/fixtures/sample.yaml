@@ -1,5 +1,5 @@
 apiVersion: test.crossplane.io/v1beta1
-kind: SimpleConfigMap
+kind: XSimpleConfigMap
 metadata:
   name: sample-configmap
 spec:

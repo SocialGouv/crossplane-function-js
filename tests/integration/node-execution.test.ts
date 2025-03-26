@@ -117,7 +117,7 @@ describe('JavaScript Code Execution', () => {
     const input = {
       input: {
         apiVersion: 'test.crossplane.io/v1beta1',
-        kind: 'SimpleConfigMap',
+        kind: 'XSimpleConfigMap',
         metadata: {
           name: 'test-simple-configmap',
           namespace: 'test-namespace'
@@ -134,7 +134,7 @@ describe('JavaScript Code Execution', () => {
         composite: {
           resource: {
             apiVersion: 'test.crossplane.io/v1beta1',
-            kind: 'SimpleConfigMap',
+            kind: 'XSimpleConfigMap',
             metadata: {
               name: 'test-simple-configmap',
               namespace: 'test-namespace'

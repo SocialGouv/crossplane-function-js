@@ -22,13 +22,13 @@ echo "Applying CRDs and Compositions..."
 echo "Applying Provider Kubernetes..."
 kubectl apply -f tests/fixtures/provider-in-cluster.yaml
 kubectl apply -f tests/fixtures/functions.yaml
-kubectl apply -f tests/fixtures/simpleconfigmaps.compositeresourcedefinition.yaml
+kubectl apply -f tests/fixtures/xsimpleconfigmaps.xrd.yaml
 
 # Create composition outputs
 echo "Preparing composition with function code..."
 yarn --cwd tests/fixtures/domain-sdk compo
 # kubectl apply -f tests/fixtures/domain-sdk/manifests
-kubectl apply -f tests/fixtures/domain-sdk/manifests/simpleconfigmaps.compo.yaml
+kubectl apply -f tests/fixtures/domain-sdk/manifests/xsimpleconfigmaps.compo.yaml
 
 # Wait for the Provider to be installed and its CRDs to be registered
 echo "Waiting for Provider Kubernetes to be installed..."
@@ -56,15 +56,15 @@ kubectl apply -f tests/fixtures/provider-config.yaml
 
 # Wait for XRD to be established
 echo "Waiting for XRD to be established..."
-kubectl wait --for=condition=established xrd/simpleconfigmaps.test.crossplane.io --timeout=60s || {
+kubectl wait --for=condition=established xrd/xsimpleconfigmaps.test.crossplane.io --timeout=60s || {
   echo "XRD not established within timeout"
   echo "Current XRD status:"
-  kubectl get xrd/simpleconfigmaps.test.crossplane.io -o yaml
+  kubectl get xrd/xsimpleconfigmaps.test.crossplane.io -o yaml
   exit 1
 }
 
-# Create a test SimpleConfigMap
-echo "(Re)Creating test SimpleConfigMap..."
+# Create a test XSimpleConfigMap
+echo "(Re)Creating test XSimpleConfigMap..."
 kubectl delete -f tests/fixtures/sample.yaml || true
 kubectl apply -f tests/fixtures/sample.yaml
 
@@ -79,10 +79,10 @@ for i in {1..30}; do
   fi
   echo "Waiting for ConfigMap to be created... ($i/30)"
   
-  # Check the status of the SimpleConfigMap
+  # Check the status of the XSimpleConfigMap
   if [ $((i % 5)) -eq 0 ]; then
-    echo "SimpleConfigMap status:"
-    kubectl get simpleconfigmaps.test.crossplane.io -o yaml || true
+    echo "XSimpleConfigMap status:"
+    kubectl get xsimpleconfigmaps.test.crossplane.io -o yaml || true
     echo "Crossplane Function status:"
     kubectl get functions.pkg.crossplane.io || true
     echo "FunctionRuntime status:"
@@ -94,8 +94,8 @@ done
 
 if [ "$configmap_created" = false ]; then
   echo "ConfigMap was not created within timeout"
-  echo "Final SimpleConfigMap status:"
-  kubectl get simpleconfigmaps.test.crossplane.io -o yaml || true
+  echo "Final XSimpleConfigMap status:"
+  kubectl get xsimpleconfigmaps.test.crossplane.io -o yaml || true
   echo "Final Crossplane Function status:"
   kubectl get functions.pkg.crossplane.io || true
   echo "Final FunctionRuntime status:"

@@ -2,11 +2,11 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: simpleconfigmaps.test.crossplane.io
+  name: xsimpleconfigmaps.test.crossplane.io
 spec:
   compositeTypeRef:
     apiVersion: test.crossplane.io/v1beta1
-    kind: SimpleConfigMap
+    kind: XSimpleConfigMap
   mode: Pipeline
   pipeline:
     - step: transform-to-uppercase

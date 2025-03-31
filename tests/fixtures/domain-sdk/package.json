@@ -1,11 +1,11 @@
 {
   "dependencies": {
-    "@xfuncjs/cli": "link:../../../packages/cli",
+    "@crossplane-js/cli": "link:../../../packages/cli",
     "chalk": "^5.0.1",
     "node-ts-modules": "^0.0.2"
   },
   "scripts": {
-    "compo": "node_modules/@xfuncjs/cli/cli compo"
+    "compo": "node_modules/@crossplane-js/cli/cli compo"
   },
   "packageManager": "yarn@4.7.0"
 }

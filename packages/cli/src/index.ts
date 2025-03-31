@@ -1,7 +1,7 @@
 import path from "path"
 import { fileURLToPath } from "url"
 
-import { createLogger } from "@xfuncjs/libs"
+import { createLogger } from "@crossplane-js/libs"
 import { Command } from "commander"
 import fs from "fs-extra"
 

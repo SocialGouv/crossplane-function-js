@@ -1,5 +1,5 @@
 {
-  "name": "@xfuncjs/libs",
+  "name": "@crossplane-js/libs",
   "version": "0.0.1",
   "description": "Shared libraries for Crossplane XFuncJS",
   "type": "module",

@@ -1,5 +1,5 @@
 {
-  "name": "@xfuncjs/cli",
+  "name": "@crossplane-js/cli",
   "version": "0.0.1",
   "description": "Command-line interface for Crossplane XFuncJS",
   "license": "MIT",
@@ -9,7 +9,7 @@
     "xfuncjs": "./cli"
   },
   "dependencies": {
-    "@xfuncjs/libs": "workspace:^",
+    "@crossplane-js/libs": "workspace:^",
     "commander": "^13.1.0",
     "fs-extra": "^11.3.0",
     "node-ts-modules": "^0.0.2",

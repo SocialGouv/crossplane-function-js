@@ -32,8 +32,8 @@ COPY --chown=1000:1000 packages/server/sea-config.json ./packages/server/
 COPY --chown=1000:1000 packages/ ./packages/
 RUN yarn build
 
-RUN yarn workspaces focus @xfuncjs/server @xfuncjs/sdk --production && yarn cache clean
-# RUN yarn fetch-tools production focus @xfuncjs/server @xfuncjs/sdk --production && yarn cache clean
+RUN yarn workspaces focus @crossplane-js/server @crossplane-js/sdk --production && yarn cache clean
+# RUN yarn fetch-tools production focus @crossplane-js/server @crossplane-js/sdk --production && yarn cache clean
 
 # Collect platform-specific dependencies # see also https://dev.to/zavoloklom/how-to-build-multi-platform-executable-binaries-in-nodejs-with-sea-rollup-docker-and-github-d0g
 USER root

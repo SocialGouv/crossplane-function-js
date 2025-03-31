@@ -1,5 +1,5 @@
 /**
- * Type definitions for @xfuncjs/sdk
+ * Type definitions for @crossplane-js/sdk
  */
 
 // Kubernetes resource metadata

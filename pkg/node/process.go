@@ -204,7 +204,7 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, input *types.X
 
 		dependencies := make(map[string]interface{})
 
-		dependencies["@xfuncjs/sdk"] = "workspace:^"
+		dependencies["@crossplane-js/sdk"] = "workspace:^"
 
 		// Create a copy of the dependencies map from the input
 		for k, v := range input.Spec.Source.Dependencies {

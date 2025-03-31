@@ -1,5 +1,5 @@
-import type { CrossplaneDesiredResources, FunctionInput } from "@xfuncjs/sdk"
-import { logger } from "@xfuncjs/sdk"
+import type { CrossplaneDesiredResources, FunctionInput } from "@crossplane-js/sdk"
+import { logger } from "@crossplane-js/sdk"
 
 export default function(input: FunctionInput): CrossplaneDesiredResources {
   logger.info("Example2 composition function started")

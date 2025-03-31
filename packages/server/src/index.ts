@@ -1,6 +1,6 @@
 import path from "path"
 
-import { createLogger } from "@xfuncjs/libs"
+import { createLogger } from "@crossplane-js/libs"
 import { Command } from "commander"
 import fs from "fs-extra"
 import { parse } from "yaml"

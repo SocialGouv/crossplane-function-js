@@ -1,5 +1,5 @@
 {
-  "name": "@xfuncjs/dev",
+  "name": "@crossplane-js/dev",
   "version": "0.0.1",
   "description": "Development tooling for Crossplane XFuncJS",
   "license": "MIT",
@@ -11,7 +11,7 @@
     ]
   },
   "scripts": {
-    "build": "yarn workspace @xfuncjs/server build",
+    "build": "yarn workspace @crossplane-js/server build",
     "test": "mocha --require ts-node/register 'tests/**/*.test.ts'",
     "test:integration": "mocha --require ts-node/register 'tests/integration/**/*.test.ts'",
     "prepare": "husky",

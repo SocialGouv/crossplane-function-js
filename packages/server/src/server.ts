@@ -1,4 +1,4 @@
-import { createLogger } from "@xfuncjs/libs"
+import { createLogger } from "@crossplane-js/libs"
 import express from "express"
 import type { Request, Response, NextFunction, RequestHandler } from "express"
 

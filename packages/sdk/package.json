@@ -1,5 +1,5 @@
 {
-  "name": "@xfuncjs/sdk",
+  "name": "@crossplane-js/sdk",
   "version": "0.0.1",
   "main": "index.ts",
   "packageManager": "yarn@4.7.0",
@@ -7,7 +7,7 @@
     "postinstall": "node-ts-modules-postinstall"
   },
   "dependencies": {
-    "@xfuncjs/libs": "workspace:^",
+    "@crossplane-js/libs": "workspace:^",
     "lodash": "^4.17.21",
     "node-ts-modules": "0.0.2",
     "pino": "^9.6.0",

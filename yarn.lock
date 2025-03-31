@@ -263,6 +263,97 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@crossplane-js/cli@workspace:packages/cli":
+  version: 0.0.0-use.local
+  resolution: "@crossplane-js/cli@workspace:packages/cli"
+  dependencies:
+    "@crossplane-js/libs": "workspace:^"
+    commander: "npm:^13.1.0"
+    fs-extra: "npm:^11.3.0"
+    node-ts-modules: "npm:^0.0.2"
+    yaml: "npm:^2.7.0"
+  bin:
+    xfuncjs: ./cli
+  languageName: unknown
+  linkType: soft
+
+"@crossplane-js/dev@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "@crossplane-js/dev@workspace:."
+  dependencies:
+    "@eslint/compat": "npm:^1.2.7"
+    "@eslint/eslintrc": "npm:^3.3.1"
+    "@eslint/js": "npm:^9.23.0"
+    "@kubernetes-models/crd-generate": "npm:^5.0.2"
+    "@types/chai": "npm:^5.2.0"
+    "@types/fs-extra": "npm:^11"
+    "@types/mocha": "npm:^10.0.10"
+    "@types/node": "npm:^22.13.10"
+    "@typescript-eslint/eslint-plugin": "npm:^8.28.0"
+    "@typescript-eslint/parser": "npm:^8.28.0"
+    chai: "npm:^5.2.0"
+    commit-and-tag-version: "npm:^12.5.0"
+    eslint: "npm:^9.23.0"
+    eslint-config-prettier: "npm:^10.1.1"
+    eslint-plugin-import: "npm:^2.31.0"
+    eslint-plugin-prettier: "npm:^5.2.5"
+    globals: "npm:^16.0.0"
+    husky: "npm:^9.1.7"
+    lint-staged: "npm:^15.5.0"
+    mocha: "npm:11.1.0"
+    node-ts-modules: "npm:^0.0.2"
+    prettier: "npm:^3.5.3"
+    ts-node: "npm:^10.9.2"
+    typescript: "npm:^5.8.2"
+    yaml: "npm:^2.7.0"
+  languageName: unknown
+  linkType: soft
+
+"@crossplane-js/libs@workspace:^, @crossplane-js/libs@workspace:packages/libs":
+  version: 0.0.0-use.local
+  resolution: "@crossplane-js/libs@workspace:packages/libs"
+  dependencies:
+    "@types/fs-extra": "npm:^11"
+    fs-extra: "npm:^11.3.0"
+    pino: "npm:^9.6.0"
+  languageName: unknown
+  linkType: soft
+
+"@crossplane-js/sdk@workspace:^, @crossplane-js/sdk@workspace:packages/sdk":
+  version: 0.0.0-use.local
+  resolution: "@crossplane-js/sdk@workspace:packages/sdk"
+  dependencies:
+    "@crossplane-js/libs": "workspace:^"
+    "@types/lodash": "npm:^4"
+    lodash: "npm:^4.17.21"
+    node-ts-modules: "npm:0.0.2"
+    pino: "npm:^9.6.0"
+    yaml: "npm:^2.7.0"
+  languageName: unknown
+  linkType: soft
+
+"@crossplane-js/server@workspace:packages/server":
+  version: 0.0.0-use.local
+  resolution: "@crossplane-js/server@workspace:packages/server"
+  dependencies:
+    "@crossplane-js/libs": "workspace:^"
+    "@crossplane-js/sdk": "workspace:^"
+    "@types/express": "npm:^5.0.1"
+    "@vercel/ncc": "npm:^0.38.3"
+    "@yarnpkg/cli": "npm:^4.7.0"
+    "@yarnpkg/core": "npm:^4.2.1"
+    "@yarnpkg/plugin-essentials": "npm:^4.3.1"
+    commander: "npm:^13.1.0"
+    express: "npm:^5"
+    fs-extra: "npm:^11.3.0"
+    node-ts-modules: "npm:^0.0.2"
+    pino: "npm:^9.6.0"
+    postject: "npm:^1.0.0-alpha.6"
+  bin:
+    server: build/xfuncjs-server-js
+  languageName: unknown
+  linkType: soft
+
 "@cspotcode/source-map-support@npm:^0.8.0":
   version: 0.8.1
   resolution: "@cspotcode/source-map-support@npm:0.8.1"
@@ -1141,97 +1232,6 @@ __metadata:
   checksum: 10c0/91b328b53d3bb17ac2fd329d9d2115192d2001e52a7f6d38828ce878e465f3bc62031a8b206bdbbf90e449c11f9e411f853f7081a6e2947ef3459365fa12da49
   languageName: node
   linkType: hard
-
-"@xfuncjs/cli@workspace:packages/cli":
-  version: 0.0.0-use.local
-  resolution: "@xfuncjs/cli@workspace:packages/cli"
-  dependencies:
-    "@xfuncjs/libs": "workspace:^"
-    commander: "npm:^13.1.0"
-    fs-extra: "npm:^11.3.0"
-    node-ts-modules: "npm:^0.0.2"
-    yaml: "npm:^2.7.0"
-  bin:
-    xfuncjs: ./cli
-  languageName: unknown
-  linkType: soft
-
-"@xfuncjs/dev@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "@xfuncjs/dev@workspace:."
-  dependencies:
-    "@eslint/compat": "npm:^1.2.7"
-    "@eslint/eslintrc": "npm:^3.3.1"
-    "@eslint/js": "npm:^9.23.0"
-    "@kubernetes-models/crd-generate": "npm:^5.0.2"
-    "@types/chai": "npm:^5.2.0"
-    "@types/fs-extra": "npm:^11"
-    "@types/mocha": "npm:^10.0.10"
-    "@types/node": "npm:^22.13.10"
-    "@typescript-eslint/eslint-plugin": "npm:^8.28.0"
-    "@typescript-eslint/parser": "npm:^8.28.0"
-    chai: "npm:^5.2.0"
-    commit-and-tag-version: "npm:^12.5.0"
-    eslint: "npm:^9.23.0"
-    eslint-config-prettier: "npm:^10.1.1"
-    eslint-plugin-import: "npm:^2.31.0"
-    eslint-plugin-prettier: "npm:^5.2.5"
-    globals: "npm:^16.0.0"
-    husky: "npm:^9.1.7"
-    lint-staged: "npm:^15.5.0"
-    mocha: "npm:11.1.0"
-    node-ts-modules: "npm:^0.0.2"
-    prettier: "npm:^3.5.3"
-    ts-node: "npm:^10.9.2"
-    typescript: "npm:^5.8.2"
-    yaml: "npm:^2.7.0"
-  languageName: unknown
-  linkType: soft
-
-"@xfuncjs/libs@workspace:^, @xfuncjs/libs@workspace:packages/libs":
-  version: 0.0.0-use.local
-  resolution: "@xfuncjs/libs@workspace:packages/libs"
-  dependencies:
-    "@types/fs-extra": "npm:^11"
-    fs-extra: "npm:^11.3.0"
-    pino: "npm:^9.6.0"
-  languageName: unknown
-  linkType: soft
-
-"@xfuncjs/sdk@workspace:^, @xfuncjs/sdk@workspace:packages/sdk":
-  version: 0.0.0-use.local
-  resolution: "@xfuncjs/sdk@workspace:packages/sdk"
-  dependencies:
-    "@types/lodash": "npm:^4"
-    "@xfuncjs/libs": "workspace:^"
-    lodash: "npm:^4.17.21"
-    node-ts-modules: "npm:0.0.2"
-    pino: "npm:^9.6.0"
-    yaml: "npm:^2.7.0"
-  languageName: unknown
-  linkType: soft
-
-"@xfuncjs/server@workspace:packages/server":
-  version: 0.0.0-use.local
-  resolution: "@xfuncjs/server@workspace:packages/server"
-  dependencies:
-    "@types/express": "npm:^5.0.1"
-    "@vercel/ncc": "npm:^0.38.3"
-    "@xfuncjs/libs": "workspace:^"
-    "@xfuncjs/sdk": "workspace:^"
-    "@yarnpkg/cli": "npm:^4.7.0"
-    "@yarnpkg/core": "npm:^4.2.1"
-    "@yarnpkg/plugin-essentials": "npm:^4.3.1"
-    commander: "npm:^13.1.0"
-    express: "npm:^5"
-    fs-extra: "npm:^11.3.0"
-    node-ts-modules: "npm:^0.0.2"
-    pino: "npm:^9.6.0"
-    postject: "npm:^1.0.0-alpha.6"
-  bin:
-    server: build/xfuncjs-server-js
-  languageName: unknown
-  linkType: soft
 
 "@yarnpkg/cli@npm:^4.7.0":
   version: 4.7.0

@@ -1,6 +1,6 @@
 import lodash from "lodash"
-import type { CrossplaneDesiredResources, FunctionInput } from "@xfuncjs/sdk"
-import { logger } from "@xfuncjs/sdk"
+import type { CrossplaneDesiredResources, FunctionInput } from "@crossplane-js/sdk"
+import { logger } from "@crossplane-js/sdk"
 import chalk from "chalk"
 
 export default function(input: FunctionInput): CrossplaneDesiredResources {

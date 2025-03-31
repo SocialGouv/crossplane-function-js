@@ -1,5 +1,5 @@
 {
-  "name": "@xfuncjs/server",
+  "name": "@crossplane-js/server",
   "version": "0.0.1",
   "description": "Crossplane XFuncJS server for executing code from compositions",
   "license": "MIT",
@@ -19,10 +19,10 @@
     "build:postject": "npx postject build/xfuncjs-server-js NODE_SEA_BLOB build/xfuncjs-server-js.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2"
   },
   "dependencies": {
+    "@crossplane-js/libs": "workspace:^",
+    "@crossplane-js/sdk": "workspace:^",
     "@types/express": "^5.0.1",
     "@vercel/ncc": "^0.38.3",
-    "@xfuncjs/libs": "workspace:^",
-    "@xfuncjs/sdk": "workspace:^",
     "@yarnpkg/cli": "^4.7.0",
     "@yarnpkg/core": "^4.2.1",
     "@yarnpkg/plugin-essentials": "^4.3.1",

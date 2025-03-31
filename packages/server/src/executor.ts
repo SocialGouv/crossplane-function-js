@@ -1,6 +1,6 @@
 import fs from "fs"
 
-import { createLogger } from "@xfuncjs/libs"
+import { createLogger } from "@crossplane-js/libs"
 
 import type { NodeResponse, NodeError, FunctionInput } from "./types"
 

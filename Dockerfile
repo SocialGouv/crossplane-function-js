@@ -27,8 +27,8 @@ COPY --chown=1000:1000 yarn.lock .yarnrc.yml ./
 COPY --chown=1000:1000 .yarn .yarn
 RUN yarn fetch
 
-COPY --chown=1000:1000 package.json tsconfig.json sea-config.json ./
-COPY --chown=1000:1000 src/ ./src/
+COPY --chown=1000:1000 package.json tsconfig.json ./
+COPY --chown=1000:1000 packages/server/sea-config.json ./packages/server/
 COPY --chown=1000:1000 packages/ ./packages/
 RUN yarn build
 
@@ -39,7 +39,7 @@ RUN yarn workspaces focus @xfuncjs/server @xfuncjs/sdk --production && yarn cach
 USER root
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 RUN mkdir -p /dependencies/lib /dependencies/usr/lib && \
-  ldd /app/build/xfuncjs-server-js | awk '{print $3}' | grep -vE '^$' | while read -r lib; do \
+  ldd /app/packages/server/build/xfuncjs-server-js | awk '{print $3}' | grep -vE '^$' | while read -r lib; do \
   if [ -f "$lib" ]; then \
   if [ "${lib#/usr/lib/}" != "$lib" ]; then \
   cp "$lib" /dependencies/usr/lib/; \
@@ -77,7 +77,8 @@ COPY --from=go-builder --chown=1000:1000 /app/xfuncjs-server /app/xfuncjs-server
 
 COPY --from=js-builder --chown=1000:1000 /app/node_modules /app/node_modules
 COPY --from=js-builder --chown=1000:1000 /app/packages /app/packages
-COPY --from=js-builder /app/package.json /app/tsconfig.json /app/build/xfuncjs-server-js /app/.yarnrc.yml /app/
+COPY --from=js-builder /app/packages/server/build/xfuncjs-server-js /app/
+COPY --from=js-builder /app/package.json /app/tsconfig.json /app/.yarnrc.yml /app/
 COPY --from=js-builder /app/.yarn /app/.yarn
 
 COPY --from=js-builder /dependencies/lib /lib

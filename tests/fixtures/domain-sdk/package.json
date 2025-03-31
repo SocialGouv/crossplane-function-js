@@ -1,10 +1,11 @@
 {
   "dependencies": {
-    "@xfuncjs/server": "link:../../..",
-    "chalk": "^5.0.1"
+    "@xfuncjs/cli": "link:../../../packages/cli",
+    "chalk": "^5.0.1",
+    "node-ts-modules": "^0.0.2"
   },
   "scripts": {
-    "compo": "node_modules/@xfuncjs/server/build/xfuncjs-server-js compo"
+    "compo": "node_modules/@xfuncjs/cli/cli compo"
   },
   "packageManager": "yarn@4.7.0"
 }

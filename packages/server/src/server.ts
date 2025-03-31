@@ -2,8 +2,8 @@ import { createLogger } from "@xfuncjs/libs"
 import express from "express"
 import type { Request, Response, NextFunction, RequestHandler } from "express"
 
-import { executeCode } from "./executor.ts"
-import type { NodeRequest } from "./types.ts"
+import { executeCode } from "./executor"
+import type { NodeRequest } from "./types"
 
 // Create a logger for this module
 const moduleLogger = createLogger("server")

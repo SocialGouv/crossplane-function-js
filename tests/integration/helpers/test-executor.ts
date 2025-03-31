@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { NodeResponse, NodeError, FunctionInput } from '../../../src/types.js';
+import { NodeResponse, NodeError, FunctionInput } from '../../../packages/server/src/types.ts';
 
 // Create a simple logger for testing
 const logger = {

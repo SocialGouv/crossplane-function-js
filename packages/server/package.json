@@ -1,0 +1,36 @@
+{
+  "name": "@xfuncjs/server",
+  "version": "0.0.1",
+  "description": "Crossplane XFuncJS server for executing code from compositions",
+  "license": "MIT",
+  "type": "module",
+  "main": "src/index.ts",
+  "bin": "build/xfuncjs-server-js",
+  "scripts": {
+    "dev": "node --no-warnings --experimental-strip-types --experimental-loader node-ts-modules/ts-module-loader.mjs src/index.ts",
+    "dev:start": "NODE_OPTIONS='--no-warnings --experimental-strip-types' build/xfuncjs-server-js",
+    "build": "yarn build:clean && yarn build:ncc:begin && yarn build:ncc && yarn build:ncc:end && yarn build:blob && yarn build:node && yarn build:postject",
+    "build:clean": "rm -rf ./build && mkdir -p build",
+    "build:ncc:begin": "jq '.type = \"commonjs\"' package.json > tmp.json && mv tmp.json package.json",
+    "build:ncc": "ncc build src/index.ts --out build/ncc",
+    "build:ncc:end": "jq '.type = \"module\"' package.json > tmp.json && mv tmp.json package.json",
+    "build:blob": "node --experimental-sea-config=sea-config.json",
+    "build:node": "node -e \"require('fs').copyFileSync(process.execPath, 'build/xfuncjs-server-js')\" && chmod 0755 build/xfuncjs-server-js",
+    "build:postject": "npx postject build/xfuncjs-server-js NODE_SEA_BLOB build/xfuncjs-server-js.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2"
+  },
+  "dependencies": {
+    "@types/express": "^5.0.1",
+    "@vercel/ncc": "^0.38.3",
+    "@xfuncjs/libs": "workspace:^",
+    "@xfuncjs/sdk": "workspace:^",
+    "@yarnpkg/cli": "^4.7.0",
+    "@yarnpkg/core": "^4.2.1",
+    "@yarnpkg/plugin-essentials": "^4.3.1",
+    "commander": "^13.1.0",
+    "express": "^5",
+    "fs-extra": "^11.3.0",
+    "node-ts-modules": "^0.0.2",
+    "pino": "^9.6.0",
+    "postject": "^1.0.0-alpha.6"
+  }
+}

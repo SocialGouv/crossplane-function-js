@@ -5,9 +5,8 @@ import { Command } from "commander"
 import fs from "fs-extra"
 import { parse } from "yaml"
 
-import compo from "./compo/index.ts"
-import { createServer, shutdownServer } from "./server.ts"
-// import yarn from './yarn/index.ts';
+import { createServer, shutdownServer } from "./server"
+// import yarn from './yarn/index';
 
 // Create a logger for this module
 const moduleLogger = createLogger("index")
@@ -114,19 +113,6 @@ const main = async () => {
       // Start the server
       server = createServer(port, options.codeFilePath)
       moduleLogger.info(`Node.js process started for code file: ${options.codeFilePath}`)
-    })
-
-  // Compo command for generating composition manifests
-  program
-    .command("compo")
-    .description("Generate composition manifests from function directories")
-    .action(async () => {
-      try {
-        await compo()
-      } catch (err) {
-        moduleLogger.error(`Error running compo command: ${err}`)
-        process.exit(1)
-      }
     })
 
   // Custom handler for the 'yarn' command

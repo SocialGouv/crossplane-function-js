@@ -1,0 +1,8 @@
+{
+  "main": "build/ncc/index.js",
+  "output": "build/xfuncjs-server-js.blob",
+  "disableExperimentalSEAWarning": true,
+  "useSnapshot": false,
+  "useCodeCache": true,
+  "assets": {}
+}

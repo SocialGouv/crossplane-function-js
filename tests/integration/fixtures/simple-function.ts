@@ -1,4 +1,4 @@
-import { FunctionInput, CrossplaneDesiredResources, KubernetesResource } from '../../../src/types.js';
+import { FunctionInput, CrossplaneDesiredResources, KubernetesResource } from '../../../packages/server/src/types.ts';
 
 export default function(input: FunctionInput): CrossplaneDesiredResources {
   // Extract data based on the input structure

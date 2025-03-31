@@ -1,24 +1,18 @@
 import pino from "pino"
 
-export const logger = pino(
-  {
-    name: "xfuncjs",
-    level: process.env.XFUNCJS_LOG_LEVEL || process.env.LOG_LEVEL || "info",
-    formatters: {
-      level: (label: string) => {
-        return { level: label.toUpperCase() }
-      },
-      bindings(_bindings: Record<string, unknown>) {
-        return {}
-      },
+export const logger = pino({
+  name: "xfuncjs",
+  level: process.env.XFUNCJS_LOG_LEVEL || process.env.LOG_LEVEL || "info",
+  formatters: {
+    level: (label: string) => {
+      return { level: label.toUpperCase() }
     },
-    timestamp: false,
+    bindings(_bindings: Record<string, unknown>) {
+      return {}
+    },
   },
-  pino.destination({
-    dest: process.stderr.fd,
-    sync: true,
-  })
-)
+  timestamp: false,
+})
 
 // Export a function to create child loggers
 export function createLogger(name: string) {

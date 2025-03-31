@@ -2,7 +2,7 @@ import fs from "fs"
 
 import { createLogger } from "@xfuncjs/libs"
 
-import type { NodeResponse, NodeError, FunctionInput } from "./types.ts"
+import type { NodeResponse, NodeError, FunctionInput } from "./types"
 
 // Create a logger for this module
 const moduleLogger = createLogger("executor")

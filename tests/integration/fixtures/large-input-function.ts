@@ -1,7 +1,7 @@
 import {
   FunctionInput,
   CrossplaneDesiredResources
-} from '../../../src/types.js';
+} from '../../../packages/server/src/types.ts';
 
 export default function(input: FunctionInput): CrossplaneDesiredResources {
   // Use type assertion to access properties safely

@@ -30,6 +30,7 @@ export default defineConfig([
   globalIgnores([
     "node_modules/**/*",
     "build/**/*",
+    "**/build/**/*",
     ".yarn/**/*",
     "tests",
     ".lintstagedrc.js",
@@ -63,7 +64,7 @@ export default defineConfig([
       sourceType: "module",
 
       parserOptions: {
-        project: ["./tsconfig.json", "./src/tsconfig.json", "./packages/*/tsconfig.json"],
+        project: ["./tsconfig.json", "./packages/*/tsconfig.json"],
         createDefaultProgram: true,
       },
     },
@@ -72,7 +73,7 @@ export default defineConfig([
       "import/resolver": {
         typescript: {
           alwaysTryTypes: true,
-          project: ["./tsconfig.json", "./src/tsconfig.json", "./packages/*/tsconfig.json"],
+          project: ["./tsconfig.json", "./packages/*/tsconfig.json"],
         },
       },
     },

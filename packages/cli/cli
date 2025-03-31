@@ -1,0 +1,2 @@
+#!/usr/bin/env -S node --experimental-loader ./node_modules/node-ts-modules/loader-esm.mjs --no-warnings --experimental-strip-types
+import "./src/index.ts"

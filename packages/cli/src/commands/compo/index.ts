@@ -1,6 +1,8 @@
 import path from "path"
+import { fileURLToPath } from "url"
 
 import { createLogger } from "@xfuncjs/libs"
+import { Command } from "commander"
 import fs from "fs-extra"
 import YAML from "yaml"
 
@@ -53,10 +55,8 @@ interface Manifest {
  * Processes function directories and generates composition manifests
  * @returns Promise<void>
  */
-export default async function (): Promise<void> {
+async function compoAction(): Promise<void> {
   const cwd = () => `${process.cwd()}`
-  const xfuncjsRootPath =
-    path.basename(__dirname) === "build" ? path.join(__dirname, "..") : __dirname
   try {
     // Find the functions directory in the current working directory
     const functionsDir = path.join(cwd(), "functions")
@@ -100,8 +100,11 @@ export default async function (): Promise<void> {
         const yamlContent = fs.readFileSync(yamlFilePath, { encoding: "utf8" })
         manifest = YAML.parse(yamlContent)
       } else {
-        // Use the generic template from src/compo/template.yaml
-        const genericTemplatePath = path.join(xfuncjsRootPath, "src/compo/composition.default.yaml")
+        // Use the generic template from templates/composition.default.yaml
+        // Get the directory name from the import.meta.url
+        const __filename = fileURLToPath(import.meta.url)
+        const __dirname = path.dirname(__filename)
+        const genericTemplatePath = path.join(__dirname, "templates/composition.default.yaml")
 
         if (!fs.existsSync(genericTemplatePath)) {
           moduleLogger.error(`Generic template not found: ${genericTemplatePath}`)
@@ -274,4 +277,22 @@ export default async function (): Promise<void> {
     moduleLogger.error(`Error generating composition manifests: ${error}`)
     process.exit(1)
   }
+}
+
+/**
+ * Register the compo command with the CLI
+ * @param program The Commander program instance
+ */
+export default function (program: Command): void {
+  program
+    .command("compo")
+    .description("Generate composition manifests from function directories")
+    .action(async () => {
+      try {
+        await compoAction()
+      } catch (err) {
+        moduleLogger.error(`Error running compo command: ${err}`)
+        process.exit(1)
+      }
+    })
 }

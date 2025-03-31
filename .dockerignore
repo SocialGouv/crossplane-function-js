@@ -8,8 +8,9 @@ Dockerfile
 .dockerignore
 
 # Binaries
-bin/
-dist/
+**/bin/
+**/dist/
+**/build/
 
 # Tests
 tests/

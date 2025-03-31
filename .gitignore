@@ -9,7 +9,7 @@ node_modules
 !.yarn/sdks
 !.yarn/versions
 
-/build
+build
 /bin
 /dist
 packages/*/dist
@@ -21,6 +21,7 @@ packages/*/dist
 /tmp.json
 /tests/fixtures/domain-sdk/manifests
 ts_modules
+tsconfig.tsbuildinfo
 
 # Kubernetes configuration
 .kubeconfig

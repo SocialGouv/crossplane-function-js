@@ -1,6 +1,6 @@
-# XFuncJS Helm Chart
+# Crossplane Function JS Helm Chart
 
-This Helm chart deploys the Crossplane XFuncJS Function and DeploymentRuntimeConfig resources.
+This Helm chart deploys the Crossplane Function JS and DeploymentRuntimeConfig resources.
 
 ## Prerequisites
 
@@ -10,12 +10,7 @@ This Helm chart deploys the Crossplane XFuncJS Function and DeploymentRuntimeCon
 ## Installation
 
 ```bash
-# Add the repository (if hosted in a Helm repository)
-# helm repo add xfuncjs-repo https://example.com/charts
-# helm repo update
-
-# Install the chart
-helm install xfuncjs ./charts/xfuncjs
+helm install crossplane-function-js oci://ghcr.io/socialgouv/helm/crossplane-function-js --version 0.0.2
 ```
 
 ## Configuration

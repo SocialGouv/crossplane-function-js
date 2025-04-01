@@ -10,5 +10,8 @@
   },
   "devDependencies": {
     "@types/fs-extra": "^11"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

@@ -43,6 +43,12 @@ tasks:
       - "rm -f bin/xfuncjs-server"
       - "{{.GO}} clean"
 
+  # Install linter
+  install-lint-tools:
+    desc: Install linter tools
+    cmds:
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
   # Lint
   lint:
     desc: Lint go code

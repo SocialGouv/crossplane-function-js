@@ -19,7 +19,7 @@ jobs:
         run: |
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
       - name: Install linter
-        run: make install-lint-tools
+        run: task install-lint-tools
       - name: Run linter
         run: task lint
   lint-js:

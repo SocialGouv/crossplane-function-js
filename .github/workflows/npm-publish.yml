@@ -1,0 +1,56 @@
+name: 🎁 NPM Publish
+
+on:
+  push:
+    tags:
+      - v*.*
+
+permissions:
+  id-token: write  # Required for OIDC token generation
+
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'yarn'
+          
+      - name: prepublish
+        shell: bash
+        run: |
+          export VERSION=$(jq -r '.version' packages/sdk/package.json)
+          cat <<< $(jq '.dependencies["@crossplane-js/libs"]="'$VERSION'"' packages/sdk/package.json) > packages/sdk/package.json
+      
+      - name: extract npm tag
+        id: npm-tag
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == *"alpha"* ]]; then
+            npm_tag="alpha"
+          elif [[ "$GITHUB_REF" == *"beta"* ]]; then
+            npm_tag="beta"
+          else
+            npm_tag="latest"
+          fi
+          echo "tag=$npm_tag" >> $GITHUB_OUTPUT
+
+      - id: publish-sdk
+        uses: JS-DevTools/npm-publish@v2
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          package: packages/sdk/package.json
+          tag: ${{ steps.npm-tag.outputs.tag }}
+      
+      - if: steps.publish-sdk.outputs.type
+        run: |
+          echo "Version changed: ${{ steps.publish-sdk.outputs.old-version }} => ${{ steps.publish-sdk.outputs.version }}"
+

@@ -13,8 +13,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
 
 jobs:
-  release:
+  # First job: Publish libs package
+  publish-libs:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.extract-version.outputs.version }}
+      npm-tag: ${{ steps.npm-tag.outputs.tag }}
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,14 +28,17 @@ jobs:
         with:
           node-version: 22
           cache: 'yarn'
-          
-      - name: prepublish
+      
+      # Extract version from libs package
+      - name: Extract version
+        id: extract-version
         shell: bash
         run: |
-          export VERSION=$(jq -r '.version' packages/sdk/package.json)
-          cat <<< $(jq '.dependencies["@crossplane-js/libs"]="'$VERSION'"' packages/libs/package.json) > packages/sdk/package.json
+          export VERSION=$(jq -r '.version' packages/libs/package.json)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
       
-      - name: extract npm tag
+      # Determine npm tag based on the git tag
+      - name: Extract npm tag
         id: npm-tag
         shell: bash
         run: |
@@ -42,15 +50,63 @@ jobs:
             npm_tag="latest"
           fi
           echo "tag=$npm_tag" >> $GITHUB_OUTPUT
-
-      - id: publish-sdk
+      
+      # Publish libs package
+      - id: publish-libs
         uses: JS-DevTools/npm-publish@v2
         with:
           token: ${{ secrets.SOCIALGROOVYBOT_NPM_TOKEN }}
-          package: packages/sdk/package.json
+          package: packages/libs/package.json
           tag: ${{ steps.npm-tag.outputs.tag }}
       
-      - if: steps.publish-sdk.outputs.type
+      # Report publishing result
+      - if: steps.publish-libs.outputs.type
         run: |
-          echo "Version changed: ${{ steps.publish-sdk.outputs.old-version }} => ${{ steps.publish-sdk.outputs.version }}"
+          echo "Libs package published: ${{ steps.publish-libs.outputs.version }}"
+  
+  # Second job: Publish dependent packages (sdk and cli)
+  publish-dependents:
+    needs: publish-libs  # This job depends on the first job
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        package:
+          - name: '@crossplane-js/sdk'
+            path: 'packages/sdk'
+          
+          - name: '@crossplane-js/cli'
+            path: 'packages/cli'
+      
+      # This ensures all matrix jobs run even if one fails
+      fail-fast: false
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'yarn'
+      
+      # Update dependencies to use the version from the first job
+      - name: Update dependencies
+        shell: bash
+        run: |
+          echo "Updating dependency @crossplane-js/libs to version ${{ needs.publish-libs.outputs.version }}"
+          cat <<< $(jq '.dependencies["@crossplane-js/libs"]="'${{ needs.publish-libs.outputs.version }}'"' ${{ matrix.package.path }}/package.json) > ${{ matrix.package.path }}/package.json
+      
+      # Publish the package
+      - id: publish
+        uses: JS-DevTools/npm-publish@v2
+        with:
+          token: ${{ secrets.SOCIALGROOVYBOT_NPM_TOKEN }}
+          package: ${{ matrix.package.path }}/package.json
+          tag: ${{ needs.publish-libs.outputs.npm-tag }}
+      
+      # Report publishing result
+      - if: steps.publish.outputs.type
+        run: |
+          echo "Package ${{ matrix.package.name }} published: ${{ steps.publish.outputs.version }}"
 

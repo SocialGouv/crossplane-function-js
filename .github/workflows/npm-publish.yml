@@ -28,7 +28,7 @@ jobs:
         shell: bash
         run: |
           export VERSION=$(jq -r '.version' packages/sdk/package.json)
-          cat <<< $(jq '.dependencies["@crossplane-js/libs"]="'$VERSION'"' packages/sdk/package.json) > packages/sdk/package.json
+          cat <<< $(jq '.dependencies["@crossplane-js/libs"]="'$VERSION'"' packages/libs/package.json) > packages/sdk/package.json
       
       - name: extract npm tag
         id: npm-tag

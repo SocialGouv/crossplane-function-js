@@ -26,6 +26,7 @@ kubectl apply -f tests/fixtures/xsimpleconfigmaps.xrd.yaml
 
 # Create composition outputs
 echo "Preparing composition with function code..."
+yarn --cwd tests/fixtures/domain-sdk install
 yarn --cwd tests/fixtures/domain-sdk compo
 # kubectl apply -f tests/fixtures/domain-sdk/manifests
 kubectl apply -f tests/fixtures/domain-sdk/manifests/xsimpleconfigmaps.compo.yaml

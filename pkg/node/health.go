@@ -70,7 +70,9 @@ func (pm *ProcessManager) restartProcess(process *ProcessInfo, hash string) {
 	// Kill the process if it's still running
 	if process.Process != nil && process.Process.Process != nil {
 		restartLogger.Info("Killing process")
-		process.Process.Process.Kill()
+		if err := process.Process.Process.Kill(); err != nil {
+			restartLogger.WithField("error", err.Error()).Warn("Failed to kill process")
+		}
 	}
 
 	// Clean up the temporary directory if it exists

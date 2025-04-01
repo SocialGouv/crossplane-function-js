@@ -88,7 +88,9 @@ func (c *NodeClient) ExecuteFunction(ctx context.Context, code string, dependenc
 	}
 	defer func() {
 		// Ensure body is fully read before closing to allow connection reuse
-		io.Copy(io.Discard, resp.Body)
+		if _, err := io.Copy(io.Discard, resp.Body); err != nil {
+			c.logger.WithField("error", err.Error()).Warn("Failed to discard response body")
+		}
 		resp.Body.Close()
 	}()
 
@@ -128,7 +130,9 @@ func (c *NodeClient) CheckReady(ctx context.Context) error {
 	}
 	defer func() {
 		// Ensure body is fully read before closing to allow connection reuse
-		io.Copy(io.Discard, resp.Body)
+		if _, err := io.Copy(io.Discard, resp.Body); err != nil {
+			c.logger.WithField("error", err.Error()).Warn("Failed to discard response body")
+		}
 		resp.Body.Close()
 	}()
 

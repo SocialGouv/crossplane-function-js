@@ -87,7 +87,6 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, input *types.X
 		if !pm.isProcessHealthy(process) {
 			procLogger.Warn("Existing process is unhealthy, creating a new one")
 			pm.restartProcess(process, specHash)
-			exists = false
 		} else {
 			procLogger.Debug("Reusing existing process")
 			return process, nil
@@ -261,6 +260,9 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, input *types.X
 		// Read the original .yarnrc.yml, extract yarnPath, and remove the plugins section
 		yarnrcSrc := "/app/.yarnrc.yml"
 		yarnrcContent, err := os.ReadFile(yarnrcSrc)
+		if err != nil {
+			procLogger.WithField("error", err.Error()).Warn("Failed to read .yarnrc.yml")
+		}
 		var yarnPath string
 
 		// Parse the YAML content
@@ -411,7 +413,9 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, input *types.X
 
 		// Kill the process
 		if process.Process.Process != nil {
-			process.Process.Process.Kill()
+			if err := process.Process.Process.Kill(); err != nil {
+				procLogger.WithField("error", err.Error()).Warn("Failed to kill process")
+			}
 		}
 		delete(pm.processes, specHash)
 

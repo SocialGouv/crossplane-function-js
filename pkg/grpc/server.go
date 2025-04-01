@@ -264,11 +264,9 @@ func (s *Server) runFunctionCrossplane(ctx context.Context, req *fnv1.RunFunctio
 		}, nil
 	}
 
-	// Extract the observed state from the RunFunctionRequest
-	var enhancedInput map[string]interface{}
-
-	// Create a structured input that includes both the original input and the observed state
-	enhancedInput = map[string]interface{}{
+	// Extract the observed state from the RunFunctionRequest and create a structured input
+	// that includes both the original input and the observed state
+	enhancedInput := map[string]interface{}{
 		"input": inputData,
 	}
 

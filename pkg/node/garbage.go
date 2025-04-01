@@ -51,7 +51,9 @@ func (pm *ProcessManager) collectGarbage() {
 			// Send SIGTERM to signal the process to exit gracefully
 			if info.Process.Process != nil {
 				processLogger.Debug("Sending SIGTERM to process")
-				info.Process.Process.Signal(syscall.SIGTERM)
+				if err := info.Process.Process.Signal(syscall.SIGTERM); err != nil {
+					processLogger.WithField("error", err.Error()).Warn("Failed to send SIGTERM to process")
+				}
 			}
 
 			// Flush any buffered stderr data
@@ -63,7 +65,9 @@ func (pm *ProcessManager) collectGarbage() {
 			// Kill the process if it doesn't exit gracefully
 			if info.Process.Process != nil {
 				processLogger.Debug("Sending SIGKILL to process")
-				info.Process.Process.Kill()
+				if err := info.Process.Process.Kill(); err != nil {
+					processLogger.WithField("error", err.Error()).Warn("Failed to send SIGKILL to process")
+				}
 			}
 
 			// Clean up the temporary directory if it exists

@@ -49,5 +49,6 @@ jobs:
       run: |
         set -eo errexit
         export KUBECONFIG="${HOME}/.kube/config"
+        yarn
         ./tests/install-crossplane.sh
         ./tests/e2e.sh

@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - v*.*
+  workflow_dispatch:
 
 permissions:
   id-token: write  # Required for OIDC token generation
@@ -99,7 +100,7 @@ jobs:
       
       # Publish the package
       - id: publish
-        uses: JS-DevTools/npm-publish@v2
+        uses: JS-DevTools/npm-publish@v3
         with:
           token: ${{ secrets.SOCIALGROOVYBOT_NPM_TOKEN }}
           package: ${{ matrix.package.path }}/package.json

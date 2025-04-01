@@ -18,6 +18,8 @@ jobs:
       - name: Add Go bin to PATH
         run: |
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+      - name: Install Task
+        uses: arduino/setup-task@v2
       - name: Install linter
         run: task install-lint-tools
       - name: Run linter

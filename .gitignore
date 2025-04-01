@@ -26,3 +26,4 @@ tsconfig.tsbuildinfo
 # Kubernetes configuration
 .kubeconfig
 .direnv
+.devbox

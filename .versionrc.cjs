@@ -21,7 +21,7 @@ const bumpFiles = [
   }, []),
 ]
 
-const chartsUpdater = ".dev/version-updater-chart.js"
+const chartsUpdater = "./.dev/version-updater-chart.cjs"
 bumpFiles.push({
   filename: `charts/crossplane-function-js/Chart.yaml`,
   updater: chartsUpdater,

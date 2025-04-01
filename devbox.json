@@ -1,0 +1,31 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.14.0/.schema/devbox.schema.json",
+  "packages": [
+    "docker",
+    "git",
+    "nodejs@22",
+    "yarn",
+    "jq",
+    "kubectl",
+    "kubernetes-helm",
+    "kind",
+    "k9s",
+    "go@1.23",
+    "go-task"
+  ],
+  "env": {
+    "DEVBOX_COREPACK_ENABLED": "1"
+  },
+  "shell": {
+    "init_hook": [
+      "# Set up local KUBECONFIG",
+      "export KUBECONFIG=\"$PWD/.kubeconfig\"",
+      "",
+      "echo \"KUBECONFIG set to $KUBECONFIG\"",
+      "",
+      "# Set GOROOT to the Go installation path",
+      "export GOROOT=\"$(go env GOROOT)\"",
+      "echo \"GOROOT set to $GOROOT\""
+    ]
+  }
+}

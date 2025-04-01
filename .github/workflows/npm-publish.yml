@@ -46,7 +46,7 @@ jobs:
       - id: publish-sdk
         uses: JS-DevTools/npm-publish@v2
         with:
-          token: ${{ secrets.NPM_TOKEN }}
+          token: ${{ secrets.SOCIALGROOVYBOT_NPM_TOKEN }}
           package: packages/sdk/package.json
           tag: ${{ steps.npm-tag.outputs.tag }}
       

@@ -34,7 +34,7 @@ config:
 
   # TLS configuration
   # enabled by default by TLS_SERVER_CERTS_DIR env var injected by crossplane on pod's funcrtion
-  # tls:
-  #   enabled: false
-  #   certFile: "/certs/tls.crt"
-  #   keyFile: "/certs/tls.key"
+  tls:
+    enabled: false
+    # certFile: "/certs/tls.crt"
+    # keyFile: "/certs/tls.key"

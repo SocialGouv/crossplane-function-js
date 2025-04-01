@@ -1,0 +1,55 @@
+name: 🗞️ Publish Helm Charts
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        chart_dir: [charts/crossplane-function-js]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Login to GitHub Container Registry
+        run: helm registry login ghcr.io -u ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Chart Metadata
+        id: chart_meta
+        run: |
+          CHART_DIR="${{ matrix.chart_dir }}"
+          # Get the base directory name
+          BASE=$(basename "$CHART_DIR")
+          # Extract name and version from Chart.yaml
+          CHART_NAME=$(grep '^name:' "$CHART_DIR/Chart.yaml" | awk '{print $2}')
+          CHART_VERSION=$(grep '^version:' "$CHART_DIR/Chart.yaml" | awk '{print $2}')
+          echo "Chart Directory: $CHART_DIR"
+          echo "Chart Base: $BASE"
+          echo "Chart Name: $CHART_NAME"
+          echo "Chart Version: $CHART_VERSION"
+          # Export values for subsequent steps
+          echo "CHART_NAME=$CHART_NAME" >> $GITHUB_ENV
+          echo "CHART_VERSION=$CHART_VERSION" >> $GITHUB_ENV
+          echo "CHART_BASE=$BASE" >> $GITHUB_ENV
+
+      - name: Package Chart
+        run: |
+          mkdir -p packaged
+          helm package "${{ matrix.chart_dir }}" -d packaged
+          ls -l packaged
+
+      - name: Push Chart to GHCR
+        run: |
+          # Locate the packaged chart file
+          CHART_PACKAGE=$(ls packaged | grep "${CHART_NAME}-")
+          echo "Found chart package: $CHART_PACKAGE"
+          # Push the chart to GHCR
+          echo "Pushing chart to GHCR"
+          helm push "packaged/${CHART_PACKAGE}" "oci://ghcr.io/socialgouv/helm"

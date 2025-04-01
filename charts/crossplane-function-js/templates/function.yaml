@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "xfuncjs.labels" . | nindent 4 }}
 spec:
-  package: {{ .Values.function.package.repository }}/{{ .Values.function.package.name }}:{{ .Values.function.package.tag }}
+  package: {{ .Values.function.package.repository }}/{{ .Values.function.package.name }}:{{ default .Chart.AppVersion .Values.function.package.tag }}
   packagePullPolicy: {{ .Values.function.pullPolicy }}
   runtimeConfigRef:
     apiVersion: pkg.crossplane.io/v1beta1

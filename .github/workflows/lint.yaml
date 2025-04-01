@@ -1,0 +1,41 @@
+name: 👾 Lint
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  lint-go:
+    name: Lint go
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: false
+      - name: Add Go bin to PATH
+        run: |
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+      - name: Install linter
+        run: make install-lint-tools
+      - name: Run linter
+        run: task lint
+  lint-js:
+    name: Lint js
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'yarn'
+      - name: Yarn install
+        run: yarn
+      - name: Run lint
+        run: yarn lint
+      - name: Run type check
+        run: yarn type-check
+  

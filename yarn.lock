@@ -287,6 +287,7 @@ __metadata:
     "@kubernetes-models/crd-generate": "npm:^5.0.2"
     "@types/chai": "npm:^5.2.0"
     "@types/fs-extra": "npm:^11"
+    "@types/js-yaml": "npm:^4"
     "@types/mocha": "npm:^10.0.10"
     "@types/node": "npm:^22.13.10"
     "@typescript-eslint/eslint-plugin": "npm:^8.28.0"
@@ -299,6 +300,7 @@ __metadata:
     eslint-plugin-prettier: "npm:^5.2.5"
     globals: "npm:^16.0.0"
     husky: "npm:^9.1.7"
+    js-yaml: "npm:^4.1.0"
     lint-staged: "npm:^15.5.0"
     mocha: "npm:11.1.0"
     node-ts-modules: "npm:^0.0.2"
@@ -957,6 +959,13 @@ __metadata:
   version: 2.0.4
   resolution: "@types/http-errors@npm:2.0.4"
   checksum: 10c0/494670a57ad4062fee6c575047ad5782506dd35a6b9ed3894cea65830a94367bd84ba302eb3dde331871f6d70ca287bfedb1b2cf658e6132cd2cbd427ab56836
+  languageName: node
+  linkType: hard
+
+"@types/js-yaml@npm:^4":
+  version: 4.0.9
+  resolution: "@types/js-yaml@npm:4.0.9"
+  checksum: 10c0/24de857aa8d61526bbfbbaa383aa538283ad17363fcd5bb5148e2c7f604547db36646440e739d78241ed008702a8920665d1add5618687b6743858fae00da211
   languageName: node
   linkType: hard
 

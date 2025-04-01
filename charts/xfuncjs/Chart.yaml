@@ -1,6 +1,0 @@
-apiVersion: v2
-name: xfuncjs
-description: A Helm chart for Crossplane XFuncJS Function and RuntimeConfig
-type: application
-version: 0.1.0
-appVersion: "1.0.0"

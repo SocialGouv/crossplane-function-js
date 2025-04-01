@@ -1,13 +1,11 @@
-# Default values for xfuncjs chart
-
 # Function configuration
 function:
   name: function-xfuncjs
   package:
     repository: localhost:5001
     name: xfuncjs-server
-    tag: test
-  pullPolicy: Always
+    tag: 
+  pullPolicy: IfNotPresent
 
 # RuntimeConfig configuration
 runtimeConfig:
@@ -35,7 +33,8 @@ config:
   # nodeRequestTimeout: "30s"
 
   # TLS configuration
-  tls:
-    enabled: false
-    # certFile: "/certs/tls.crt"
-    # keyFile: "/certs/tls.key"
+  # enabled by default by TLS_SERVER_CERTS_DIR env var injected by crossplane on pod's funcrtion
+  # tls:
+  #   enabled: false
+  #   certFile: "/certs/tls.crt"
+  #   keyFile: "/certs/tls.key"

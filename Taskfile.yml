@@ -43,11 +43,11 @@ tasks:
       - "rm -f bin/xfuncjs-server"
       - "{{.GO}} clean"
 
-  # Run unit tests
-  test:
-    desc: Run unit tests
+  # Lint
+  lint:
+    desc: Lint go code
     cmds:
-      - "{{.GO}} test -v ./..."
+      - golangci-lint run --skip-dirs=nix --timeout=10m
 
   # Set up test environment
   setup-test-env:

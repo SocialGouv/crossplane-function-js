@@ -27,7 +27,7 @@ jobs:
         cache: 'yarn'
 
     - name: Set up Docker
-      uses: docker/setup-buildx-action@v2
+      uses: docker/setup-buildx-action@v3
 
     - name: Install Helm
       uses: azure/setup-helm@v3

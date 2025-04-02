@@ -19,7 +19,6 @@ packages/*/dist
 # Generated files
 *.out.yaml
 /tmp.json
-/tests/fixtures/domain-sdk/manifests
 ts_modules
 tsconfig.tsbuildinfo
 

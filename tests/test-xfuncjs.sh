@@ -15,21 +15,11 @@ trap 'handle_error $LINENO' ERR
 echo "Creating test namespace..."
 kubectl create namespace test-xfuncjs --dry-run=client -o yaml | kubectl apply -f -
 
-# Apply CRDs and Compositions
-echo "Applying CRDs and Compositions..."
 
 # Apply the first part of provider in cluster (Provider, DeploymentRuntimeConfig, ClusterRoleBinding)
 echo "Applying Provider Kubernetes..."
-kubectl apply -f tests/fixtures/provider-in-cluster.yaml
-kubectl apply -f tests/fixtures/functions.yaml
-kubectl apply -f tests/fixtures/xsimpleconfigmaps.xrd.yaml
-
-# Create composition outputs
-echo "Preparing composition with function code..."
-yarn --cwd tests/fixtures/domain-sdk install
-yarn --cwd tests/fixtures/domain-sdk compo
-# kubectl apply -f tests/fixtures/domain-sdk/manifests
-kubectl apply -f tests/fixtures/domain-sdk/manifests/xsimpleconfigmaps.compo.yaml
+kubectl apply -f tests/fixtures/crossplane-basics/provider-in-cluster.yaml
+kubectl apply -f tests/fixtures/crossplane-basics/functions.yaml
 
 # Wait for the Provider to be installed and its CRDs to be registered
 echo "Waiting for Provider Kubernetes to be installed..."
@@ -53,7 +43,18 @@ done
 
 # Apply the second part of provider in cluster (ProviderConfig)
 echo "Applying ProviderConfig..."
-kubectl apply -f tests/fixtures/provider-config.yaml
+kubectl apply -f tests/fixtures/crossplane-basics/provider-config.yaml
+
+# Create composition outputs
+echo "Preparing composition with function code..."
+yarn --cwd tests/fixtures/domain-sdk install
+yarn --cwd tests/fixtures/domain-sdk compo
+
+# Apply CRDs and Compositions
+echo "Applying XRD and Compositions..."
+kubectl apply -f tests/fixtures/domain-sdk/functions/xsimpleconfigmaps/xrd.yaml
+kubectl apply -f tests/fixtures/domain-sdk/manifests/xsimpleconfigmaps.compo.yaml
+# kubectl apply -f tests/fixtures/domain-sdk/manifests
 
 # Wait for XRD to be established
 echo "Waiting for XRD to be established..."
@@ -66,8 +67,8 @@ kubectl wait --for=condition=established xrd/xsimpleconfigmaps.test.crossplane.i
 
 # Create a test XSimpleConfigMap
 echo "(Re)Creating test XSimpleConfigMap..."
-kubectl delete -f tests/fixtures/sample.yaml || true
-kubectl apply -f tests/fixtures/sample.yaml
+kubectl delete -f tests/fixtures/domain-sdk/sample.yaml || true
+kubectl apply -f tests/fixtures/domain-sdk/sample.yaml
 
 # Wait for the ConfigMap to be created
 echo "Waiting for ConfigMap to be created..."

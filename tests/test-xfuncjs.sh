@@ -54,7 +54,6 @@ yarn --cwd tests/fixtures/domain-sdk compo
 echo "Applying XRD and Compositions..."
 kubectl apply -f tests/fixtures/domain-sdk/functions/xsimpleconfigmaps/xrd.yaml
 kubectl apply -f tests/fixtures/domain-sdk/manifests/xsimpleconfigmaps.compo.yaml
-# kubectl apply -f tests/fixtures/domain-sdk/manifests
 
 # Wait for XRD to be established
 echo "Waiting for XRD to be established..."
@@ -64,6 +63,22 @@ kubectl wait --for=condition=established xrd/xsimpleconfigmaps.test.crossplane.i
   kubectl get xrd/xsimpleconfigmaps.test.crossplane.io -o yaml
   exit 1
 }
+
+# Wait for the XSimpleConfigmap CRD to be established
+echo "Waiting for XSimpleConfigmap CRD to be established..."
+for i in {1..30}; do
+  if kubectl get crd xsimpleconfigmaps.test.crossplane.io &> /dev/null; then
+    echo "XSimpleConfigmap CRD is established!"
+    break
+  fi
+  echo "Waiting for XSimpleConfigmap CRD to be established... ($i/30)"
+  sleep 2
+done
+
+# Generate models from CRD
+kubectl get crd xsimpleconfigmaps.test.crossplane.io -o yaml > tests/fixtures/domain-sdk/manifests/xsimpleconfigmaps.crd.yaml
+yarn crd-generate --input tests/fixtures/domain-sdk/manifests/xsimpleconfigmaps.crd.yaml --output tests/fixtures/domain-sdk/models
+
 
 # Create a test XSimpleConfigMap
 echo "(Re)Creating test XSimpleConfigMap..."

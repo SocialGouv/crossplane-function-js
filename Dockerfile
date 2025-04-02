@@ -18,13 +18,21 @@ FROM node:$NODE_VERSION AS js-builder
 
 RUN apk add --no-cache jq
 
-RUN corepack enable
+
+COPY --chown=1000:1000 yarn.lock .yarnrc.yml /app/
+COPY --chown=1000:1000 .yarn /app/.yarn
+
+# RUN corepack enable
+# Instead of using corepack enable, we'll create a yarn wrapper script that uses the first file in .yarn/releases
+RUN YARN_PATH=$(find /app/.yarn/releases -type f -name "yarn-*.cjs" | sort | head -1) && \
+  echo '#!/bin/sh' > /usr/local/bin/yarn && \
+  echo "exec $(which node) $YARN_PATH \"\$@\"" >> /usr/local/bin/yarn && \
+  chmod +x /usr/local/bin/yarn && \
+  chown -R 1000:1000 /app
 
 USER 1000
 WORKDIR /app
 
-COPY --chown=1000:1000 yarn.lock .yarnrc.yml ./
-COPY --chown=1000:1000 .yarn .yarn
 RUN yarn fetch
 
 COPY --chown=1000:1000 package.json tsconfig.json ./

@@ -54,7 +54,7 @@ jobs:
       
       # Publish libs package
       - id: publish-libs
-        uses: JS-DevTools/npm-publish@v2
+        uses: JS-DevTools/npm-publish@v3
         with:
           token: ${{ secrets.SOCIALGROOVYBOT_NPM_TOKEN }}
           package: packages/libs/package.json

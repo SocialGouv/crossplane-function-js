@@ -7,6 +7,7 @@ import fs from "fs-extra"
 
 // Import commands
 import compoCommand from "./commands/compo/index.ts"
+import xrd2crdCommand from "./commands/xrd2crd/index.ts"
 
 // Create a logger for this module
 const moduleLogger = createLogger("cli")
@@ -81,6 +82,7 @@ const main = async () => {
 
   // Register commands
   compoCommand(program)
+  xrd2crdCommand(program)
 
   // Parse command line arguments with Commander
   await program.parseAsync()

@@ -64,19 +64,21 @@ kubectl wait --for=condition=established xrd/xsimpleconfigmaps.test.crossplane.i
   exit 1
 }
 
+# Get the CRD
 # Wait for the XSimpleConfigmap CRD to be established
-echo "Waiting for XSimpleConfigmap CRD to be established..."
-for i in {1..30}; do
-  if kubectl get crd xsimpleconfigmaps.test.crossplane.io &> /dev/null; then
-    echo "XSimpleConfigmap CRD is established!"
-    break
-  fi
-  echo "Waiting for XSimpleConfigmap CRD to be established... ($i/30)"
-  sleep 2
-done
+# echo "Waiting for XSimpleConfigmap CRD to be established..."
+# for i in {1..30}; do
+#   if kubectl get crd xsimpleconfigmaps.test.crossplane.io &> /dev/null; then
+#     echo "XSimpleConfigmap CRD is established!"
+#     break
+#   fi
+#   echo "Waiting for XSimpleConfigmap CRD to be established... ($i/30)"
+#   sleep 2
+# done
+# kubectl get crd xsimpleconfigmaps.test.crossplane.io -o yaml > tests/fixtures/domain-sdk/manifests/xsimpleconfigmaps.crd.yaml
 
 # Generate models from CRD
-kubectl get crd xsimpleconfigmaps.test.crossplane.io -o yaml > tests/fixtures/domain-sdk/manifests/xsimpleconfigmaps.crd.yaml
+yarn --cwd tests/fixtures/domain-sdk xrd2crd functions/xsimpleconfigmaps/xrd.yaml > tests/fixtures/domain-sdk/manifests/xsimpleconfigmaps.crd.yaml
 yarn crd-generate --input tests/fixtures/domain-sdk/manifests/xsimpleconfigmaps.crd.yaml --output tests/fixtures/domain-sdk/models
 
 

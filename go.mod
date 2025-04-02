@@ -8,7 +8,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/sirupsen/logrus v1.9.3
 	google.golang.org/grpc v1.67.0
-	google.golang.org/protobuf v1.35.1
+	google.golang.org/protobuf v1.36.6
 	k8s.io/apimachinery v0.32.3
 	k8s.io/client-go v0.32.3
 	sigs.k8s.io/yaml v1.4.0

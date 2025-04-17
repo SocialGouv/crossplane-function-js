@@ -11,7 +11,6 @@ COPY vendor/ vendor/
 COPY go.mod go.sum ./
 COPY pkg/ pkg/
 COPY cmd/ cmd/
-COPY proto/ proto/
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -mod=vendor -o xfuncjs-server cmd/server/main.go
 
 FROM node:$NODE_VERSION AS js-builder
@@ -25,10 +24,10 @@ COPY --chown=1000:1000 .yarn /app/.yarn
 # RUN corepack enable
 # Instead of using corepack enable, we'll create a yarn wrapper script that uses the first file in .yarn/releases
 RUN YARN_PATH=$(find /app/.yarn/releases -type f -name "yarn-*.cjs" | sort | head -1) && \
-  echo '#!/bin/sh' > /usr/local/bin/yarn && \
-  echo "exec $(which node) $YARN_PATH \"\$@\"" >> /usr/local/bin/yarn && \
-  chmod +x /usr/local/bin/yarn && \
-  chown -R 1000:1000 /app
+    echo '#!/bin/sh' > /usr/local/bin/yarn && \
+    echo "exec $(which node) $YARN_PATH \"\$@\"" >> /usr/local/bin/yarn && \
+    chmod +x /usr/local/bin/yarn && \
+    chown -R 1000:1000 /app
 
 USER 1000
 WORKDIR /app
@@ -47,15 +46,15 @@ RUN yarn workspaces focus @crossplane-js/server @crossplane-js/sdk --production 
 USER root
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 RUN mkdir -p /dependencies/lib /dependencies/usr/lib && \
-  ldd /app/packages/server/build/xfuncjs-server-js | awk '{print $3}' | grep -vE '^$' | while read -r lib; do \
-  if [ -f "$lib" ]; then \
-  if [ "${lib#/usr/lib/}" != "$lib" ]; then \
-  cp "$lib" /dependencies/usr/lib/; \
-  elif [ "${lib#/lib/}" != "$lib" ]; then \
-  cp "$lib" /dependencies/lib/; \
-  fi; \
-  fi; \
-  done
+    ldd /app/packages/server/build/xfuncjs-server-js | awk '{print $3}' | grep -vE '^$' | while read -r lib; do \
+    if [ -f "$lib" ]; then \
+    if [ "${lib#/usr/lib/}" != "$lib" ]; then \
+    cp "$lib" /dependencies/usr/lib/; \
+    elif [ "${lib#/lib/}" != "$lib" ]; then \
+    cp "$lib" /dependencies/lib/; \
+    fi; \
+    fi; \
+    done
 
 
 FROM alpine:3 AS certs

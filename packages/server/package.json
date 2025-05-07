@@ -7,7 +7,7 @@
   "main": "src/index.ts",
   "bin": "build/xfuncjs-server-js",
   "scripts": {
-    "dev": "node --no-warnings --experimental-strip-types --experimental-loader node-ts-modules/ts-module-loader.mjs src/index.ts",
+    "dev": "node --no-warnings --experimental-strip-types --experimental-loader node-ts-modules/loader-esm.mjs src/index.ts",
     "dev:start": "NODE_OPTIONS='--no-warnings --experimental-strip-types' build/xfuncjs-server-js",
     "build": "yarn build:clean && yarn build:ncc:begin && yarn build:ncc && yarn build:ncc:end && yarn build:blob && yarn build:node && yarn build:postject",
     "build:clean": "rm -rf ./build && mkdir -p build",

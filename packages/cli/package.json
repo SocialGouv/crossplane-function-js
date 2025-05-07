@@ -11,11 +11,16 @@
   "dependencies": {
     "@crossplane-js/libs": "workspace:^",
     "commander": "^13.1.0",
+    "esbuild": "^0.25.4",
     "fs-extra": "^11.3.0",
     "node-ts-modules": "^0.0.2",
+    "uuid": "^11.1.0",
     "yaml": "^2.7.0"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "@types/uuid": "^10.0.0"
   }
 }

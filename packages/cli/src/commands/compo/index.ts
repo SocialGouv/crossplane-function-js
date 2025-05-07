@@ -1,9 +1,13 @@
+import { tmpdir } from "os"
 import path from "path"
 import { fileURLToPath } from "url"
 
 import { createLogger } from "@crossplane-js/libs"
 import { Command } from "commander"
+import { build } from "esbuild"
+import type { BuildOptions, Plugin } from "esbuild"
 import fs from "fs-extra"
+import { v4 as uuidv4 } from "uuid"
 import YAML from "yaml"
 
 // Create a logger for this module
@@ -51,11 +55,116 @@ interface Manifest {
 }
 
 /**
+ * Bundles a TypeScript file using esbuild
+ * @param filePath Path to the TypeScript file
+ * @param embedDeps Whether to embed dependencies or keep them external
+ * @param customConfig Custom esbuild configuration
+ * @returns Promise<string> The bundled code
+ */
+async function bundleTypeScript(
+  filePath: string,
+  embedDeps: boolean = false,
+  customConfig: Partial<BuildOptions> = {}
+): Promise<string> {
+  const tempDir = path.join(tmpdir(), `xfuncjs-bundle-${uuidv4()}`)
+  const outputFile = path.join(tempDir, "bundle.js")
+
+  moduleLogger.debug(`Bundling TypeScript file: ${filePath}`)
+  moduleLogger.debug(`Using temporary directory: ${tempDir}`)
+
+  try {
+    // Create temp directory
+    fs.mkdirSync(tempDir, { recursive: true })
+
+    // Get original file size for logging
+    const originalSize = fs.statSync(filePath).size
+
+    // Default esbuild options optimized for readability
+    const defaultOptions: BuildOptions = {
+      entryPoints: [filePath],
+      bundle: true,
+      format: "esm",
+      sourcemap: true,
+      target: "esnext",
+      outfile: outputFile,
+      minify: false,
+      keepNames: true,
+      legalComments: "inline",
+    }
+
+    // If embedDeps is false, add plugin to keep dependencies external
+    if (!embedDeps) {
+      // Create a plugin to mark all non-relative imports as external
+      const externalizeNpmDepsPlugin: Plugin = {
+        name: "externalize-npm-deps",
+        setup(build) {
+          // Filter for all import paths that don't start with ./ or ../
+          build.onResolve({ filter: /^[^./]/ }, args => {
+            return { path: args.path, external: true }
+          })
+        },
+      }
+
+      defaultOptions.plugins = [externalizeNpmDepsPlugin]
+      moduleLogger.debug(`Keeping all node_modules packages as external dependencies`)
+    } else {
+      moduleLogger.debug(`Embedding all dependencies in the bundle`)
+    }
+
+    // Merge with custom config
+    const buildOptions: BuildOptions = { ...defaultOptions, ...customConfig }
+    moduleLogger.debug(`esbuild options: ${JSON.stringify(buildOptions)}`)
+
+    // Bundle with esbuild
+    await build(buildOptions)
+
+    // Read the bundled code
+    const bundledCode = fs.readFileSync(outputFile, { encoding: "utf8" })
+
+    // Log bundle size information
+    const bundledSize = fs.statSync(outputFile).size
+    moduleLogger.debug(`Bundling complete: ${originalSize} bytes → ${bundledSize} bytes`)
+
+    return bundledCode
+  } catch (error) {
+    moduleLogger.error(`Bundling failed: ${error}`)
+    throw new Error(`Failed to bundle TypeScript file ${filePath}: ${error}`)
+  } finally {
+    // Clean up temp directory
+    if (fs.existsSync(tempDir)) {
+      fs.rmSync(tempDir, { recursive: true, force: true })
+      moduleLogger.debug(`Cleaned up temporary directory: ${tempDir}`)
+    }
+  }
+}
+
+/**
  * Main function for the compo command
  * Processes function directories and generates composition manifests
+ * @param options Command options
  * @returns Promise<void>
  */
-async function compoAction(): Promise<void> {
+async function compoAction(
+  options: { bundle?: boolean; bundleConfig?: string; embedDeps?: boolean } = {}
+): Promise<void> {
+  // Default to bundling enabled
+  const shouldBundle = options.bundle !== false
+  // Default to external dependencies (not embedded)
+  const shouldEmbedDeps = options.embedDeps === true
+
+  moduleLogger.debug(`Bundle: ${shouldBundle}, Embed dependencies: ${shouldEmbedDeps}`)
+
+  // Parse custom bundle config if provided
+  let bundleConfig: Partial<BuildOptions> = {}
+  if (options.bundleConfig) {
+    try {
+      bundleConfig = JSON.parse(options.bundleConfig) as Partial<BuildOptions>
+      moduleLogger.debug(`Using custom bundle configuration: ${JSON.stringify(bundleConfig)}`)
+    } catch (error) {
+      moduleLogger.error(`Invalid bundle configuration JSON: ${error}`)
+      process.exit(1)
+    }
+  }
   const cwd = () => `${process.cwd()}`
   try {
     // Find the functions directory in the current working directory
@@ -180,10 +289,23 @@ async function compoAction(): Promise<void> {
           moduleLogger.warn(`Skipping ${functionName}: composition.fn.ts not found`)
           continue
         }
-        // Read the function code
-        const fnCode = fs.readFileSync(fnFilePath, { encoding: "utf8" })
-        // Set the inline code
-        xfuncjsStep.input.spec.source.inline = fnCode
+
+        if (shouldBundle) {
+          moduleLogger.info(`Bundling TypeScript for ${functionName}`)
+          try {
+            const bundledCode = await bundleTypeScript(fnFilePath, shouldEmbedDeps, bundleConfig)
+            xfuncjsStep.input.spec.source.inline = bundledCode
+            moduleLogger.info(`Successfully bundled TypeScript for ${functionName}`)
+          } catch (error) {
+            moduleLogger.error(`Error bundling TypeScript for ${functionName}`)
+            throw error // Propagate the error up
+          }
+        } else {
+          // Original behavior when bundling is disabled
+          moduleLogger.info(`Bundling disabled, using raw TypeScript for ${functionName}`)
+          const fnCode = fs.readFileSync(fnFilePath, { encoding: "utf8" })
+          xfuncjsStep.input.spec.source.inline = fnCode
+        }
       }
 
       if (xfuncjsStep.input.spec.dependencies === "__DEPENDENCIES__") {
@@ -287,9 +409,12 @@ export default function (program: Command): void {
   program
     .command("compo")
     .description("Generate composition manifests from function directories")
-    .action(async () => {
+    .option("--no-bundle", "Disable TypeScript bundling")
+    .option("--bundle-config <json>", "Custom esbuild configuration (JSON string)")
+    .option("--embed-deps", "Embed dependencies in the bundle (default: false)")
+    .action(async options => {
       try {
-        await compoAction()
+        await compoAction(options)
       } catch (err) {
         moduleLogger.error(`Error running compo command: ${err}`)
         process.exit(1)

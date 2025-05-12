@@ -26,4 +26,25 @@ type Logger interface {
 	WithField(key string, value interface{}) Logger
 	// WithFields adds multiple fields to the logger
 	WithFields(fields map[string]interface{}) Logger
+	// WithValues adds key-value pairs to the logger
+	WithValues(keysAndValues ...interface{}) Logger
+}
+
+// WithValues adds key-value pairs to the logger
+// This is a helper function that converts key-value pairs to a map and calls WithFields
+func WithValues(log Logger, keysAndValues ...interface{}) Logger {
+	if len(keysAndValues)%2 != 0 {
+		return log.WithField("error", "odd number of arguments passed as key-value pairs for logging")
+	}
+
+	fields := make(map[string]interface{}, len(keysAndValues)/2)
+	for i := 0; i < len(keysAndValues); i += 2 {
+		key, ok := keysAndValues[i].(string)
+		if !ok {
+			key = "unknown"
+		}
+		fields[key] = keysAndValues[i+1]
+	}
+
+	return log.WithFields(fields)
 }

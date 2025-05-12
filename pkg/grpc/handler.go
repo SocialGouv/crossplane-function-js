@@ -11,6 +11,7 @@ import (
 	"github.com/crossplane/function-sdk-go/response"
 	"google.golang.org/protobuf/types/known/structpb"
 
+	"github.com/socialgouv/xfuncjs-server/pkg/conditions"
 	"github.com/socialgouv/xfuncjs-server/pkg/context/fncontext"
 	"github.com/socialgouv/xfuncjs-server/pkg/events"
 	"github.com/socialgouv/xfuncjs-server/pkg/logger"
@@ -261,6 +262,13 @@ func buildResponse(rsp *fnv1.RunFunctionResponse, jsResponse *JSResponse, resour
 			rsp.Requirements = &fnv1.Requirements{}
 		}
 		rsp.Requirements.ExtraResources = extraResources
+	}
+
+	// Process conditions if present
+	if len(jsResponse.Conditions) > 0 {
+		if err := conditions.SetConditions(rsp, jsResponse.Conditions, log); err != nil {
+			return errors.Wrapf(err, "failed to process conditions")
+		}
 	}
 
 	// Process context data if present

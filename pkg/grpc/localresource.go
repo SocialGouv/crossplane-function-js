@@ -6,6 +6,7 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/errors"
 	fnv1 "github.com/crossplane/function-sdk-go/proto/v1"
 	"github.com/crossplane/function-sdk-go/resource"
+	"github.com/socialgouv/xfuncjs-server/pkg/conditions"
 )
 
 // JSResponse represents the response from a JavaScript function
@@ -14,6 +15,8 @@ type JSResponse struct {
 	Resources map[string]JSResource `json:"resources"`
 	// Events is a list of events to create
 	Events []CreateEvent `json:"events,omitempty"`
+	// Conditions is a list of conditions to create
+	Conditions []conditions.ConditionResource `json:"conditions,omitempty"`
 	// Context is a map of context data to add to the response
 	Context map[string]interface{} `json:"context,omitempty"`
 	// ExtraResourceRequirements is a map of resource name to resource requirements

@@ -87,10 +87,11 @@ func parseInput(req *fnv1.RunFunctionRequest) (*types.XFuncJSInput, error) {
 
 // prepareResources prepares the resources from the request
 type resourceBundle struct {
-	oxr      *resource.Composite
-	dxr      *resource.Composite
-	observed map[resource.Name]resource.ObservedComposed
-	desired  map[resource.Name]*resource.DesiredComposed
+	oxr            *resource.Composite
+	dxr            *resource.Composite
+	observed       map[resource.Name]resource.ObservedComposed
+	desired        map[resource.Name]*resource.DesiredComposed
+	extraResources map[string][]resource.Extra
 }
 
 func prepareResources(req *fnv1.RunFunctionRequest) (*resourceBundle, error) {
@@ -123,16 +124,17 @@ func prepareResources(req *fnv1.RunFunctionRequest) (*resourceBundle, error) {
 	}
 
 	// Get extra resources
-	_, err = request.GetExtraResources(req)
+	extraResources, err := request.GetExtraResources(req)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot get extra resources from %T", req)
 	}
 
 	return &resourceBundle{
-		oxr:      oxr,
-		dxr:      dxr,
-		observed: observed,
-		desired:  desired,
+		oxr:            oxr,
+		dxr:            dxr,
+		observed:       observed,
+		desired:        desired,
+		extraResources: extraResources,
 	}, nil
 }
 
@@ -151,6 +153,19 @@ func createEnhancedInput(xfuncjsInput *types.XFuncJSInput, resources *resourceBu
 			},
 			"resources": ObservedToMap(resources.observed),
 		},
+	}
+
+	// Add extra resources if present
+	if len(resources.extraResources) > 0 {
+		extraResourcesMap := make(map[string]interface{})
+		for name, extras := range resources.extraResources {
+			extrasList := make([]interface{}, len(extras))
+			for i, extra := range extras {
+				extrasList[i] = extra.Resource.UnstructuredContent()
+			}
+			extraResourcesMap[name] = extrasList
+		}
+		enhancedInput["extraResources"] = extraResourcesMap
 	}
 
 	// Convert the enhanced input to JSON
@@ -231,6 +246,21 @@ func buildResponse(rsp *fnv1.RunFunctionResponse, jsResponse *JSResponse, resour
 		if err := events.SetEvents(rsp, eventsToSet); err != nil {
 			return errors.Wrapf(err, "failed to process events")
 		}
+	}
+
+	// Process extra resource requirements if present
+	if len(jsResponse.ExtraResourceRequirements) > 0 {
+		extraResources := make(map[string]*fnv1.ResourceSelector)
+		for name, requirement := range jsResponse.ExtraResourceRequirements {
+			extraResources[name] = requirement.ToResourceSelector()
+			log.Debug("Requesting ExtraResources", "name", name, "selector", extraResources[name])
+		}
+
+		// Set requirements in the response
+		if rsp.Requirements == nil {
+			rsp.Requirements = &fnv1.Requirements{}
+		}
+		rsp.Requirements.ExtraResources = extraResources
 	}
 
 	// Process context data if present

@@ -16,6 +16,43 @@ type JSResponse struct {
 	Events []CreateEvent `json:"events,omitempty"`
 	// Context is a map of context data to add to the response
 	Context map[string]interface{} `json:"context,omitempty"`
+	// ExtraResourceRequirements is a map of resource name to resource requirements
+	ExtraResourceRequirements map[string]ExtraResourceRequirement `json:"extraResourceRequirements,omitempty"`
+}
+
+// ExtraResourceRequirement defines a requirement for extra resources
+type ExtraResourceRequirement struct {
+	// APIVersion of the resource
+	APIVersion string `json:"apiVersion"`
+	// Kind of the resource
+	Kind string `json:"kind"`
+	// MatchLabels defines the labels to match the resource
+	MatchLabels map[string]string `json:"matchLabels,omitempty"`
+	// MatchName defines the name to match the resource
+	MatchName string `json:"matchName,omitempty"`
+}
+
+// ToResourceSelector converts the ExtraResourceRequirement to a fnv1.ResourceSelector
+func (e *ExtraResourceRequirement) ToResourceSelector() *fnv1.ResourceSelector {
+	out := &fnv1.ResourceSelector{
+		ApiVersion: e.APIVersion,
+		Kind:       e.Kind,
+	}
+
+	if e.MatchName == "" && len(e.MatchLabels) > 0 {
+		out.Match = &fnv1.ResourceSelector_MatchLabels{
+			MatchLabels: &fnv1.MatchLabels{Labels: e.MatchLabels},
+		}
+		return out
+	}
+
+	if e.MatchName != "" {
+		out.Match = &fnv1.ResourceSelector_MatchName{
+			MatchName: e.MatchName,
+		}
+	}
+
+	return out
 }
 
 // JSResource represents a resource in the JavaScript function response

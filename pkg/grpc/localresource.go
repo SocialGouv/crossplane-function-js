@@ -64,6 +64,8 @@ type JSResource struct {
 	Resource json.RawMessage `json:"resource"`
 	// Ready indicates if the resource is ready
 	Ready *bool `json:"ready,omitempty"`
+	// ConnectionDetails contains connection details for the resource
+	ConnectionDetails map[string]string `json:"connectionDetails,omitempty"`
 }
 
 // CreateEvent will create an event for the target(s).
@@ -100,9 +102,20 @@ func ObservedToMap(observed map[resource.Name]resource.ObservedComposed) map[str
 	resources := make(map[string]interface{})
 	for name, resource := range observed {
 		if resource.Resource != nil {
-			resources[string(name)] = map[string]interface{}{
+			resourceMap := map[string]interface{}{
 				"resource": resource.Resource.UnstructuredContent(),
 			}
+
+			// Add connection details if present
+			if len(resource.ConnectionDetails) > 0 {
+				connectionDetails := make(map[string]string)
+				for k, v := range resource.ConnectionDetails {
+					connectionDetails[k] = string(v)
+				}
+				resourceMap["connectionDetails"] = connectionDetails
+			}
+
+			resources[string(name)] = resourceMap
 		}
 	}
 	return resources
@@ -137,6 +150,18 @@ func ProcessResources(rsp *fnv1.RunFunctionResponse, dxr *resource.Composite, de
 				cd.Ready = resource.ReadyTrue
 			} else {
 				cd.Ready = resource.ReadyFalse
+			}
+		}
+
+		// Process connection details if provided
+		if len(res.ConnectionDetails) > 0 {
+			// For composed resources, we don't set connection details directly
+			// They will be collected by Crossplane from the actual resources
+			// But for the composite resource (XR), we can set connection details
+			if string(name) == "composite" {
+				for k, v := range res.ConnectionDetails {
+					dxr.ConnectionDetails[k] = []byte(v)
+				}
 			}
 		}
 

@@ -93,6 +93,7 @@ type resourceBundle struct {
 	observed       map[resource.Name]resource.ObservedComposed
 	desired        map[resource.Name]*resource.DesiredComposed
 	extraResources map[string][]resource.Extra
+	credentials    map[string]resource.Credentials
 }
 
 func prepareResources(req *fnv1.RunFunctionRequest) (*resourceBundle, error) {
@@ -130,12 +131,25 @@ func prepareResources(req *fnv1.RunFunctionRequest) (*resourceBundle, error) {
 		return nil, errors.Wrapf(err, "cannot get extra resources from %T", req)
 	}
 
+	// Initialize credentials map
+	credentials := make(map[string]resource.Credentials)
+
+	// Extract credentials from the request if present
+	for name := range req.GetCredentials() {
+		cred, err := request.GetCredentials(req, name)
+		if err != nil {
+			return nil, errors.Wrapf(err, "cannot get credentials %s from %T", name, req)
+		}
+		credentials[name] = cred
+	}
+
 	return &resourceBundle{
 		oxr:            oxr,
 		dxr:            dxr,
 		observed:       observed,
 		desired:        desired,
 		extraResources: extraResources,
+		credentials:    credentials,
 	}, nil
 }
 
@@ -156,6 +170,16 @@ func createEnhancedInput(xfuncjsInput *types.XFuncJSInput, resources *resourceBu
 		},
 	}
 
+	// Add composite resource connection details if present
+	if len(resources.oxr.ConnectionDetails) > 0 {
+		compositeMap := enhancedInput["observed"].(map[string]interface{})["composite"].(map[string]interface{})
+		connectionDetails := make(map[string]string)
+		for k, v := range resources.oxr.ConnectionDetails {
+			connectionDetails[k] = string(v)
+		}
+		compositeMap["connectionDetails"] = connectionDetails
+	}
+
 	// Add extra resources if present
 	if len(resources.extraResources) > 0 {
 		extraResourcesMap := make(map[string]interface{})
@@ -167,6 +191,26 @@ func createEnhancedInput(xfuncjsInput *types.XFuncJSInput, resources *resourceBu
 			extraResourcesMap[name] = extrasList
 		}
 		enhancedInput["extraResources"] = extraResourcesMap
+	}
+
+	// Add credentials if present
+	if len(resources.credentials) > 0 {
+		credentialsMap := make(map[string]interface{})
+		for name, cred := range resources.credentials {
+			// Only include credentials of type Data for now
+			if cred.Type == resource.CredentialsTypeData {
+				dataMap := make(map[string]string)
+				for k, v := range cred.Data {
+					// Convert byte slices to strings for JSON serialization
+					dataMap[k] = string(v)
+				}
+				credentialsMap[name] = map[string]interface{}{
+					"type": string(cred.Type),
+					"data": dataMap,
+				}
+			}
+		}
+		enhancedInput["credentials"] = credentialsMap
 	}
 
 	// Convert the enhanced input to JSON

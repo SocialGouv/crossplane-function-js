@@ -130,3 +130,8 @@ func (l *LogrusLogger) WithFields(fields map[string]interface{}) Logger {
 		entry:  l.entry.WithFields(logrus.Fields(fields)),
 	}
 }
+
+// WithValues adds key-value pairs to the logger
+func (l *LogrusLogger) WithValues(keysAndValues ...interface{}) Logger {
+	return WithValues(l, keysAndValues...)
+}

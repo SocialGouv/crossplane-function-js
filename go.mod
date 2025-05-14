@@ -3,7 +3,7 @@ module github.com/socialgouv/xfuncjs-server
 go 1.23.7
 
 require (
-	github.com/crossplane/crossplane-runtime v1.18.0
+	github.com/crossplane/crossplane-runtime v1.19.0
 	github.com/crossplane/function-sdk-go v0.4.0
 	github.com/google/uuid v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0

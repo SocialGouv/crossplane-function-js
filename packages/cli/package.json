@@ -16,6 +16,7 @@
     "commander": "^13.1.0",
     "esbuild": "^0.25.4",
     "fs-extra": "^11.3.0",
+    "lodash": "^4.17.21",
     "node-ts-modules": "^0.0.3",
     "uuid": "^11.1.0",
     "yaml": "^2.7.0"
@@ -24,6 +25,7 @@
     "access": "public"
   },
   "devDependencies": {
+    "@types/lodash": "^4",
     "@types/uuid": "^10.0.0"
   },
   "files": [

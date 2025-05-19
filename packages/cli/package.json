@@ -25,5 +25,10 @@
   },
   "devDependencies": {
     "@types/uuid": "^10.0.0"
-  }
+  },
+  "files": [
+    "cli",
+    "src",
+    "tsconfig.json"
+  ]
 }

@@ -3,7 +3,7 @@
   "dependencies": {
     "@crossplane-js/cli": "link:../../../packages/cli",
     "chalk": "^5.0.1",
-    "node-ts-modules": "^0.0.2"
+    "node-ts-modules": "^0.0.3"
   },
   "scripts": {
     "compo": "node_modules/@crossplane-js/cli/cli compo",

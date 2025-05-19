@@ -272,7 +272,7 @@ __metadata:
     commander: "npm:^13.1.0"
     esbuild: "npm:^0.25.4"
     fs-extra: "npm:^11.3.0"
-    node-ts-modules: "npm:^0.0.2"
+    node-ts-modules: "npm:^0.0.3"
     uuid: "npm:^11.1.0"
     yaml: "npm:^2.7.0"
   bin:
@@ -306,7 +306,7 @@ __metadata:
     js-yaml: "npm:^4.1.0"
     lint-staged: "npm:^15.5.0"
     mocha: "npm:11.1.0"
-    node-ts-modules: "npm:^0.0.2"
+    node-ts-modules: "npm:^0.0.3"
     prettier: "npm:^3.5.3"
     ts-node: "npm:^10.9.2"
     typescript: "npm:^5.8.2"
@@ -351,7 +351,7 @@ __metadata:
     commander: "npm:^13.1.0"
     express: "npm:^5"
     fs-extra: "npm:^11.3.0"
-    node-ts-modules: "npm:^0.0.2"
+    node-ts-modules: "npm:^0.0.3"
     pino: "npm:^9.6.0"
     postject: "npm:^1.0.0-alpha.6"
   bin:
@@ -6505,12 +6505,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-ts-modules@npm:0.0.2, node-ts-modules@npm:^0.0.2":
+"node-ts-modules@npm:0.0.2":
   version: 0.0.2
   resolution: "node-ts-modules@npm:0.0.2"
   bin:
     node-ts-modules-postinstall: postinstall.js
   checksum: 10c0/39e63cc105f82a812c5c2b33c9cb44d9eab750c41c89290a9f088b232350e56ffd9eef98d2a012675766a2940d3d3b95e14e2a6de5e6e61e6501cb99acbc6668
+  languageName: node
+  linkType: hard
+
+"node-ts-modules@npm:^0.0.3":
+  version: 0.0.3
+  resolution: "node-ts-modules@npm:0.0.3"
+  bin:
+    node-ts-modules-postinstall: postinstall.js
+  checksum: 10c0/fe49a052daa11bb64e2bb0efc56c2aabebcbc4c6d1544625843adb6e9b1b542a9f8ac18c20001e84ecee806d71c8f7239a6a1b4a9c870d40b28a4b6734d75ba4
   languageName: node
   linkType: hard
 

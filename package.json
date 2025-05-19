@@ -53,6 +53,6 @@
     "yaml": "^2.7.0"
   },
   "dependencies": {
-    "node-ts-modules": "^0.0.2"
+    "node-ts-modules": "^0.0.3"
   }
 }

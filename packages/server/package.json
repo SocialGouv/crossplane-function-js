@@ -29,7 +29,7 @@
     "commander": "^13.1.0",
     "express": "^5",
     "fs-extra": "^11.3.0",
-    "node-ts-modules": "^0.0.2",
+    "node-ts-modules": "^0.0.3",
     "pino": "^9.6.0",
     "postject": "^1.0.0-alpha.6"
   }

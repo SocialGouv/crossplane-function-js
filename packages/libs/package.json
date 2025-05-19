@@ -1,6 +1,6 @@
 {
   "name": "@crossplane-js/libs",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Shared libraries for Crossplane XFuncJS",
   "type": "module",
   "main": "index.ts",

@@ -1,4 +1,5 @@
 {
+  "name": "domain-sdk",
   "dependencies": {
     "@crossplane-js/cli": "link:../../../packages/cli",
     "chalk": "^5.0.1",

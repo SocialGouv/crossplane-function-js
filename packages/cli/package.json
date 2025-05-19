@@ -8,6 +8,9 @@
   "bin": {
     "xfuncjs": "./cli"
   },
+  "scripts": {
+    "postinstall": "node-ts-modules-postinstall"
+  },
   "dependencies": {
     "@crossplane-js/libs": "workspace:^",
     "commander": "^13.1.0",

@@ -9,7 +9,7 @@
   "dependencies": {
     "@crossplane-js/libs": "workspace:^",
     "lodash": "^4.17.21",
-    "node-ts-modules": "0.0.2",
+    "node-ts-modules": "0.0.3",
     "pino": "^9.6.0",
     "yaml": "^2.7.0"
   },

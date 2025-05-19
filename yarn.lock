@@ -331,7 +331,7 @@ __metadata:
     "@crossplane-js/libs": "workspace:^"
     "@types/lodash": "npm:^4"
     lodash: "npm:^4.17.21"
-    node-ts-modules: "npm:0.0.2"
+    node-ts-modules: "npm:0.0.3"
     pino: "npm:^9.6.0"
     yaml: "npm:^2.7.0"
   languageName: unknown
@@ -6505,16 +6505,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-ts-modules@npm:0.0.2":
-  version: 0.0.2
-  resolution: "node-ts-modules@npm:0.0.2"
-  bin:
-    node-ts-modules-postinstall: postinstall.js
-  checksum: 10c0/39e63cc105f82a812c5c2b33c9cb44d9eab750c41c89290a9f088b232350e56ffd9eef98d2a012675766a2940d3d3b95e14e2a6de5e6e61e6501cb99acbc6668
-  languageName: node
-  linkType: hard
-
-"node-ts-modules@npm:^0.0.3":
+"node-ts-modules@npm:0.0.3, node-ts-modules@npm:^0.0.3":
   version: 0.0.3
   resolution: "node-ts-modules@npm:0.0.3"
   bin:

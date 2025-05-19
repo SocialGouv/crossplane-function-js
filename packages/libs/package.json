@@ -4,6 +4,9 @@
   "description": "Shared libraries for Crossplane XFuncJS",
   "type": "module",
   "main": "index.ts",
+  "scripts": {
+    "postinstall": "node-ts-modules-postinstall"
+  },
   "dependencies": {
     "fs-extra": "^11.3.0",
     "pino": "^9.6.0"

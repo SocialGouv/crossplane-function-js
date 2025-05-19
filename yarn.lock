@@ -322,6 +322,7 @@ __metadata:
   dependencies:
     "@types/fs-extra": "npm:^11"
     fs-extra: "npm:^11.3.0"
+    node-ts-modules: "npm:^0.0.3"
     pino: "npm:^9.6.0"
   languageName: unknown
   linkType: soft

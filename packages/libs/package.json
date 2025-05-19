@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "fs-extra": "^11.3.0",
+    "node-ts-modules": "^0.0.3",
     "pino": "^9.6.0"
   },
   "devDependencies": {

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.11 (2025-05-20)
+
+
+### Bug Fixes
+
+* use tsx for cli ([bf0cb16](https://github.com/SocialGouv/crossplane-function-js/commit/bf0cb16e1417f736c1a3d059784eebd5e072e48b))
+
 ## 0.0.10 (2025-05-19)
 
 

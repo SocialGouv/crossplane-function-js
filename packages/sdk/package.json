@@ -1,15 +1,12 @@
 {
   "name": "@crossplane-js/sdk",
   "version": "0.0.10",
-  "main": "index.ts",
   "packageManager": "yarn@4.8.1",
-  "scripts": {
-    "postinstall": "node-ts-modules-postinstall"
-  },
+  "type": "module",
+  "main": "index.ts",
   "dependencies": {
     "@crossplane-js/libs": "workspace:^",
     "lodash": "^4.17.21",
-    "node-ts-modules": "0.0.2",
     "pino": "^9.6.0",
     "yaml": "^2.7.0"
   },

@@ -8,16 +8,13 @@
   "bin": {
     "xfuncjs": "./cli"
   },
-  "scripts": {
-    "postinstall": "node-ts-modules-postinstall"
-  },
   "dependencies": {
     "@crossplane-js/libs": "workspace:^",
     "commander": "^13.1.0",
     "esbuild": "^0.25.4",
     "fs-extra": "^11.3.0",
     "lodash": "^4.17.21",
-    "node-ts-modules": "^0.0.3",
+    "tsx": "^4.19.4",
     "uuid": "^11.1.0",
     "yaml": "^2.7.0"
   },

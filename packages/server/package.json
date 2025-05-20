@@ -7,8 +7,6 @@
   "main": "src/index.ts",
   "bin": "build/xfuncjs-server-js",
   "scripts": {
-    "dev": "node --no-warnings --experimental-strip-types --experimental-loader node-ts-modules/loader-esm.mjs src/index.ts",
-    "dev:start": "NODE_OPTIONS='--no-warnings --experimental-strip-types' build/xfuncjs-server-js",
     "build": "yarn build:clean && yarn build:ncc:begin && yarn build:ncc && yarn build:ncc:end && yarn build:blob && yarn build:node && yarn build:postject",
     "build:clean": "rm -rf ./build && mkdir -p build",
     "build:ncc:begin": "jq '.type = \"commonjs\"' package.json > tmp.json && mv tmp.json package.json",
@@ -29,8 +27,8 @@
     "commander": "^13.1.0",
     "express": "^5",
     "fs-extra": "^11.3.0",
-    "node-ts-modules": "^0.0.3",
     "pino": "^9.6.0",
-    "postject": "^1.0.0-alpha.6"
+    "postject": "^1.0.0-alpha.6",
+    "tsx": "^4.19.4"
   }
 }

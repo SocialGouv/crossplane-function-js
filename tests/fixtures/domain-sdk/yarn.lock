@@ -24,15 +24,5 @@ __metadata:
   dependencies:
     "@crossplane-js/cli": "link:../../../packages/cli"
     chalk: "npm:^5.0.1"
-    node-ts-modules: "npm:^0.0.3"
   languageName: unknown
   linkType: soft
-
-"node-ts-modules@npm:^0.0.3":
-  version: 0.0.3
-  resolution: "node-ts-modules@npm:0.0.3"
-  bin:
-    node-ts-modules-postinstall: postinstall.js
-  checksum: 10c0/fe49a052daa11bb64e2bb0efc56c2aabebcbc4c6d1544625843adb6e9b1b542a9f8ac18c20001e84ecee806d71c8f7239a6a1b4a9c870d40b28a4b6734d75ba4
-  languageName: node
-  linkType: hard

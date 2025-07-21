@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@crossplane-js/libs": "workspace:^",
-    "commander": "^13.1.0",
+    "commander": "^14.0.0",
     "esbuild": "^0.25.4",
     "fs-extra": "^11.3.0",
     "lodash": "^4.17.21",

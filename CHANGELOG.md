@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.13 (2025-07-23)
+
+
+### Bug Fixes
+
+* **chart:** add image prefix v for default appVersion ([dcc38d5](https://github.com/SocialGouv/crossplane-function-js/commit/dcc38d563a5f8c2871616c8f4e3ff8a37d6b2e63))
+
 ## 0.0.12 (2025-07-23)
 
 

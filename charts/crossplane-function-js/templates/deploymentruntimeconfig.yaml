@@ -3,10 +3,6 @@ kind: DeploymentRuntimeConfig
 metadata:
   name: {{ .Values.runtimeConfig.name }}
 spec:
-  serviceConfig:
-    name: {{ .Values.runtimeConfig.service.name }}
-    namespace: {{ .Values.runtimeConfig.service.namespace }}
-    port: 9443
   deploymentTemplate:
     spec:
       selector:

@@ -66,7 +66,7 @@ Please keep in mind that a problematic PR broke [0.3.9](//github.com/imdario/mer
 
 Keep in mind that in [0.3.2](//github.com/imdario/mergo/releases/tag/0.3.2), Mergo changed `Merge()`and `Map()` signatures to support [transformers](#transformers). I added an optional/variadic argument so that it won't break the existing code.
 
-If you were using Mergo before April 6th, 2015, please check your project works as intended after updating your local copy with `go get -u dario.cat/mergo`. I apologize for any issue caused by its previous behavior and any future bug that Mergo could cause in existing projects after the change (release 0.2.0).
+If you were using Mergo before April 6th, 2015, please check your project works as intended after updating your local copy with ```go get -u dario.cat/mergo```. I apologize for any issue caused by its previous behavior and any future bug that Mergo could cause in existing projects after the change (release 0.2.0).
 
 ### Donations
 
@@ -79,17 +79,17 @@ If Mergo is useful to you, consider buying me a coffee, a beer, or making a mont
 
 Mergo is used by [thousands](https://deps.dev/go/dario.cat%2Fmergo/v1.0.0/dependents) [of](https://deps.dev/go/github.com%2Fimdario%2Fmergo/v0.3.16/dependents) [projects](https://deps.dev/go/github.com%2Fimdario%2Fmergo/v0.3.12), including:
 
-- [containerd/containerd](https://github.com/containerd/containerd)
-- [datadog/datadog-agent](https://github.com/datadog/datadog-agent)
-- [docker/cli/](https://github.com/docker/cli/)
-- [goreleaser/goreleaser](https://github.com/goreleaser/goreleaser)
-- [go-micro/go-micro](https://github.com/go-micro/go-micro)
-- [grafana/loki](https://github.com/grafana/loki)
-- [kubernetes/kubernetes](https://github.com/kubernetes/kubernetes)
-- [masterminds/sprig](github.com/Masterminds/sprig)
-- [moby/moby](https://github.com/moby/moby)
-- [slackhq/nebula](https://github.com/slackhq/nebula)
-- [volcano-sh/volcano](https://github.com/volcano-sh/volcano)
+* [containerd/containerd](https://github.com/containerd/containerd)
+* [datadog/datadog-agent](https://github.com/datadog/datadog-agent)
+* [docker/cli/](https://github.com/docker/cli/)
+* [goreleaser/goreleaser](https://github.com/goreleaser/goreleaser)
+* [go-micro/go-micro](https://github.com/go-micro/go-micro)
+* [grafana/loki](https://github.com/grafana/loki)
+* [kubernetes/kubernetes](https://github.com/kubernetes/kubernetes)
+* [masterminds/sprig](github.com/Masterminds/sprig)
+* [moby/moby](https://github.com/moby/moby)
+* [slackhq/nebula](https://github.com/slackhq/nebula)
+* [volcano-sh/volcano](https://github.com/volcano-sh/volcano)
 
 ## Install
 

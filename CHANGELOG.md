@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.12 (2025-07-23)
+
+
+### Bug Fixes
+
+* **helm:** default values for registry and image ([9215c21](https://github.com/SocialGouv/crossplane-function-js/commit/9215c21652295ccf7c4dcbd17f6b8ae0dee896b1))
+
 ## 0.0.11 (2025-05-20)
 
 

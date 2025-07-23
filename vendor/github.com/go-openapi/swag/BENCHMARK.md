@@ -42,7 +42,7 @@ BenchmarkToXXXName/ToHumanNameTitle-4 	 9188260	      3941 ns/op	     104 B/op	 
 goos: linux
 goarch: amd64
 pkg: github.com/go-openapi/swag
-cpu: AMD Ryzen 7 5800X 8-Core Processor
+cpu: AMD Ryzen 7 5800X 8-Core Processor             
 BenchmarkToXXXName/ToGoName-16         	18527378	      1972 ns/op	      42 B/op	       5 allocs/op
 BenchmarkToXXXName/ToVarName-16        	15552692	      2093 ns/op	      62 B/op	       7 allocs/op
 BenchmarkToXXXName/ToFileName-16       	32161176	      1117 ns/op	     147 B/op	       7 allocs/op

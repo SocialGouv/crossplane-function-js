@@ -2,8 +2,8 @@
 function:
   name: function-xfuncjs
   package:
-    repository: localhost:5001
-    name: xfuncjs-server
+    repository: ghcr.io/socialgouv
+    name: crossplane-function-js
     tag: 
   pullPolicy: IfNotPresent
 

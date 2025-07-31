@@ -2,8 +2,8 @@
 export { logger, createLogger } from "@crossplane-js/libs"
 
 // Export types
-export type * from "./src/types"
+export type * from "./src/types.ts"
 
-export * from "./src/Model/index"
-export * from "./src/utils/FieldRef"
-export * from "./src/utils/secretUtils"
+export * from "./src/Model/index.ts"
+export * from "./src/utils/FieldRef.ts"
+export * from "./src/utils/secretUtils.ts"

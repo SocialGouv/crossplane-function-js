@@ -1,6 +1,6 @@
 {
   "name": "@crossplane-js/server",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "Crossplane XFuncJS server for executing code from compositions",
   "license": "MIT",
   "type": "module",

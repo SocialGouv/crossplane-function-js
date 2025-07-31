@@ -1,4 +1,13 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
+# Ajouter le PATH de base pour avoir accès à direnv
+export PATH="$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:$PATH"
+
+# Si direnv est disponible, récupérer le PATH du projet via bash
+if [ -f ".envrc" ] && command -v direnv >/dev/null 2>&1; then
+    # Utiliser bash pour exécuter direnv et extraire seulement le PATH
+    PROJECT_PATH=$(bash -c 'eval "$(direnv export bash 2>/dev/null)" && echo "$PATH"')
+    if [ -n "$PROJECT_PATH" ]; then
+        export PATH="$PROJECT_PATH"
+    fi
+fi
 
 yarn lint-staged

@@ -16,22 +16,22 @@ With this reason along with the main purpose of Flect, which is to make it
 easy to develop web application in Go, Flect has limitations with its own
 rules.
 
-- It covers regular rule (adding -s or -es and of the word)
-- It covers well-known irregular rules (such as -is to -es, -f to -ves, etc)
-  - https://en.wiktionary.org/wiki/Appendix:English_irregular_nouns#Rules
-- It covers well-known irregular words (such as children, men, etc)
-- If a word can be countable and uncountable like milk or time, it will be
+* It covers regular rule (adding -s or -es and of the word)
+* It covers well-known irregular rules (such as -is to -es, -f to -ves, etc)
+  * https://en.wiktionary.org/wiki/Appendix:English_irregular_nouns#Rules
+* It covers well-known irregular words (such as children, men, etc)
+* If a word can be countable and uncountable like milk or time, it will be
   treated as countable.
-- If a word has more than one plural forms, which means it has at least one
+* If a word has more than one plural forms, which means it has at least one
   irregular plural, we tried to find most popular one. (The selected plural
   could be odd to you, please feel free to open an issue with back data)
-  - For example, we selected "stadiums" over "stadia", "dwarfs" over "dwarves"
-  - One or combination of en.wiktionary.org, britannica.com, and
+  * For example, we selected "stadiums" over "stadia", "dwarfs" over "dwarves"
+  * One or combination of en.wiktionary.org, britannica.com, and
     trends.google.com are used to check the recent usage trends.
-- However, we cannot cover all cases and some of our cases could not fit with
+* However, we cannot cover all cases and some of our cases could not fit with
   your situation. You can override the default with functions such as
   `InsertPlural()`, `InsertSingular()`, or `LoadInfrections()`.
-- If you have a json file named `inflections.json` in your application root,
+* If you have a json file named `inflections.json` in your application root,
   the file will be automatically loaded as your custom inflection dictionary.
 
 ## Installation
@@ -39,6 +39,7 @@ rules.
 ```console
 $ go get github.com/gobuffalo/flect
 ```
+
 
 ## Packages
 
@@ -52,8 +53,8 @@ In addition to helpful methods that take in a `string` and return a `string`, th
 
 The `Ident` type contains two fields.
 
-- `Original` - This is the original `string` that was used to create the `Ident`
-- `Parts` - This is a `[]string` that represents all of the "parts" of the string, that have been split apart, making the segments easier to work with
+* `Original` - This is the original `string` that was used to create the `Ident`
+* `Parts` - This is a `[]string` that represents all of the "parts" of the string, that have been split apart, making the segments easier to work with
 
 Examples of creating new inflection rules using `Ident` can be found in the `github.com/gobuffalo/flect/name` package.
 

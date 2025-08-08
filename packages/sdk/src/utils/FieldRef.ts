@@ -1,21 +1,39 @@
-import lodash from "lodash"
+import { JSONPath } from "jsonpath-plus"
 
 /**
  * A reference to a field in an object, with fallback in case the field is not found.
- * Used to reference a value when declaring a composed resource. If the field is not found,
- * the resource will be set with a wrong value, but it will be paused, until a compose
- * function is called again with the correct values.
+ * Used to reference a value when declaring a composed resource using JSONPath syntax.
+ * If the field is not found, the resource will be set with a wrong value, but it will be paused,
+ * until a compose function is called again with the correct values.
+ *
+ * @example
+ * // Access a nested field using JSONPath syntax
+ * new FieldRef(data, "$.spec.containers[0].name", "default-name")
+ *
+ * // Access array elements
+ * new FieldRef(data, "$.items[*].metadata.name", [])
+ *
+ * // Access with conditional expressions
+ * new FieldRef(data, "$.spec.template.spec.containers[?(@.name=='main')].image", "default:latest")
  */
 export class FieldRef<T> extends String {
   private resolved: boolean
 
+  /**
+   * Get a value from an object using JSONPath syntax
+   * @param valueContainer The object to query
+   * @param path JSONPath expression (e.g., "$.spec.containers[0].name")
+   * @param fallback The fallback value if the path is not found
+   * @param valueTransformer Optional function to transform the found value
+   * @returns A tuple containing [value, resolved] where resolved indicates if the path was found
+   */
   static getValue<T>(
     valueContainer: Record<string, any>,
     path: string,
     fallback: T,
     valueTransformer?: (value: any) => T
   ): [T, boolean] {
-    const obj = lodash.get(valueContainer, path)
+    const obj = JSONPath({ path, json: valueContainer, wrap: false })
     if (obj === undefined) {
       return [fallback, false]
     }
@@ -23,6 +41,13 @@ export class FieldRef<T> extends String {
     return [transformedValue, true]
   }
 
+  /**
+   * Create a new FieldRef instance using JSONPath syntax
+   * @param valueContainer The object to query
+   * @param path JSONPath expression (e.g., "$.spec.containers[0].name")
+   * @param fallback The fallback value if the path is not found
+   * @param valueTransformer Optional function to transform the found value
+   */
   constructor(
     valueContainer: Record<string, any>,
     path: string,

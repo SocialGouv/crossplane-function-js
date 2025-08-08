@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.20 (2025-08-08)
+
+
+### Bug Fixes
+
+* dependencies placeholder replace ([2cd4eb2](https://github.com/SocialGouv/crossplane-function-js/commit/2cd4eb2d674f439da6b21afb4487990295f1c0d3))
+
 ## 0.0.19 (2025-08-08)
 
 

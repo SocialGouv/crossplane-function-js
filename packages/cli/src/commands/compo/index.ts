@@ -384,12 +384,39 @@ async function compoAction(
         }
       }
 
+      // Check for xrd.yaml in the function directory
+      const xrdFilePath = path.join(functionDir, "xrd.yaml")
+      let finalOutput: string
+
+      if (fs.existsSync(xrdFilePath)) {
+        // Read and parse the XRD file
+        try {
+          const xrdContent = fs.readFileSync(xrdFilePath, { encoding: "utf8" })
+          const xrdManifest = YAML.parse(xrdContent)
+
+          // Generate multi-document YAML with XRD first, then composition
+          const xrdYaml = YAML.stringify(xrdManifest)
+          const compositionYaml = YAML.stringify(manifest)
+
+          // Combine with document separator
+          finalOutput = `${xrdYaml}---\n${compositionYaml}`
+
+          moduleLogger.info(`Including XRD from ${xrdFilePath} for ${functionName}`)
+        } catch (error) {
+          moduleLogger.error(`Error reading or parsing xrd.yaml for ${functionName}: ${error}`)
+          // Fall back to composition only
+          finalOutput = YAML.stringify(manifest)
+        }
+      } else {
+        // No XRD file, use composition only (existing behavior)
+        finalOutput = YAML.stringify(manifest)
+      }
+
       // Generate the output file
       const outputPath = path.join(manifestsDir, `${functionName}.compo.yaml`)
-      const yamlOutput = YAML.stringify(manifest)
 
       // Write the output file
-      fs.writeFileSync(outputPath, yamlOutput)
+      fs.writeFileSync(outputPath, finalOutput)
 
       moduleLogger.info(`Generated manifest for ${functionName}: ${outputPath}`)
     }

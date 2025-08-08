@@ -316,7 +316,7 @@ async function compoAction(
         }
       }
 
-      if (xfuncjsStep.input.spec.dependencies === "__DEPENDENCIES__") {
+      if (xfuncjsStep.input.spec.source.dependencies === ("__DEPENDENCIES__" as any)) {
         // Check for package.json in the function directory
         let dependencies: Record<string, string> = {}
         const packageJsonPath = path.join(functionDir, "package.json")

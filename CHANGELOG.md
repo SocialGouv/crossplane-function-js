@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.17 (2025-08-08)
+
+
+### Bug Fixes
+
+* **jsonpath:** replace lib to detect jsonpath syntax error ([19db897](https://github.com/SocialGouv/crossplane-function-js/commit/19db8974f2613a91d20dcfe071b6260a7ab36cf1))
+
 ## 0.0.16 (2025-08-08)
 
 

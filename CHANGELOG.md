@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.18 (2025-08-08)
+
+
+### Bug Fixes
+
+* use apiVersion from xrd in compo ([67c95d8](https://github.com/SocialGouv/crossplane-function-js/commit/67c95d8d0b6ea0dece48884d9ea962fbdee14849))
+
 ## 0.0.17 (2025-08-08)
 
 

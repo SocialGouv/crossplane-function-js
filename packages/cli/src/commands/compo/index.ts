@@ -2,7 +2,7 @@ import { tmpdir } from "os"
 import path from "path"
 import { fileURLToPath } from "url"
 
-import { createLogger } from "@crossplane-js/libs"
+import { createLogger, getLatestKubernetesVersion } from "@crossplane-js/libs"
 import { Command } from "commander"
 import { build } from "esbuild"
 import type { BuildOptions, Plugin } from "esbuild"
@@ -200,6 +200,21 @@ async function compoAction(
     for (const functionName of functionDirs) {
       const functionDir = path.join(functionsDir, functionName)
 
+      // Check for XRD file early and parse it once
+      const xrdFilePath = path.join(functionDir, "xrd.yaml")
+      let xrdManifest: any = null
+      let xrdContent: string | null = null
+
+      if (fs.existsSync(xrdFilePath)) {
+        try {
+          xrdContent = fs.readFileSync(xrdFilePath, { encoding: "utf8" })
+          xrdManifest = YAML.parse(xrdContent)
+          moduleLogger.debug(`Loaded XRD file for ${functionName}`)
+        } catch (error) {
+          moduleLogger.error(`Error reading or parsing XRD file for ${functionName}: ${error}`)
+        }
+      }
+
       // Check if composition.yaml exists
       let manifest: Manifest
       const yamlFilePath = path.join(functionDir, "composition.yaml")
@@ -228,6 +243,48 @@ async function compoAction(
         // Update the name in the manifest to match the function name
         if (manifest.metadata && manifest.metadata.name) {
           manifest.metadata.name = manifest.metadata.name.replace("__FUNCTION_NAME__", functionName)
+        }
+
+        // Update the apiVersion in the compositeTypeRef using the already loaded XRD
+        if (
+          manifest.spec &&
+          manifest.spec.compositeTypeRef &&
+          manifest.spec.compositeTypeRef.apiVersion
+        ) {
+          if (
+            xrdManifest &&
+            xrdManifest.spec &&
+            xrdManifest.spec.group &&
+            xrdManifest.spec.versions &&
+            xrdManifest.spec.versions.length > 0
+          ) {
+            const group = xrdManifest.spec.group
+            try {
+              const version = getLatestKubernetesVersion(xrdManifest.spec.versions)
+              const apiVersion = `${group}/${version}`
+
+              manifest.spec.compositeTypeRef.apiVersion = apiVersion
+              moduleLogger.debug(
+                `Set compositeTypeRef.apiVersion to ${apiVersion} (latest version) from XRD for ${functionName}`
+              )
+            } catch (error) {
+              moduleLogger.warn(
+                `Error determining latest version for ${functionName}, using first version: ${error}`
+              )
+              const version = xrdManifest.spec.versions[0].name
+              const apiVersion = `${group}/${version}`
+              manifest.spec.compositeTypeRef.apiVersion = apiVersion
+              moduleLogger.debug(
+                `Set compositeTypeRef.apiVersion to ${apiVersion} (fallback to first) from XRD for ${functionName}`
+              )
+            }
+          } else if (xrdManifest) {
+            moduleLogger.warn(
+              `XRD file exists but missing required spec.group or spec.versions for ${functionName}`
+            )
+          } else {
+            moduleLogger.debug(`No XRD file found for ${functionName}, keeping template apiVersion`)
+          }
         }
 
         // Update the kind in the compositeTypeRef
@@ -384,29 +441,18 @@ async function compoAction(
         }
       }
 
-      // Check for xrd.yaml in the function directory
-      const xrdFilePath = path.join(functionDir, "xrd.yaml")
+      // Generate final output using the already loaded XRD data
       let finalOutput: string
 
-      if (fs.existsSync(xrdFilePath)) {
-        // Read and parse the XRD file
-        try {
-          const xrdContent = fs.readFileSync(xrdFilePath, { encoding: "utf8" })
-          const xrdManifest = YAML.parse(xrdContent)
+      if (xrdManifest && xrdContent) {
+        // Generate multi-document YAML with XRD first, then composition
+        const xrdYaml = YAML.stringify(xrdManifest)
+        const compositionYaml = YAML.stringify(manifest)
 
-          // Generate multi-document YAML with XRD first, then composition
-          const xrdYaml = YAML.stringify(xrdManifest)
-          const compositionYaml = YAML.stringify(manifest)
+        // Combine with document separator
+        finalOutput = `${xrdYaml}---\n${compositionYaml}`
 
-          // Combine with document separator
-          finalOutput = `${xrdYaml}---\n${compositionYaml}`
-
-          moduleLogger.info(`Including XRD from ${xrdFilePath} for ${functionName}`)
-        } catch (error) {
-          moduleLogger.error(`Error reading or parsing xrd.yaml for ${functionName}: ${error}`)
-          // Fall back to composition only
-          finalOutput = YAML.stringify(manifest)
-        }
+        moduleLogger.info(`Including XRD from ${xrdFilePath} for ${functionName}`)
       } else {
         // No XRD file, use composition only (existing behavior)
         finalOutput = YAML.stringify(manifest)

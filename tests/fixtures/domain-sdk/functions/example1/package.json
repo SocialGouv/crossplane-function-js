@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "lodash": "^4.17.21",
-    "chalk": "^5.0.1"
-  }
-}

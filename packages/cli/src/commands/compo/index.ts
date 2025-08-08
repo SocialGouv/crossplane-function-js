@@ -202,18 +202,10 @@ async function compoAction(
 
       // Check for XRD file early and parse it once
       const xrdFilePath = path.join(functionDir, "xrd.yaml")
-      let xrdManifest: any = null
-      let xrdContent: string | null = null
 
-      if (fs.existsSync(xrdFilePath)) {
-        try {
-          xrdContent = fs.readFileSync(xrdFilePath, { encoding: "utf8" })
-          xrdManifest = YAML.parse(xrdContent)
-          moduleLogger.debug(`Loaded XRD file for ${functionName}`)
-        } catch (error) {
-          moduleLogger.error(`Error reading or parsing XRD file for ${functionName}: ${error}`)
-        }
-      }
+      const xrdContent: string = fs.readFileSync(xrdFilePath, { encoding: "utf8" })
+      const xrdManifest = YAML.parse(xrdContent)
+      moduleLogger.debug(`Loaded XRD file for ${functionName}`)
 
       // Check if composition.yaml exists
       let manifest: Manifest
@@ -246,56 +238,15 @@ async function compoAction(
         }
 
         // Update the apiVersion in the compositeTypeRef using the already loaded XRD
-        if (
-          manifest.spec &&
-          manifest.spec.compositeTypeRef &&
-          manifest.spec.compositeTypeRef.apiVersion
-        ) {
-          if (
-            xrdManifest &&
-            xrdManifest.spec &&
-            xrdManifest.spec.group &&
-            xrdManifest.spec.versions &&
-            xrdManifest.spec.versions.length > 0
-          ) {
-            const group = xrdManifest.spec.group
-            try {
-              const version = getLatestKubernetesVersion(xrdManifest.spec.versions)
-              const apiVersion = `${group}/${version}`
+        if (manifest.spec && manifest.spec.compositeTypeRef) {
+          const group = xrdManifest.spec.group
+          const version = getLatestKubernetesVersion(xrdManifest.spec.versions)
+          const apiVersion = `${group}/${version}`
 
-              manifest.spec.compositeTypeRef.apiVersion = apiVersion
-              moduleLogger.debug(
-                `Set compositeTypeRef.apiVersion to ${apiVersion} (latest version) from XRD for ${functionName}`
-              )
-            } catch (error) {
-              moduleLogger.warn(
-                `Error determining latest version for ${functionName}, using first version: ${error}`
-              )
-              const version = xrdManifest.spec.versions[0].name
-              const apiVersion = `${group}/${version}`
-              manifest.spec.compositeTypeRef.apiVersion = apiVersion
-              moduleLogger.debug(
-                `Set compositeTypeRef.apiVersion to ${apiVersion} (fallback to first) from XRD for ${functionName}`
-              )
-            }
-          } else if (xrdManifest) {
-            moduleLogger.warn(
-              `XRD file exists but missing required spec.group or spec.versions for ${functionName}`
-            )
-          } else {
-            moduleLogger.debug(`No XRD file found for ${functionName}, keeping template apiVersion`)
-          }
-        }
-
-        // Update the kind in the compositeTypeRef
-        if (
-          manifest.spec &&
-          manifest.spec.compositeTypeRef &&
-          manifest.spec.compositeTypeRef.kind
-        ) {
-          manifest.spec.compositeTypeRef.kind = manifest.spec.compositeTypeRef.kind.replace(
-            "__FUNCTION_NAME__",
-            functionName
+          manifest.spec.compositeTypeRef.apiVersion = apiVersion
+          manifest.spec.compositeTypeRef.kind = xrdManifest.spec.names.kind
+          moduleLogger.debug(
+            `Set compositeTypeRef.apiVersion to ${apiVersion} (latest version) from XRD for ${functionName}`
           )
         }
 

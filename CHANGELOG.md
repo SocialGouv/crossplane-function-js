@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.15 (2025-08-08)
+
+
+### Bug Fixes
+
+* include xrd in generated manifest ([75384e9](https://github.com/SocialGouv/crossplane-function-js/commit/75384e9ad60a7bc0995f311886b98d6359591979))
+
 ## 0.0.14 (2025-07-31)
 
 

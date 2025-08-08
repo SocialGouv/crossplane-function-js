@@ -1,4 +1,4 @@
-import { JSONPath } from "jsonpath-plus"
+import jsonpath from "jsonpath"
 
 /**
  * A reference to a field in an object, with fallback in case the field is not found.
@@ -33,7 +33,7 @@ export class FieldRef<T> extends String {
     fallback: T,
     valueTransformer?: (value: any) => T
   ): [T, boolean] {
-    const obj = JSONPath({ path, json: valueContainer, wrap: false })
+    const obj = jsonpath.value(valueContainer, path)
     if (obj === undefined) {
       return [fallback, false]
     }

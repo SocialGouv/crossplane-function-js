@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.16 (2025-08-08)
+
+
+### Features
+
+* **fieldref:** implements jsonpath ([9080919](https://github.com/SocialGouv/crossplane-function-js/commit/9080919a30b254454e0417b1400b6d192c0fc1c7))
+
 ## 0.0.15 (2025-08-08)
 
 

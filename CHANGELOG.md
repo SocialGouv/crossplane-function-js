@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.21 (2025-08-11)
+
+
+### Features
+
+* registerXrdModel ([456a0c2](https://github.com/SocialGouv/crossplane-function-js/commit/456a0c211e73b5ab9cbf93554965d9aec82cd007))
+
 ## 0.0.20 (2025-08-08)
 
 

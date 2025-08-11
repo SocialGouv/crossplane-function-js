@@ -1,6 +1,7 @@
 import fs from "fs"
 
 import { createLogger } from "@crossplane-js/libs"
+import { getRegisteredXrdModelByApiVersion } from "@crossplane-js/sdk"
 
 import type { NodeResponse, NodeError, FunctionInput } from "./types"
 
@@ -68,7 +69,37 @@ export async function executeCode(
 
       let result
       try {
-        result = await module.default(input)
+        let composite: any = input
+
+        // Try to instantiate using registered XRD model if available
+        try {
+          const inputData = input as any
+          const compositeResource = inputData?.observed?.composite?.resource
+
+          if (compositeResource?.apiVersion && compositeResource?.kind) {
+            const RegisteredModelClass = getRegisteredXrdModelByApiVersion(
+              compositeResource.apiVersion,
+              compositeResource.kind
+            )
+
+            if (RegisteredModelClass) {
+              moduleLogger.debug(`Using registered XRD model for ${compositeResource.kind}`)
+              composite = new RegisteredModelClass(compositeResource)
+            } else {
+              moduleLogger.debug(
+                `No registered XRD model found for ${compositeResource.kind}, using raw input`
+              )
+            }
+          }
+        } catch (modelErr) {
+          moduleLogger.debug(
+            `Failed to instantiate XRD model, falling back to raw input: ${(modelErr as Error).message}`
+          )
+          // Fall back to raw input if model instantiation fails
+          composite = input
+        }
+
+        result = await module.default(composite)
         moduleLogger.debug("Function execution completed")
       } catch (execErr) {
         moduleLogger.error(`Error during function execution: ${(execErr as Error).message}`)

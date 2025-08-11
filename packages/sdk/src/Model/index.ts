@@ -13,10 +13,79 @@ type Status = {
   [key: string]: any
 }
 
+// XRD Model Registry types
+export interface XrdModelRegistryEntry {
+  modelClass: typeof Model
+  group: string
+  kind: string
+}
+
+export interface XrdModelRegistry {
+  [key: string]: XrdModelRegistryEntry
+}
+
+// Global registry for XRD models
+const xrdModelRegistry: XrdModelRegistry = {}
+
+/**
+ * Register an XRD model class with the global registry
+ * @param group - The API group (e.g., "workspace.fabrique.social.gouv.fr")
+ * @param kind - The resource kind (e.g., "XRedis")
+ * @returns Class decorator function
+ */
+export function registerXrdModel(group: string, kind: string) {
+  return function <T extends new (...args: any[]) => Model<any>>(target: T): T {
+    const registryKey = `${group}/${kind}`
+
+    xrdModelRegistry[registryKey] = {
+      modelClass: target as any,
+      group,
+      kind,
+    }
+
+    return target
+  }
+}
+
+/**
+ * Get a registered XRD model class by group and kind
+ * @param group - The API group
+ * @param kind - The resource kind
+ * @returns The registered model class or undefined if not found
+ */
+export function getRegisteredXrdModel(group: string, kind: string): typeof Model | undefined {
+  const registryKey = `${group}/${kind}`
+  return xrdModelRegistry[registryKey]?.modelClass
+}
+
+/**
+ * Get a registered XRD model class by apiVersion and kind
+ * @param apiVersion - The full API version (e.g., "workspace.fabrique.social.gouv.fr/v1alpha1")
+ * @param kind - The resource kind
+ * @returns The registered model class or undefined if not found
+ */
+export function getRegisteredXrdModelByApiVersion(
+  apiVersion: string,
+  kind: string
+): typeof Model | undefined {
+  // Extract group from apiVersion
+  // If no '/' is present, use "core" as convention for core resources
+  const group = apiVersion.includes("/") ? apiVersion.split("/")[0] : "core"
+  return getRegisteredXrdModel(group, kind)
+}
+
+/**
+ * Get all registered XRD models
+ * @returns The complete registry
+ */
+export function getXrdModelRegistry(): XrdModelRegistry {
+  return { ...xrdModelRegistry }
+}
+
 export class Model<T> extends BaseModel<T> {
   getMetadata(): IObjectMeta {
     const self = this as any
-    if (!self.metadatata) {
+    if (!self.metadata) {
       throw new Error("No metadata found")
     }
     return self.metadata

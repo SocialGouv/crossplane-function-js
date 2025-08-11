@@ -70,33 +70,21 @@ export async function executeCode(
       let result
       try {
         let composite: any = input
+        const inputData = input as any
+        const compositeResource = inputData?.observed?.composite?.resource
 
-        // Try to instantiate using registered XRD model if available
-        try {
-          const inputData = input as any
-          const compositeResource = inputData?.observed?.composite?.resource
+        const RegisteredModelClass = getRegisteredXrdModelByApiVersion(
+          compositeResource.apiVersion,
+          compositeResource.kind
+        )
 
-          if (compositeResource?.apiVersion && compositeResource?.kind) {
-            const RegisteredModelClass = getRegisteredXrdModelByApiVersion(
-              compositeResource.apiVersion,
-              compositeResource.kind
-            )
-
-            if (RegisteredModelClass) {
-              moduleLogger.debug(`Using registered XRD model for ${compositeResource.kind}`)
-              composite = new RegisteredModelClass(compositeResource)
-            } else {
-              moduleLogger.debug(
-                `No registered XRD model found for ${compositeResource.kind}, using raw input`
-              )
-            }
-          }
-        } catch (modelErr) {
-          moduleLogger.debug(
-            `Failed to instantiate XRD model, falling back to raw input: ${(modelErr as Error).message}`
+        if (RegisteredModelClass) {
+          moduleLogger.info(`Using registered XRD model for ${compositeResource.kind}`)
+          composite = new RegisteredModelClass(compositeResource)
+        } else {
+          moduleLogger.warn(
+            `No registered XRD model found for ${compositeResource.kind}, using raw input`
           )
-          // Fall back to raw input if model instantiation fails
-          composite = input
         }
 
         result = await module.default(composite)

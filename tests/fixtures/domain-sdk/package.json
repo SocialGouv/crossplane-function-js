@@ -1,8 +1,12 @@
 {
   "name": "domain-sdk",
   "dependencies": {
-    "@crossplane-js/cli": "link:../../../packages/cli",
-    "chalk": "^5.0.1"
+    "@crossplane-js/sdk": "link:../../../packages/sdk",
+    "chalk": "^5.0.1",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@crossplane-js/cli": "link:../../../packages/cli"
   },
   "scripts": {
     "compo": "node_modules/@crossplane-js/cli/cli compo",

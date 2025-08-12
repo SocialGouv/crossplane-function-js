@@ -5,22 +5,14 @@
   "license": "MIT",
   "type": "module",
   "main": "src/index.ts",
-  "bin": "build/xfuncjs-server-js",
+  "bin": "src/index.ts",
   "scripts": {
-    "build": "yarn build:clean && yarn build:ncc:begin && yarn build:ncc && yarn build:ncc:end && yarn build:blob && yarn build:node && yarn build:postject",
-    "build:clean": "rm -rf ./build && mkdir -p build",
-    "build:ncc:begin": "jq '.type = \"commonjs\"' package.json > tmp.json && mv tmp.json package.json",
-    "build:ncc": "ncc build src/index.ts --out build/ncc",
-    "build:ncc:end": "jq '.type = \"module\"' package.json > tmp.json && mv tmp.json package.json",
-    "build:blob": "node --experimental-sea-config=sea-config.json",
-    "build:node": "node -e \"require('fs').copyFileSync(process.execPath, 'build/xfuncjs-server-js')\" && chmod 0755 build/xfuncjs-server-js",
-    "build:postject": "npx postject build/xfuncjs-server-js NODE_SEA_BLOB build/xfuncjs-server-js.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2"
+    "start": "node src/index.ts"
   },
   "dependencies": {
     "@crossplane-js/libs": "workspace:^",
     "@crossplane-js/sdk": "workspace:^",
     "@types/express": "^5.0.1",
-    "@vercel/ncc": "^0.38.3",
     "@yarnpkg/cli": "^4.7.0",
     "@yarnpkg/core": "^4.2.1",
     "@yarnpkg/plugin-essentials": "^4.3.1",
@@ -28,7 +20,6 @@
     "express": "^5",
     "fs-extra": "^11.3.0",
     "pino": "^9.6.0",
-    "postject": "^1.0.0-alpha.6",
     "tsx": "^4.19.4"
   }
 }

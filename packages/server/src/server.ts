@@ -2,8 +2,8 @@ import { createLogger } from "@crossplane-js/libs"
 import express from "express"
 import type { Request, Response, NextFunction, RequestHandler } from "express"
 
-import { executeCode } from "./executor"
-import type { NodeRequest } from "./types"
+import { executeCode } from "./executor.ts"
+import type { NodeRequest } from "./types.ts"
 
 // Create a logger for this module
 const moduleLogger = createLogger("server")

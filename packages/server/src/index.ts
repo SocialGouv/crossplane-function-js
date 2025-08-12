@@ -1,12 +1,11 @@
 import path from "path"
+import { fileURLToPath } from "url"
 
 import { createLogger } from "@crossplane-js/libs"
 import { Command } from "commander"
 import fs from "fs-extra"
-import { parse } from "yaml"
 
-import { createServer, shutdownServer } from "./server"
-// import yarn from './yarn/index';
+import { createServer, shutdownServer } from "./server.ts"
 
 // Create a logger for this module
 const moduleLogger = createLogger("index")
@@ -75,8 +74,12 @@ process.on("unhandledRejection", (reason, _promise) => {
 // Create a new command instance
 const program = new Command()
 
+// Get __dirname equivalent for ES modules
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 const xfuncjsRootPath =
-  path.basename(__dirname) === "build" ? path.join(__dirname, "..") : __dirname
+  path.basename(__dirname) === "build" ? path.join(__dirname, "..") : path.join(__dirname, "..")
 
 const main = async () => {
   const pkgFile = path.join(xfuncjsRootPath, "package.json")
@@ -115,51 +118,8 @@ const main = async () => {
       moduleLogger.info(`Node.js process started for code file: ${options.codeFilePath}`)
     })
 
-  // Custom handler for the 'yarn' command
-  const runYarn = async () => {
-    try {
-      // Read and parse .yarnrc.yml
-      const yarnrcContent = await fs.readFile(".yarnrc.yml", { encoding: "utf-8" })
-      const yarnrc = parse(yarnrcContent) as { yarnPath?: string }
-
-      if (!yarnrc.yarnPath) {
-        moduleLogger.error("No yarnPath found in .yarnrc.yml")
-        process.exit(1)
-      }
-
-      const originalArgv = process.argv
-      try {
-        // Embedded yarn -- works but miss workspace focus command support as implemented actually
-        // await yarn();
-
-        // NODE-SEA require yarn release
-        const yarnExecutable = `./${yarnrc.yarnPath}`
-        const yarnIndex = process.argv.indexOf("yarn")
-        const args = yarnIndex >= 0 ? process.argv.slice(yarnIndex + 1) : []
-        process.argv = [process.execPath, yarnExecutable, ...args]
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const moduleRequire = require("module")
-        const dynamicRequire = moduleRequire.createRequire(process.cwd())
-        const possiblePaths = [path.join(`${process.cwd()}`, yarnExecutable)].filter(Boolean) // hack: feint the ncc compiler to keep dynamic require resolution
-        const modulePath = possiblePaths.find(fs.existsSync)
-        moduleLogger.info(`Running yarn from ${modulePath} with args: ${args.join(" ")}`)
-        await dynamicRequire(modulePath)
-      } finally {
-        process.argv = originalArgv
-      }
-    } catch (err) {
-      moduleLogger.error(`Error running yarn: ${err}`)
-      process.exit(1)
-    }
-  }
-
-  // Check if the first argument is 'yarn'
-  if (process.argv.length > 2 && process.argv[2] === "yarn") {
-    await runYarn()
-  } else {
-    // Parse command line arguments with Commander
-    await program.parseAsync()
-  }
+  // Parse command line arguments with Commander
+  await program.parseAsync()
 }
 
 main()

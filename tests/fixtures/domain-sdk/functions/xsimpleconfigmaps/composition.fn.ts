@@ -1,15 +1,15 @@
 import lodash from "lodash"
-import type { CrossplaneDesiredResources, FunctionInput } from "@crossplane-js/sdk"
+import type { CrossplaneDesiredResources, CrossplaneInput } from "@crossplane-js/sdk"
 import { logger } from "@crossplane-js/sdk"
 import chalk from "chalk"
 
-export default function(input: FunctionInput): CrossplaneDesiredResources {
+export default function(input: CrossplaneInput): CrossplaneDesiredResources {
   logger.info(chalk.red("Hello, world!"))
 
   logger.info("Composition function started")
   // Use lodash.get with a default value and type assertion for safety
   const data = (lodash.get(input, 'observed.composite.resource.spec.data', {}) as Record<string, string>);
-  logger.debug({ data }, "Input data")
+  logger.info({ data }, "Input data")
   
   const uppercaseData: Record<string, string> = {};
   for (const key in data) {

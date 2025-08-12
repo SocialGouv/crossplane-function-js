@@ -1,9 +1,7 @@
-import fs from "fs"
-
 import { createLogger } from "@crossplane-js/libs"
-import { getRegisteredXrdModelByApiVersion } from "@crossplane-js/sdk"
 
-import type { NodeResponse, NodeError, FunctionInput } from "./types"
+import type { NodeResponse, NodeError, FunctionInput } from "./types.ts"
+// import { createModel } from "./model.ts"
 
 // Create a logger for this module
 const moduleLogger = createLogger("executor")
@@ -42,16 +40,8 @@ export async function executeCode(
 
       let module
       try {
-        // NODE-STANDARD
-        // module = await import(codeFilePath);
-
-        // NODE-SEA
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const moduleRequire = require("module")
-        const dynamicRequire = moduleRequire.createRequire(process.cwd())
-        const possiblePaths = [codeFilePath].filter(Boolean) // hack: feint the ncc compiler to keep dynamic require resolution
-        const modulePath = possiblePaths.find(fs.existsSync)
-        module = dynamicRequire(modulePath)
+        // Use standard Node.js dynamic import
+        module = await import(codeFilePath)
       } catch (importErr) {
         moduleLogger.error(`Error importing module: ${(importErr as Error).message}`)
         if ((importErr as Error).stack) {
@@ -69,25 +59,14 @@ export async function executeCode(
 
       let result
       try {
-        let composite: any = input
         const inputData = input as any
-        const compositeResource = inputData?.observed?.composite?.resource
 
-        const RegisteredModelClass = getRegisteredXrdModelByApiVersion(
-          compositeResource.apiVersion,
-          compositeResource.kind
-        )
+        result = await module.default(inputData)
+        // WIP
+        // const compositeResource = inputData?.observed?.composite?.resource
+        // const composite = createModel(compositeResource)
+        // result = await module.default(composite)
 
-        if (RegisteredModelClass) {
-          moduleLogger.info(`Using registered XRD model for ${compositeResource.kind}`)
-          composite = new RegisteredModelClass(compositeResource)
-        } else {
-          moduleLogger.warn(
-            `No registered XRD model found for ${compositeResource.kind}, using raw input`
-          )
-        }
-
-        result = await module.default(composite)
         moduleLogger.debug("Function execution completed")
       } catch (execErr) {
         moduleLogger.error(`Error during function execution: ${(execErr as Error).message}`)

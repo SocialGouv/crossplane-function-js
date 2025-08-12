@@ -2,7 +2,7 @@
 
 pkgs.mkShell {
   packages = with pkgs; [
-    nodejs_22
+    nodejs_24
     go_1_23
     yarn
     jq

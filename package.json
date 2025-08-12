@@ -22,7 +22,7 @@
     "release": "commit-and-tag-version"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.7",
@@ -33,7 +33,7 @@
     "@types/fs-extra": "^11",
     "@types/js-yaml": "^4",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^22.13.10",
+    "@types/node": "^24.2.1",
     "@typescript-eslint/eslint-plugin": "^8.28.0",
     "@typescript-eslint/parser": "^8.28.0",
     "chai": "^5.2.0",
@@ -51,5 +51,8 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2",
     "yaml": "^2.7.0"
+  },
+  "dependencies": {
+    "@crossplane-js/sdk": "workspace:^"
   }
 }

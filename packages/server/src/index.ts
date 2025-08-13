@@ -94,12 +94,18 @@ const main = async () => {
       isDefault: true,
     })
     .description("Start the HTTP server for executing code")
-    .option("-c, --code-file-path <code-file-path>", "Path to the code file to execute")
     .option("-p, --port <number>", "Port to listen on", String(DEFAULT_PORT))
     .action(async options => {
+      // Get code file path from environment variable
+      const codeFilePath = process.env.XFUNCJS_CODE_FILE_PATH
+      if (!codeFilePath) {
+        moduleLogger.error("XFUNCJS_CODE_FILE_PATH environment variable is required")
+        process.exit(1)
+      }
+
       // Validate code file path
-      if (!(await fs.exists(options.codeFilePath))) {
-        moduleLogger.error(`Code file not found: ${options.codeFilePath}`)
+      if (!(await fs.exists(codeFilePath))) {
+        moduleLogger.error(`Code file not found: ${codeFilePath}`)
         process.exit(1)
       }
 
@@ -111,11 +117,11 @@ const main = async () => {
         process.exit(1)
       }
 
-      moduleLogger.info(`Code file path: ${options.codeFilePath}`)
+      moduleLogger.info(`Code file path: ${codeFilePath}`)
 
       // Start the server
-      server = createServer(port, options.codeFilePath)
-      moduleLogger.info(`Node.js process started for code file: ${options.codeFilePath}`)
+      server = createServer(port, codeFilePath)
+      moduleLogger.info(`Node.js process started for code file: ${codeFilePath}`)
     })
 
   // Parse command line arguments with Commander

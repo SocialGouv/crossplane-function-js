@@ -31,6 +31,7 @@ interface SourceSpec {
   inline: string
   dependencies?: Record<string, string>
   yarnLock?: string
+  tsConfig?: string
 }
 
 interface InputSpec {
@@ -54,6 +55,95 @@ interface Manifest {
   }
 }
 
+interface TypeScriptConfig {
+  extends?: string
+  compilerOptions?: {
+    baseUrl?: string
+    paths?: Record<string, string[]>
+    [key: string]: any
+  }
+  [key: string]: any
+}
+
+/**
+ * Loads and resolves a TypeScript configuration file, handling extends
+ * @param configPath Path to the tsconfig.json file
+ * @param baseDir Base directory for resolving relative paths
+ * @returns Resolved TypeScript configuration
+ */
+function loadTsConfig(configPath: string, _baseDir?: string): TypeScriptConfig | null {
+  try {
+    if (!fs.existsSync(configPath)) {
+      return null
+    }
+
+    const configContent = fs.readFileSync(configPath, { encoding: "utf8" })
+    const config: TypeScriptConfig = JSON.parse(configContent)
+    const configDir = path.dirname(configPath)
+
+    // If the config extends another config, load and merge it
+    if (config.extends) {
+      const extendsPath = path.resolve(configDir, config.extends)
+      const baseConfig = loadTsConfig(extendsPath, configDir)
+
+      if (baseConfig) {
+        // Merge configurations, with current config taking precedence
+        const mergedConfig: TypeScriptConfig = {
+          ...baseConfig,
+          ...config,
+          compilerOptions: {
+            ...baseConfig.compilerOptions,
+            ...config.compilerOptions,
+          },
+        }
+        return mergedConfig
+      }
+    }
+
+    return config
+  } catch (error) {
+    moduleLogger.debug(`Failed to load TypeScript config from ${configPath}: ${error}`)
+    return null
+  }
+}
+
+/**
+ * Converts TypeScript path mappings to esbuild alias format
+ * @param tsConfig TypeScript configuration
+ * @param baseDir Base directory for resolving relative paths
+ * @returns esbuild alias configuration
+ */
+function convertTsPathsToEsbuildAlias(
+  tsConfig: TypeScriptConfig,
+  baseDir: string
+): Record<string, string> | undefined {
+  const { compilerOptions } = tsConfig
+  if (!compilerOptions?.paths) {
+    return undefined
+  }
+
+  const { paths } = compilerOptions
+  const alias: Record<string, string> = {}
+
+  for (const [pattern, mappings] of Object.entries(paths)) {
+    if (mappings.length === 0) continue
+
+    // Take the first mapping (most common case)
+    const mapping = mappings[0]
+
+    // Remove the /* suffix from pattern and mapping if present
+    const cleanPattern = pattern.replace(/\/\*$/, "")
+    const cleanMapping = mapping.replace(/\/\*$/, "")
+
+    // Resolve the mapping path relative to the base directory
+    const resolvedMapping = path.resolve(baseDir, cleanMapping)
+
+    alias[cleanPattern] = resolvedMapping
+  }
+
+  return Object.keys(alias).length > 0 ? alias : undefined
+}
+
 /**
  * Bundles a TypeScript file using esbuild
  * @param filePath Path to the TypeScript file
@@ -73,15 +163,90 @@ async function bundleTypeScript(
   moduleLogger.debug(`Using temporary directory: ${tempDir}`)
 
   try {
-    // Create temp directory
+    // Create temp directory for output only
     fs.mkdirSync(tempDir, { recursive: true })
 
     // Get original file size for logging
     const originalSize = fs.statSync(filePath).size
 
-    // Default esbuild options optimized for readability
+    // Check if models/index.ts exists and prepare to auto-import it
+    const packageRoot = process.cwd()
+    const modelsIndexPath = path.join(packageRoot, "models", "index.ts")
+    const shouldAutoImportModels = fs.existsSync(modelsIndexPath)
+
+    // Create virtual entry content that imports models and re-exports the function
+    const relativeFunctionPath = path.relative(packageRoot, filePath).replace(/\\/g, "/")
+    let virtualEntryContent = ""
+
+    if (shouldAutoImportModels) {
+      virtualEntryContent += `import './models';\n`
+      moduleLogger.debug(`Auto-importing models from: ${modelsIndexPath}`)
+    }
+
+    // Import and re-export the function as default
+    virtualEntryContent += `export { default } from './${relativeFunctionPath}';\n`
+
+    moduleLogger.debug(`Virtual entry content:\n${virtualEntryContent}`)
+
+    // Load TypeScript configuration and extract aliases
+    const functionDir = path.dirname(filePath)
+    let tsConfig: TypeScriptConfig | null = null
+    let esbuildAlias: Record<string, string> | undefined = undefined
+
+    // Try to load tsconfig.json from function directory first, then from current working directory
+    const functionTsConfigPath = path.join(functionDir, "tsconfig.json")
+    const cwdTsConfigPath = path.join(process.cwd(), "tsconfig.json")
+
+    let configPath: string | null = null
+    let configBaseDir: string | null = null
+
+    if (fs.existsSync(functionTsConfigPath)) {
+      tsConfig = loadTsConfig(functionTsConfigPath, functionDir)
+      configPath = functionTsConfigPath
+      configBaseDir = functionDir
+      moduleLogger.debug(
+        `Loaded TypeScript config from function directory: ${functionTsConfigPath}`
+      )
+    } else if (fs.existsSync(cwdTsConfigPath)) {
+      tsConfig = loadTsConfig(cwdTsConfigPath, process.cwd())
+      configPath = cwdTsConfigPath
+      configBaseDir = process.cwd()
+      moduleLogger.debug(
+        `Loaded TypeScript config from current working directory: ${cwdTsConfigPath}`
+      )
+    }
+
+    // Convert TypeScript path aliases to esbuild aliases
+    if (tsConfig && configPath && configBaseDir) {
+      const configDir = path.dirname(configPath)
+      const baseUrl = tsConfig.compilerOptions?.baseUrl || "."
+      const resolvedBaseDir = path.resolve(configDir, baseUrl)
+
+      moduleLogger.debug(`TypeScript config found at: ${configPath}`)
+      moduleLogger.debug(`Config directory: ${configDir}`)
+      moduleLogger.debug(`Base URL: ${baseUrl}`)
+      moduleLogger.debug(`Resolved base directory: ${resolvedBaseDir}`)
+      moduleLogger.debug(`TypeScript paths: ${JSON.stringify(tsConfig.compilerOptions?.paths)}`)
+
+      esbuildAlias = convertTsPathsToEsbuildAlias(tsConfig, resolvedBaseDir)
+
+      if (esbuildAlias && Object.keys(esbuildAlias).length > 0) {
+        moduleLogger.info(
+          `Applied TypeScript path aliases to esbuild: ${JSON.stringify(esbuildAlias)}`
+        )
+        moduleLogger.info(`Base directory for aliases: ${resolvedBaseDir}`)
+      } else {
+        moduleLogger.debug(`No TypeScript path aliases found or converted`)
+      }
+    }
+
+    // Default esbuild options optimized for readability using stdin
     const defaultOptions: BuildOptions = {
-      entryPoints: [filePath],
+      stdin: {
+        contents: virtualEntryContent,
+        resolveDir: packageRoot,
+        sourcefile: "virtual-entry.ts",
+      },
       bundle: true,
       format: "esm",
       sourcemap: true,
@@ -96,16 +261,50 @@ async function bundleTypeScript(
           experimentalDecorators: true,
         },
       },
+      // Add TypeScript path aliases if available
+      ...(esbuildAlias && { alias: esbuildAlias }),
     }
 
     // If embedDeps is false, add plugin to keep dependencies external
     if (!embedDeps) {
-      // Create a plugin to mark all non-relative imports as external
+      // Create a plugin to mark all non-relative imports as external, except for aliases
       const externalizeNpmDepsPlugin: Plugin = {
         name: "externalize-npm-deps",
         setup(build) {
-          // Filter for all import paths that don't start with ./ or ../
+          // Filter for imports that don't start with ./ or ../ (non-relative imports)
           build.onResolve({ filter: /^[^./]/ }, args => {
+            moduleLogger.debug(`Processing import: ${args.path} from ${args.importer || "entry"}`)
+
+            // Skip if this is an entry point (no importer means it's an entry point)
+            if (!args.importer) {
+              moduleLogger.debug(`Skipping entry point: ${args.path}`)
+              return undefined
+            }
+
+            // Skip built-in Node.js modules
+            if (args.path.startsWith("node:")) {
+              moduleLogger.debug(`Skipping Node.js built-in: ${args.path}`)
+              return undefined
+            }
+
+            // Check if this matches any of our TypeScript path aliases
+            // Be more specific about alias matching to avoid false positives with scoped packages
+            if (esbuildAlias) {
+              for (const alias of Object.keys(esbuildAlias)) {
+                // For aliases like "@", only match if it's followed by a slash (e.g., "@/models")
+                // This prevents matching scoped packages like "@crossplane-js/sdk"
+                if (alias === "@" && args.path.startsWith("@/")) {
+                  moduleLogger.debug(`Allowing alias resolution: ${args.path}`)
+                  return undefined // Let esbuild handle the alias resolution
+                } else if (alias !== "@" && args.path.startsWith(alias)) {
+                  moduleLogger.debug(`Allowing alias resolution: ${args.path}`)
+                  return undefined // Let esbuild handle the alias resolution
+                }
+              }
+            }
+
+            // For all other imports (npm packages, scoped packages, etc.), mark as external
+            moduleLogger.debug(`Marking as external: ${args.path}`)
             return { path: args.path, external: true }
           })
         },
@@ -124,11 +323,11 @@ async function bundleTypeScript(
     // Bundle with esbuild
     await build(buildOptions)
 
-    // Read the bundled code
+    // Read the bundled code (always single entry point now)
     const bundledCode = fs.readFileSync(outputFile, { encoding: "utf8" })
+    const bundledSize = fs.statSync(outputFile).size
 
     // Log bundle size information
-    const bundledSize = fs.statSync(outputFile).size
     moduleLogger.debug(`Bundling complete: ${originalSize} bytes → ${bundledSize} bytes`)
 
     return bundledCode
@@ -395,6 +594,38 @@ async function compoAction(
         // Add yarn.lock to the manifest if found
         if (yarnLock) {
           xfuncjsStep.input.spec.source.yarnLock = yarnLock
+        }
+      }
+
+      if (xfuncjsStep.input.spec.source.tsConfig === "__TSCONFIG__") {
+        // Check for tsconfig.json in the function directory
+        const functionTsConfigPath = path.join(functionDir, "tsconfig.json")
+        const rootTsConfigPath = path.join(cwd(), "tsconfig.json")
+        let tsConfig: string | null = null
+
+        if (fs.existsSync(functionTsConfigPath)) {
+          try {
+            // Use tsconfig.json from the function directory
+            tsConfig = fs.readFileSync(functionTsConfigPath, {
+              encoding: "utf8",
+            })
+            moduleLogger.debug(`Using tsconfig.json from function directory: ${functionName}`)
+          } catch (error) {
+            moduleLogger.error(`Error reading tsconfig.json in function directory: ${error}`)
+          }
+        } else if (fs.existsSync(rootTsConfigPath)) {
+          try {
+            // Use tsconfig.json from the current working directory
+            tsConfig = fs.readFileSync(rootTsConfigPath, { encoding: "utf8" })
+            moduleLogger.debug(`Using tsconfig.json from current working directory`)
+          } catch (error) {
+            moduleLogger.error(`Error reading tsconfig.json in current working directory: ${error}`)
+          }
+        }
+
+        // Add tsconfig.json to the manifest if found
+        if (tsConfig) {
+          xfuncjsStep.input.spec.source.tsConfig = tsConfig
         }
       }
 

@@ -19,6 +19,7 @@ spec:
           source:
             dependencies: __DEPENDENCIES__
             yarnLock: __YARN_LOCK__
+            tsConfig: __TSCONFIG__
             inline: __FUNCTION_CODE__
     - step: automatically-detect-ready-composed-resources
       functionRef:

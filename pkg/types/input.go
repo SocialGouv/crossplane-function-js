@@ -17,6 +17,7 @@ type XFuncJSInput struct {
 			Inline       string            `json:"inline,omitempty"`
 			Dependencies map[string]string `json:"dependencies,omitempty"`
 			YarnLock     string            `json:"yarnLock,omitempty"`
+			TsConfig     string            `json:"tsConfig,omitempty"`
 		} `json:"source"`
 		Params map[string]interface{} `json:"params,omitempty"`
 		Target string                 `json:"target,omitempty"`
@@ -42,6 +43,7 @@ func (i *XFuncJSInput) DeepCopyObject() runtime.Object {
 	}
 	copy.Spec.Source.Inline = i.Spec.Source.Inline
 	copy.Spec.Source.YarnLock = i.Spec.Source.YarnLock
+	copy.Spec.Source.TsConfig = i.Spec.Source.TsConfig
 	copy.Spec.Target = i.Spec.Target
 
 	// Copy dependencies

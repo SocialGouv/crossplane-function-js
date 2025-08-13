@@ -2,8 +2,7 @@ import { logger, FieldRef, withFieldRefsClassFactory, Model } from "@crossplane-
 import type { CrossplaneDesiredResources, CrossplaneObservedResources } from "@crossplane-js/sdk"
 
 import { v1 } from "kubernetes-models"
-import "../../models"
-import { XSimpleConfigMap } from "../../models/test.crossplane.io/v1beta1"
+import type { XSimpleConfigMap } from "@/models/test.crossplane.io/v1beta1"
 
 const ConfigMap = withFieldRefsClassFactory(v1.ConfigMap)
 

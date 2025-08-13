@@ -121,7 +121,7 @@ func NewYarnInstaller(queue *YarnQueue, logger logger.Logger) *YarnInstaller {
 }
 
 // PrepareYarnEnvironment prepares the yarn environment in the specified directory
-func (yi *YarnInstaller) PrepareYarnEnvironment(workDir string, yarnLock string, logger logger.Logger) (string, error) {
+func (yi *YarnInstaller) PrepareYarnEnvironment(workDir string, yarnLock string, tsConfig string, logger logger.Logger) (string, error) {
 	// If yarn.lock is provided, write it to the temporary directory
 	if yarnLock != "" {
 		yarnLockPath := filepath.Join(workDir, "yarn.lock")
@@ -130,6 +130,17 @@ func (yi *YarnInstaller) PrepareYarnEnvironment(workDir string, yarnLock string,
 				Warn("Failed to write yarn.lock to temporary directory")
 		} else {
 			logger.Info("Created yarn.lock in temporary directory")
+		}
+	}
+
+	// If tsconfig.json is provided, write it to the temporary directory
+	if tsConfig != "" {
+		tsConfigPath := filepath.Join(workDir, "tsconfig.json")
+		if err := os.WriteFile(tsConfigPath, []byte(tsConfig), 0644); err != nil {
+			logger.WithField("error", err.Error()).
+				Warn("Failed to write tsconfig.json to temporary directory")
+		} else {
+			logger.Info("Created tsconfig.json in temporary directory")
 		}
 	}
 

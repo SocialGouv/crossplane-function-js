@@ -165,7 +165,7 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, input *types.X
 	}
 
 	// Prepare yarn environment
-	yarnPath, err := pm.yarnInstaller.PrepareYarnEnvironment(uniqueDirPath, input.Spec.Source.YarnLock, procLogger)
+	yarnPath, err := pm.yarnInstaller.PrepareYarnEnvironment(uniqueDirPath, input.Spec.Source.YarnLock, input.Spec.Source.TsConfig, procLogger)
 	if err != nil {
 		procLogger.WithField(logger.FieldError, err.Error()).
 			Warn("Failed to prepare yarn environment, but continuing anyway")
@@ -189,10 +189,12 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, input *types.X
 	processCtx := context.Background()
 
 	// Use Node.js with TypeScript sources directly
-	cmd := exec.CommandContext(processCtx, "node", "/app/packages/server/src/index.ts", "--code-file-path", tempFilePath)
+	cmd := exec.CommandContext(processCtx, "node", "/app/packages/server/src/index.ts")
 
+	// Ensure our custom ESM alias loader is enabled via NODE_OPTIONS
 	cmd.Env = append(os.Environ(),
 		fmt.Sprintf("PORT=%d", port),
+		fmt.Sprintf("XFUNCJS_CODE_FILE_PATH=%s", tempFilePath),
 		"XFUNCJS_LOG_LEVEL=debug", // Ensure we capture all logs from Node.js
 		"LOG_LEVEL=debug",         // Fallback for Pino logger
 	)

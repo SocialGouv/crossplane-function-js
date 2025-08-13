@@ -31,7 +31,7 @@ func (dr *DependencyResolver) ResolveDependencies(inputDependencies map[string]s
 
 		if strings.HasPrefix(v, "link:") {
 			// Resolve workspace package dependencies
-			if resolved, _, resolveErr := ResolveWorkspacePackage(v, workspaceRoot, workspaceMap, logger); resolveErr != nil {
+			if resolved, _, resolveErr := ResolveWorkspacePackage(k, workspaceRoot, workspaceMap, logger); resolveErr != nil {
 				logger.WithField("dependency", k).
 					WithField("value", v).
 					WithField("error", resolveErr.Error()).

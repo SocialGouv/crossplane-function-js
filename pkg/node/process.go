@@ -436,19 +436,18 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, input *types.X
 	procLogger.Info("Running yarn install")
 	yarnCmd := exec.Command("yarn", "install")
 	yarnCmd.Dir = uniqueDirPath // Set the working directory
-	yarnCmd.Env = append(os.Environ(),
-		"NODE_OPTIONS=--experimental-strip-types --experimental-transform-types --no-warnings",
-		"NODE_NO_WARNINGS=1",
-	)
+	yarnCmd.Env = os.Environ()
 
 	// Create a custom logWriter for yarn output
 	yarnStdoutWriter := &logWriter{
-		logger: procLogger.WithField("yarn", "stdout"),
-		prefix: fmt.Sprintf("yarn[%s]: ", specHash[:8]),
+		logger:     procLogger.WithField("yarn", "stdout"),
+		prefix:     fmt.Sprintf("yarn[%s]: ", specHash[:8]),
+		streamType: "stdout",
 	}
 	yarnStderrWriter := &logWriter{
-		logger: procLogger.WithField("yarn", "stderr"),
-		prefix: fmt.Sprintf("yarn[%s]: ", specHash[:8]),
+		logger:     procLogger.WithField("yarn", "stderr"),
+		prefix:     fmt.Sprintf("yarn[%s]: ", specHash[:8]),
+		streamType: "stderr",
 	}
 
 	yarnCmd.Stdout = yarnStdoutWriter
@@ -474,17 +473,24 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, input *types.X
 
 	cmd.Env = append(os.Environ(),
 		fmt.Sprintf("PORT=%d", port),
-		"NODE_OPTIONS=--experimental-strip-types --experimental-transform-types --no-warnings",
-		"NODE_NO_WARNINGS=1",
+		"XFUNCJS_LOG_LEVEL=debug", // Ensure we capture all logs from Node.js
+		"LOG_LEVEL=debug",         // Fallback for Pino logger
 	)
 
-	// Create a custom logWriter
+	// Create custom logWriters for both stdout and stderr
+	stdoutWriter := &logWriter{
+		logger:     procLogger,
+		prefix:     fmt.Sprintf("node[%s]: ", specHash[:8]),
+		streamType: "stdout",
+	}
 	stderrWriter := &logWriter{
-		logger: procLogger,
-		prefix: fmt.Sprintf("node[%s]: ", specHash[:8]),
+		logger:     procLogger,
+		prefix:     fmt.Sprintf("node[%s]: ", specHash[:8]),
+		streamType: "stderr",
 	}
 
-	// Redirect stderr to our logger
+	// Redirect both stdout and stderr to our loggers
+	cmd.Stdout = stdoutWriter
 	cmd.Stderr = stderrWriter
 
 	// Start the process

@@ -1,14 +1,22 @@
-import lodash from "lodash"
-import type { CrossplaneDesiredResources, CrossplaneInput } from "@crossplane-js/sdk"
-import { logger } from "@crossplane-js/sdk"
-import chalk from "chalk"
+import { logger, FieldRef, withFieldRefsClassFactory, Model } from "@crossplane-js/sdk"
+import type { CrossplaneDesiredResources, CrossplaneObservedResources } from "@crossplane-js/sdk"
 
-export default function(input: CrossplaneInput): CrossplaneDesiredResources {
-  logger.info(chalk.red("Hello, world!"))
+import { v1 } from "kubernetes-models"
+import "../../models"
+import { XSimpleConfigMap } from "../../models/test.crossplane.io/v1beta1"
 
+const ConfigMap = withFieldRefsClassFactory(v1.ConfigMap)
+
+export default function(composite: XSimpleConfigMap, _resources: CrossplaneObservedResources): CrossplaneDesiredResources {
   logger.info("Composition function started")
-  // Use lodash.get with a default value and type assertion for safety
-  const data = (lodash.get(input, 'observed.composite.resource.spec.data', {}) as Record<string, string>);
+
+  // const namespace = composite.getClaimNamespace()
+  const isReady = composite.isReady()
+
+  logger.info(`Ready: ${isReady}`)
+  logger.info(composite)
+  
+  const data = composite.spec.data;
   logger.info({ data }, "Input data")
   
   const uppercaseData: Record<string, string> = {};
@@ -16,19 +24,21 @@ export default function(input: CrossplaneInput): CrossplaneDesiredResources {
     uppercaseData[key.toUpperCase()] = data[key].toUpperCase();
   }
   
-  const configMap = {
-    apiVersion: "v1",
-    kind: "ConfigMap",
+  const testConfigMap = new ConfigMap({
     metadata: {
       name: "generated-configmap",
       namespace: "test-xfuncjs",
+      // namespace: namespace,
       labels: {
         example: "true"
       }
     },
-    data: uppercaseData
-  };
-  
+    data: {
+      ...uppercaseData,
+      // hello: new FieldRef<string>(composite, "$.status.conditions[?(@.type=='Ready')].status", ""),
+    },
+  })
+
   const desired = {
     resources: {
       configmap: {
@@ -36,27 +46,25 @@ export default function(input: CrossplaneInput): CrossplaneDesiredResources {
           apiVersion: "kubernetes.crossplane.io/v1alpha2",
           kind: "Object",
           metadata: {
-            name: "generated-configmap",
+            // name: `${composite.getName()}-configmap`,
+            name: `generated-configmap`,
             annotations: {
               "uptest.upbound.io/timeout": "60"
             }
           },
           spec: {
-            // Watch for changes to the ConfigMap object.
-            // Watching resources is an alpha feature and needs to be enabled with --enable-watches
-            // in the provider to get this configuration working.
-            // watch: true
             forProvider: {
-              manifest: configMap
+              manifest: testConfigMap,
             },
             providerConfigRef: {
-              name: "default"
-            }
-          }
-        }
-      }
-    }
-  };
+              // name: "in-cluster",
+              name: "default",
+            },
+          },
+        },
+      },
+    },
+  }
   
   logger.info("Composition function completed")
   logger.debug({ desired }, "Generated output")

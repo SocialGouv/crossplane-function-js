@@ -79,7 +79,12 @@ kubectl wait --for=condition=established xrd/xsimpleconfigmaps.test.crossplane.i
 
 # Generate models from CRD
 yarn --cwd tests/fixtures/domain-sdk xrd2crd functions/xsimpleconfigmaps/xrd.yaml > tests/fixtures/domain-sdk/manifests/xsimpleconfigmaps.crd.yaml
-yarn crd-generate --input tests/fixtures/domain-sdk/manifests/xsimpleconfigmaps.crd.yaml --output tests/fixtures/domain-sdk/models
+yarn crd-generate \
+  --customBaseClassImportPath @crossplane-js/sdk \
+  --modelDecorator @registerXrdModel \
+  --modelDecoratorPath @crossplane-js/sdk \
+  --input tests/fixtures/domain-sdk/manifests/xsimpleconfigmaps.crd.yaml \
+  --output tests/fixtures/domain-sdk/models
 
 
 # Create a test XSimpleConfigMap

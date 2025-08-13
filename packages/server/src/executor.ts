@@ -1,7 +1,7 @@
 import { createLogger } from "@crossplane-js/libs"
 
+import { createModel } from "./model.ts"
 import type { NodeResponse, NodeError, FunctionInput } from "./types.ts"
-// import { createModel } from "./model.ts"
 
 // Create a logger for this module
 const moduleLogger = createLogger("executor")
@@ -61,11 +61,9 @@ export async function executeCode(
       try {
         const inputData = input as any
 
-        result = await module.default(inputData)
-        // WIP
-        // const compositeResource = inputData?.observed?.composite?.resource
-        // const composite = createModel(compositeResource)
-        // result = await module.default(composite)
+        const compositeResource = inputData?.observed?.composite?.resource
+        const composite = createModel(compositeResource)
+        result = await module.default(composite)
 
         moduleLogger.debug("Function execution completed")
       } catch (execErr) {

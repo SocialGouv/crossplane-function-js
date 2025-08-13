@@ -290,7 +290,7 @@ __metadata:
     "@eslint/compat": "npm:^1.2.7"
     "@eslint/eslintrc": "npm:^3.3.1"
     "@eslint/js": "npm:^9.23.0"
-    "@kubernetes-models/crd-generate": "npm:^5.0.2"
+    "@kubernetes-models/crd-generate": "patch:@kubernetes-models/crd-generate@npm%3A5.0.2#~/.yarn/patches/@kubernetes-models-crd-generate-npm-5.0.2-d0c40558b7.patch"
     "@types/chai": "npm:^5.2.0"
     "@types/fs-extra": "npm:^11"
     "@types/js-yaml": "npm:^4"
@@ -839,7 +839,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@kubernetes-models/crd-generate@npm:^5.0.2":
+"@kubernetes-models/crd-generate@npm:5.0.2":
   version: 5.0.2
   resolution: "@kubernetes-models/crd-generate@npm:5.0.2"
   dependencies:
@@ -853,6 +853,23 @@ __metadata:
   bin:
     crd-generate: bin/crd-generate.js
   checksum: 10c0/3388a12ef78a44a4e63174cbf21e1f80314eb49633aedbebac3c51296faa8be1ce91c29ac98fb18ebdad11a683ca769c17f5732d3d854c5ac8047b1eff8e2081
+  languageName: node
+  linkType: hard
+
+"@kubernetes-models/crd-generate@patch:@kubernetes-models/crd-generate@npm%3A5.0.2#~/.yarn/patches/@kubernetes-models-crd-generate-npm-5.0.2-d0c40558b7.patch":
+  version: 5.0.2
+  resolution: "@kubernetes-models/crd-generate@patch:@kubernetes-models/crd-generate@npm%3A5.0.2#~/.yarn/patches/@kubernetes-models-crd-generate-npm-5.0.2-d0c40558b7.patch::version=5.0.2&hash=07ecb8"
+  dependencies:
+    "@kubernetes-models/generate": "npm:^2.4.0"
+    "@kubernetes-models/read-input": "npm:^3.1.1"
+    "@kubernetes-models/string-util": "npm:^3.0.1"
+    lodash: "npm:^4.17.21"
+    tslib: "npm:^2.4.0"
+    yaml: "npm:^2.2.2"
+    yargs: "npm:^17.6.0"
+  bin:
+    crd-generate: bin/crd-generate.js
+  checksum: 10c0/6c1ca7a9ce49f28d616ddbadb80ad4a21ad75c78019714fef3b80602f82f332f9d0937a4ec2ca2f1cfbfc188847c13e6fd615a805566d8ba7f45fa12dedb981c
   languageName: node
   linkType: hard
 

@@ -3,6 +3,7 @@
   "dependencies": {
     "@crossplane-js/sdk": "link:../../../packages/sdk",
     "chalk": "^5.0.1",
+    "kubernetes-models": "^4.5.0",
     "lodash": "^4.17.21"
   },
   "devDependencies": {

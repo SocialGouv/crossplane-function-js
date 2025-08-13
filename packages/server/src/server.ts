@@ -38,40 +38,63 @@ export function createServer(port: number, codeFilePath: string) {
     try {
       const { input } = req.body as NodeRequest
 
-      // Enhanced logging of the full request body
-      moduleLogger.debug({ body: req.body }, "=== REQUEST RECEIVED ===")
+      // Log request metadata without sensitive content
+      moduleLogger.debug("=== REQUEST RECEIVED ===")
+      moduleLogger.debug(`Request method: ${req.method}, path: ${req.path}`)
+      moduleLogger.debug(`Input data size: ${JSON.stringify(input).length} bytes`)
 
-      // Specifically log observed resources if present
+      // Specifically log observed resources if present (without full content)
       if (req.body.observed) {
         moduleLogger.debug("=== OBSERVED RESOURCES ===")
 
-        // Log composite resource if present
+        // Log composite resource metadata if present
         if (req.body.observed.composite) {
-          moduleLogger.debug({ composite: req.body.observed.composite }, "Composite Resource:")
+          const composite = req.body.observed.composite
+          moduleLogger.debug(
+            {
+              compositeKind: composite.resource?.kind,
+              compositeName: composite.resource?.metadata?.name,
+              compositeNamespace: composite.resource?.metadata?.namespace,
+            },
+            "Composite Resource metadata"
+          )
         }
 
-        // Log individual resources if present
+        // Log individual resources metadata if present
         if (req.body.observed.resources) {
-          moduleLogger.info("Resources:")
           const resourceNames = Object.keys(req.body.observed.resources)
           moduleLogger.info(`Found ${resourceNames.length} resources: ${resourceNames.join(", ")}`)
 
-          // Log each resource
+          // Log each resource metadata (not full content)
           for (const [name, resource] of Object.entries(req.body.observed.resources)) {
-            moduleLogger.info({ resource }, `Resource "${name}"`)
+            const resourceObj = resource as any
+            moduleLogger.info(
+              {
+                resourceName: name,
+                kind: resourceObj.resource?.kind,
+                name: resourceObj.resource?.metadata?.name,
+                namespace: resourceObj.resource?.metadata?.namespace,
+              },
+              `Resource "${name}" metadata`
+            )
           }
         }
       }
 
       moduleLogger.info("=== EXECUTING CODE ===")
-      moduleLogger.info(`Input length: ${JSON.stringify(input).length}`)
 
       const result = await executeCode(codeFilePath, input)
 
       moduleLogger.info("=== CODE EXECUTION COMPLETED ===")
 
-      // Log the response for debugging
-      moduleLogger.debug(`Execute response: ${JSON.stringify(result, null, 2)}`)
+      // Log response metadata without full content
+      if (result.error) {
+        moduleLogger.debug(`Execute response: error - ${result.error.message}`)
+      } else {
+        moduleLogger.debug(
+          `Execute response: success - result size: ${JSON.stringify(result.result || {}).length} bytes`
+        )
+      }
 
       res.json(result)
     } catch (err: unknown) {

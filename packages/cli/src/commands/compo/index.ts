@@ -90,6 +90,12 @@ async function bundleTypeScript(
       minify: false,
       keepNames: true,
       legalComments: "inline",
+      // Enable TypeScript decorators
+      tsconfigRaw: {
+        compilerOptions: {
+          experimentalDecorators: true,
+        },
+      },
     }
 
     // If embedDeps is false, add plugin to keep dependencies external

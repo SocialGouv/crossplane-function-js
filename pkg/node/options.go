@@ -36,6 +36,18 @@ func WithRequestTimeout(timeout time.Duration) ProcessManagerOption {
 	}
 }
 
+// WithYarnQueue sets the yarn installer with queue support
+func WithYarnQueue(maxConcurrentYarnInstalls int) ProcessManagerOption {
+	return func(pm *ProcessManager) {
+		// Initialize the global yarn queue if not already initialized
+		if GetYarnQueue() == nil {
+			InitializeYarnQueue(maxConcurrentYarnInstalls, pm.logger)
+		}
+		pm.yarnInstaller = NewYarnInstaller(GetYarnQueue(), pm.logger)
+		pm.dependencyResolver = NewDependencyResolver(pm.logger)
+	}
+}
+
 // SetNodeServerPort sets the base port for the Node.js HTTP servers
 func (pm *ProcessManager) SetNodeServerPort(port int) {
 	pm.nodeServerPort = port

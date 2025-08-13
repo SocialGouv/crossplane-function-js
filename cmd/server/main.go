@@ -88,6 +88,7 @@ func main() {
 		node.WithHealthCheckWait(cfg.HealthCheckWait),
 		node.WithHealthCheckInterval(cfg.HealthCheckInterval),
 		node.WithRequestTimeout(cfg.NodeRequestTimeout),
+		node.WithYarnQueue(cfg.MaxConcurrentYarnInstalls),
 	)
 	if err != nil {
 		err = pkgerrors.WrapWithCode(err, pkgerrors.ErrorCodeInternalError, "failed to create process manager")

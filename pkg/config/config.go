@@ -31,6 +31,9 @@ type Config struct {
 	HealthCheckWait     time.Duration `envconfig:"HEALTH_CHECK_WAIT" default:"30s" description:"Timeout for health check"`
 	HealthCheckInterval time.Duration `envconfig:"HEALTH_CHECK_INTERVAL" default:"500ms" description:"Interval for health check polling"`
 	NodeRequestTimeout  time.Duration `envconfig:"NODE_REQUEST_TIMEOUT" default:"30s" description:"Timeout for Node.js requests"`
+
+	// Yarn configuration
+	MaxConcurrentYarnInstalls int `envconfig:"MAX_CONCURRENT_YARN_INSTALLS" default:"3" description:"Maximum concurrent yarn install operations"`
 }
 
 // LoadConfig loads configuration from environment variables and returns a Config
@@ -95,6 +98,9 @@ func (c *Config) Validate() error {
 	}
 	if c.NodeRequestTimeout <= 0 {
 		return fmt.Errorf("node request timeout must be positive")
+	}
+	if c.MaxConcurrentYarnInstalls <= 0 {
+		return fmt.Errorf("max concurrent yarn installs must be positive")
 	}
 	return nil
 }

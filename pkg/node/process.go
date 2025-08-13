@@ -7,250 +7,13 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/socialgouv/xfuncjs-server/pkg/hash"
 	"github.com/socialgouv/xfuncjs-server/pkg/logger"
 	"github.com/socialgouv/xfuncjs-server/pkg/types"
-	"sigs.k8s.io/yaml"
 )
-
-// WorkspacePackage represents a package in the yarn workspace
-type WorkspacePackage struct {
-	Name    string `json:"name"`
-	Version string `json:"version"`
-	Path    string
-}
-
-// WorkspaceInfo represents the output from yarn workspaces list --json
-type WorkspaceInfo struct {
-	Location string `json:"location"`
-	Name     string `json:"name"`
-}
-
-// Global workspace cache
-var (
-	workspaceCache     map[string]string
-	workspaceCacheMux  sync.RWMutex
-	workspaceCacheTime time.Time
-)
-
-// getWorkspacePackages discovers workspace packages using yarn workspaces list --json
-// This function now uses global caching to avoid repeated expensive yarn commands
-func getWorkspacePackages(workspaceRoot string, logger logger.Logger) (map[string]string, error) {
-	// Check if we have a cached result
-	workspaceCacheMux.RLock()
-	if workspaceCache != nil {
-		logger.WithField("cache_age", time.Since(workspaceCacheTime)).
-			Debug("Using cached workspace packages")
-		defer workspaceCacheMux.RUnlock()
-		// Return a copy of the cached map to prevent concurrent modification
-		result := make(map[string]string, len(workspaceCache))
-		for k, v := range workspaceCache {
-			result[k] = v
-		}
-		return result, nil
-	}
-	workspaceCacheMux.RUnlock()
-
-	// Cache miss, acquire write lock and refresh
-	workspaceCacheMux.Lock()
-	defer workspaceCacheMux.Unlock()
-
-	// Double-check in case another goroutine updated the cache while we were waiting
-	if workspaceCache != nil {
-		logger.WithField("cache_age", time.Since(workspaceCacheTime)).
-			Debug("Using cached workspace packages (double-check)")
-		// Return a copy of the cached map to prevent concurrent modification
-		result := make(map[string]string, len(workspaceCache))
-		for k, v := range workspaceCache {
-			result[k] = v
-		}
-		return result, nil
-	}
-
-	logger.Info("Loading workspace packages cache")
-	// Run yarn workspaces list --json from the workspace root
-	cmd := exec.Command("yarn", "workspaces", "list", "--json")
-	cmd.Dir = workspaceRoot
-
-	output, err := cmd.Output()
-	if err != nil {
-		logger.WithField("error", err.Error()).
-			Error("Failed to run yarn workspaces list command")
-		return nil, fmt.Errorf("failed to run yarn workspaces list: %w", err)
-	}
-
-	// Parse the output - each line is a separate JSON object
-	lines := strings.Split(strings.TrimSpace(string(output)), "\n")
-	workspaceMap := make(map[string]string)
-
-	for _, line := range lines {
-		if strings.TrimSpace(line) == "" {
-			continue
-		}
-
-		var workspace WorkspaceInfo
-		if err := json.Unmarshal([]byte(line), &workspace); err != nil {
-			logger.WithField("line", line).
-				WithField("error", err.Error()).
-				Warn("Failed to parse workspace info line")
-			continue
-		}
-
-		// Skip the root workspace (location is ".")
-		if workspace.Location == "." {
-			continue
-		}
-
-		workspaceMap[workspace.Name] = workspace.Location
-	}
-
-	logger.WithField("workspace_count", len(workspaceMap)).
-		Info("Discovered and cached workspace packages")
-
-	// Update the global cache
-	workspaceCache = workspaceMap
-	workspaceCacheTime = time.Now()
-
-	// Return a copy of the map to prevent concurrent modification
-	result := make(map[string]string, len(workspaceMap))
-	for k, v := range workspaceMap {
-		result[k] = v
-	}
-	return result, nil
-}
-
-// invalidateWorkspaceCache clears the global workspace cache
-// This can be useful when workspace structure changes are detected
-func invalidateWorkspaceCache() {
-	workspaceCacheMux.Lock()
-	defer workspaceCacheMux.Unlock()
-	workspaceCache = nil
-	workspaceCacheTime = time.Time{}
-}
-
-// getWorkspaceCacheStats returns cache statistics for monitoring
-func getWorkspaceCacheStats() (bool, time.Duration, int) {
-	workspaceCacheMux.RLock()
-	defer workspaceCacheMux.RUnlock()
-
-	if workspaceCache == nil {
-		return false, 0, 0
-	}
-
-	age := time.Since(workspaceCacheTime)
-	return true, age, len(workspaceCache)
-}
-
-// resolveWorkspacePackage resolves a link: dependency to a workspace package
-func resolveWorkspacePackage(dependencyValue, workspaceRoot string, workspaceMap map[string]string, logger logger.Logger) (string, string, error) {
-	var targetPath string
-
-	if strings.HasPrefix(dependencyValue, "link:") {
-		targetPath = strings.TrimPrefix(dependencyValue, "link:")
-	} else {
-		return dependencyValue, "", nil
-	}
-
-	// Clean the target path
-	targetPath = filepath.Clean(targetPath)
-
-	// Normalize the target path to handle relative paths like ../../../packages/sdk
-	// Convert to absolute path and then back to relative from workspace root
-	absoluteTargetPath := filepath.Join(workspaceRoot, targetPath)
-	cleanAbsolutePath := filepath.Clean(absoluteTargetPath)
-	normalizedTargetPath, err := filepath.Rel(workspaceRoot, cleanAbsolutePath)
-	if err != nil {
-		normalizedTargetPath = targetPath
-	}
-
-	// If the normalized path still contains "..", it means it's going outside the workspace
-	// In this case, try to extract just the final part (e.g., "packages/sdk" from "../packages/sdk")
-	if strings.Contains(normalizedTargetPath, "..") {
-		// Split the path and find the part that doesn't start with ".."
-		parts := strings.Split(normalizedTargetPath, string(filepath.Separator))
-		var cleanParts []string
-		for _, part := range parts {
-			if part != ".." && part != "." && part != "" {
-				cleanParts = append(cleanParts, part)
-			}
-		}
-		if len(cleanParts) > 0 {
-			candidatePath := filepath.Join(cleanParts...)
-			normalizedTargetPath = candidatePath
-		}
-	}
-
-	// Find the workspace package at this location
-	var packageName string
-	var packageLocation string
-
-	for name, location := range workspaceMap {
-		if location == normalizedTargetPath {
-			packageName = name
-			packageLocation = location
-			break
-		}
-	}
-
-	if packageName == "" {
-		// Try to resolve by reading package.json at the target path
-		absolutePath := filepath.Join(workspaceRoot, targetPath)
-		packageJSONPath := filepath.Join(absolutePath, "package.json")
-
-		if _, err := os.Stat(packageJSONPath); os.IsNotExist(err) {
-			return "", "", fmt.Errorf("no workspace package found at %s", targetPath)
-		}
-
-		// Read the package.json to get the package name
-		packageJSONBytes, err := os.ReadFile(packageJSONPath)
-		if err != nil {
-			logger.WithField("package_json_path", packageJSONPath).
-				WithField("error", err.Error()).
-				Error("Failed to read package.json")
-			return "", "", fmt.Errorf("failed to read package.json at %s: %w", packageJSONPath, err)
-		}
-
-		var pkg WorkspacePackage
-		if err := json.Unmarshal(packageJSONBytes, &pkg); err != nil {
-			logger.WithField("package_json_path", packageJSONPath).
-				WithField("error", err.Error()).
-				Error("Failed to parse package.json")
-			return "", "", fmt.Errorf("failed to parse package.json at %s: %w", packageJSONPath, err)
-		}
-
-		if pkg.Name == "" {
-			return "", "", fmt.Errorf("package name not found in package.json at %s", packageJSONPath)
-		}
-
-		// Check if this package is actually in the workspace
-		if actualLocation, exists := workspaceMap[pkg.Name]; exists {
-			if actualLocation != targetPath {
-				logger.WithField("package_name", pkg.Name).
-					WithField("expected_location", targetPath).
-					WithField("actual_location", actualLocation).
-					Warn("Package location mismatch, using actual location")
-				packageLocation = actualLocation
-			} else {
-				packageLocation = targetPath
-			}
-			packageName = pkg.Name
-		} else {
-			return "", "", fmt.Errorf("package %s at %s is not in the workspace", pkg.Name, targetPath)
-		}
-	}
-
-	// Return as link dependency with absolute path to /app
-	linkRef := fmt.Sprintf("link:/app/%s", packageLocation)
-	logger.WithField("package_name", packageName).
-		WithField("resolved_to", linkRef).
-		Info("Resolved workspace dependency")
-
-	return linkRef, packageLocation, nil
-}
 
 // ProcessManager manages Node.js processes
 type ProcessManager struct {
@@ -266,6 +29,8 @@ type ProcessManager struct {
 	healthCheckWait     time.Duration
 	healthCheckInterval time.Duration
 	requestTimeout      time.Duration
+	yarnInstaller       *YarnInstaller
+	dependencyResolver  *DependencyResolver
 }
 
 // NewProcessManager creates a new process manager
@@ -297,18 +62,6 @@ func NewProcessManager(gcInterval, idleTimeout time.Duration, tempDir string, lo
 	pm.startGarbageCollector()
 
 	return pm, nil
-}
-
-// InvalidateWorkspaceCache invalidates the global workspace package cache
-// This can be useful when workspace structure changes are detected
-func (pm *ProcessManager) InvalidateWorkspaceCache() {
-	invalidateWorkspaceCache()
-	pm.logger.Info("Workspace package cache invalidated")
-}
-
-// GetWorkspaceCacheStats returns workspace cache statistics for monitoring
-func (pm *ProcessManager) GetWorkspaceCacheStats() (bool, time.Duration, int) {
-	return getWorkspaceCacheStats()
 }
 
 // getOrCreateProcess gets an existing process for the given input or creates a new one
@@ -376,52 +129,30 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, input *types.X
 		return nil, fmt.Errorf("failed to write code to temporary file %s: %w", tempFilePath, err)
 	}
 
-	// Discover workspace packages using yarn workspaces list --json
-	workspaceMap, err := getWorkspacePackages("/app", procLogger)
+	// Discover workspace packages
+	workspaceMap, err := GetWorkspacePackages("/app", procLogger)
 	if err != nil {
 		procLogger.WithField(logger.FieldError, err.Error()).
 			Warn("Failed to discover workspace packages, workspace dependencies may not work correctly")
 		workspaceMap = make(map[string]string) // Use empty map as fallback
 	}
 
-	// Create dependencies map
-	dependencies := make(map[string]interface{})
-
-	procLogger.WithField("input_dependencies", input.Spec.Source.Dependencies).
-		Info("Starting dependency processing")
-
-	// Add user-specified dependencies
-	for k, v := range input.Spec.Source.Dependencies {
-		resolvedDep := v
-
-		if strings.HasPrefix(v, "link:") {
-			// Resolve workspace package dependencies
-			if resolved, _, resolveErr := resolveWorkspacePackage(v, "/app", workspaceMap, procLogger); resolveErr != nil {
-				procLogger.WithField("dependency", k).
-					WithField("value", v).
-					WithField(logger.FieldError, resolveErr.Error()).
-					Warn("Failed to resolve workspace dependency, using original value")
-			} else {
-				resolvedDep = resolved
+	// Resolve dependencies
+	dependencies, err := pm.dependencyResolver.ResolveDependencies(input.Spec.Source.Dependencies, workspaceMap, "/app", procLogger)
+	if err != nil {
+		// Clean up the temporary directory
+		if uniqueDirPath != "" {
+			procLogger.Info("Removing temporary directory after dependency resolution failure")
+			if cleanupErr := os.RemoveAll(uniqueDirPath); cleanupErr != nil {
+				procLogger.WithField(logger.FieldError, cleanupErr.Error()).
+					Warn("Failed to remove temporary directory after dependency resolution failure")
 			}
 		}
-
-		dependencies[k] = resolvedDep
+		return nil, fmt.Errorf("failed to resolve dependencies: %w", err)
 	}
 
-	procLogger.WithField("total_dependencies", len(dependencies)).
-		Info("Completed dependency processing")
-
-	// Create simple package.json with link dependencies
-	packageJSON := map[string]interface{}{
-		"name":         "xfuncjs-function",
-		"version":      "0.0.0",
-		"private":      true,
-		"dependencies": dependencies,
-	}
-
-	packageJSONBytes, err := json.MarshalIndent(packageJSON, "", "  ")
-	if err != nil {
+	// Create package.json
+	if err := pm.yarnInstaller.CreatePackageJSON(uniqueDirPath, dependencies, procLogger); err != nil {
 		// Clean up the temporary directory
 		if uniqueDirPath != "" {
 			procLogger.Info("Removing temporary directory after package.json creation failure")
@@ -430,119 +161,25 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, input *types.X
 					Warn("Failed to remove temporary directory after package.json creation failure")
 			}
 		}
-		return nil, fmt.Errorf("failed to marshal package.json: %w", err)
-	}
-	packageJSONPath := filepath.Join(uniqueDirPath, "package.json")
-	if err := os.WriteFile(packageJSONPath, packageJSONBytes, 0644); err != nil {
-		// Clean up the temporary directory
-		if uniqueDirPath != "" {
-			procLogger.Info("Removing temporary directory after package.json write failure")
-			if cleanupErr := os.RemoveAll(uniqueDirPath); cleanupErr != nil {
-				procLogger.WithField(logger.FieldError, cleanupErr.Error()).
-					Warn("Failed to remove temporary directory after package.json write failure")
-			}
-		}
-		return nil, fmt.Errorf("failed to write package.json to %s: %w", packageJSONPath, err)
-	}
-	procLogger.Info("Created package.json with workspace dependencies")
-
-	// If yarn.lock is provided, write it to the temporary directory
-	if input.Spec.Source.YarnLock != "" {
-		yarnLockPath := filepath.Join(uniqueDirPath, "yarn.lock")
-		if err := os.WriteFile(yarnLockPath, []byte(input.Spec.Source.YarnLock), 0644); err != nil {
-			procLogger.WithField(logger.FieldError, err.Error()).
-				Warn("Failed to write yarn.lock to temporary directory")
-		} else {
-			procLogger.Info("Created yarn.lock in temporary directory")
-		}
+		return nil, fmt.Errorf("failed to create package.json: %w", err)
 	}
 
-	// Read the original .yarnrc.yml, extract yarnPath, and remove the plugins section
-	yarnrcSrc := "/app/.yarnrc.yml"
-	yarnrcContent, err := os.ReadFile(yarnrcSrc)
-	if err != nil {
-		procLogger.WithField("error", err.Error()).Warn("Failed to read .yarnrc.yml")
-	}
-	var yarnPath string
-
-	// Parse the YAML content
-	var yarnConfig map[string]interface{}
-	if err := yaml.Unmarshal(yarnrcContent, &yarnConfig); err != nil {
-		procLogger.WithField(logger.FieldError, err.Error()).
-			Warn("Failed to parse .yarnrc.yml")
-	}
-
-	// Extract yarnPath from the config
-	if path, ok := yarnConfig["yarnPath"].(string); ok {
-		yarnPath = path
-		procLogger.WithField("yarnPath", yarnPath).Info("Found yarnPath in .yarnrc.yml")
-	}
-
-	// Remove the plugins section
-	delete(yarnConfig, "plugins")
-
-	// Marshal back to YAML
-	modifiedYarnrc, err := yaml.Marshal(yarnConfig)
+	// Prepare yarn environment
+	yarnPath, err := pm.yarnInstaller.PrepareYarnEnvironment(uniqueDirPath, input.Spec.Source.YarnLock, procLogger)
 	if err != nil {
 		procLogger.WithField(logger.FieldError, err.Error()).
-			Warn("Failed to marshal modified .yarnrc.yml")
-	} else {
-		// Write the modified .yarnrc.yml to the temporary directory
-		yarnrcDst := filepath.Join(uniqueDirPath, ".yarnrc.yml")
-		if err := os.WriteFile(yarnrcDst, modifiedYarnrc, 0644); err != nil {
-			procLogger.WithField(logger.FieldError, err.Error()).
-				Warn("Failed to write modified .yarnrc.yml to temporary directory")
-		} else {
-			procLogger.Info("Created modified .yarnrc.yml in temporary directory (plugins removed)")
-		}
+			Warn("Failed to prepare yarn environment, but continuing anyway")
 	}
 
-	// Create .yarn directory in the temp directory and copy contents from /app/.yarn
-	// Exclude install-state.gz which is environment-specific
-	yarnSrcDir := "/app/.yarn"
-	yarnDstDir := filepath.Join(uniqueDirPath, ".yarn")
-	if err := os.MkdirAll(yarnDstDir, 0755); err != nil {
+	// Install dependencies using the queue
+	if err := pm.yarnInstaller.InstallDependencies(ctx, uniqueDirPath, specHash, yarnPath, procLogger); err != nil {
 		procLogger.WithField(logger.FieldError, err.Error()).
-			Warn("Failed to create .yarn directory in temporary directory")
-	} else if err := copyDir(yarnSrcDir, yarnDstDir, "install-state.gz"); err != nil {
-		procLogger.WithField(logger.FieldError, err.Error()).
-			Warn("Failed to copy .yarn directory to temporary directory")
-	} else {
-		procLogger.Info("Copied .yarn directory to temporary directory")
+			Warn("Yarn install failed, but continuing anyway")
 	}
 
 	// Construct the absolute path to the yarn executable
 	yarnExecPath := filepath.Join(uniqueDirPath, yarnPath)
 	procLogger.WithField("yarnExecPath", yarnExecPath).Info("Using yarn executable")
-
-	// Run yarn install to resolve workspace dependencies
-	procLogger.Info("Running yarn install")
-	yarnCmd := exec.Command("yarn", "install")
-	yarnCmd.Dir = uniqueDirPath // Set the working directory
-	yarnCmd.Env = os.Environ()
-
-	// Create a custom logWriter for yarn output
-	yarnStdoutWriter := &logWriter{
-		logger:     procLogger.WithField("yarn", "stdout"),
-		prefix:     fmt.Sprintf("yarn[%s]: ", specHash[:8]),
-		streamType: "stdout",
-	}
-	yarnStderrWriter := &logWriter{
-		logger:     procLogger.WithField("yarn", "stderr"),
-		prefix:     fmt.Sprintf("yarn[%s]: ", specHash[:8]),
-		streamType: "stderr",
-	}
-
-	yarnCmd.Stdout = yarnStdoutWriter
-	yarnCmd.Stderr = yarnStderrWriter
-
-	// Run yarn install
-	if err := yarnCmd.Run(); err != nil {
-		procLogger.WithField(logger.FieldError, err.Error()).
-			Warn("Yarn install failed, but continuing anyway")
-	} else {
-		procLogger.Info("Yarn install completed successfully")
-	}
 
 	port := pm.getNextPort()
 	procLogger = procLogger.WithField(logger.FieldPort, port)

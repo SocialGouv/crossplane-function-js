@@ -30,8 +30,48 @@ type WorkspaceInfo struct {
 	Name     string `json:"name"`
 }
 
+// Global workspace cache
+var (
+	workspaceCache     map[string]string
+	workspaceCacheMux  sync.RWMutex
+	workspaceCacheTime time.Time
+)
+
 // getWorkspacePackages discovers workspace packages using yarn workspaces list --json
+// This function now uses global caching to avoid repeated expensive yarn commands
 func getWorkspacePackages(workspaceRoot string, logger logger.Logger) (map[string]string, error) {
+	// Check if we have a cached result
+	workspaceCacheMux.RLock()
+	if workspaceCache != nil {
+		logger.WithField("cache_age", time.Since(workspaceCacheTime)).
+			Debug("Using cached workspace packages")
+		defer workspaceCacheMux.RUnlock()
+		// Return a copy of the cached map to prevent concurrent modification
+		result := make(map[string]string, len(workspaceCache))
+		for k, v := range workspaceCache {
+			result[k] = v
+		}
+		return result, nil
+	}
+	workspaceCacheMux.RUnlock()
+
+	// Cache miss, acquire write lock and refresh
+	workspaceCacheMux.Lock()
+	defer workspaceCacheMux.Unlock()
+
+	// Double-check in case another goroutine updated the cache while we were waiting
+	if workspaceCache != nil {
+		logger.WithField("cache_age", time.Since(workspaceCacheTime)).
+			Debug("Using cached workspace packages (double-check)")
+		// Return a copy of the cached map to prevent concurrent modification
+		result := make(map[string]string, len(workspaceCache))
+		for k, v := range workspaceCache {
+			result[k] = v
+		}
+		return result, nil
+	}
+
+	logger.Info("Loading workspace packages cache")
 	// Run yarn workspaces list --json from the workspace root
 	cmd := exec.Command("yarn", "workspaces", "list", "--json")
 	cmd.Dir = workspaceRoot
@@ -69,9 +109,40 @@ func getWorkspacePackages(workspaceRoot string, logger logger.Logger) (map[strin
 	}
 
 	logger.WithField("workspace_count", len(workspaceMap)).
-		Info("Discovered workspace packages")
+		Info("Discovered and cached workspace packages")
 
-	return workspaceMap, nil
+	// Update the global cache
+	workspaceCache = workspaceMap
+	workspaceCacheTime = time.Now()
+
+	// Return a copy of the map to prevent concurrent modification
+	result := make(map[string]string, len(workspaceMap))
+	for k, v := range workspaceMap {
+		result[k] = v
+	}
+	return result, nil
+}
+
+// invalidateWorkspaceCache clears the global workspace cache
+// This can be useful when workspace structure changes are detected
+func invalidateWorkspaceCache() {
+	workspaceCacheMux.Lock()
+	defer workspaceCacheMux.Unlock()
+	workspaceCache = nil
+	workspaceCacheTime = time.Time{}
+}
+
+// getWorkspaceCacheStats returns cache statistics for monitoring
+func getWorkspaceCacheStats() (bool, time.Duration, int) {
+	workspaceCacheMux.RLock()
+	defer workspaceCacheMux.RUnlock()
+
+	if workspaceCache == nil {
+		return false, 0, 0
+	}
+
+	age := time.Since(workspaceCacheTime)
+	return true, age, len(workspaceCache)
 }
 
 // resolveWorkspacePackage resolves a link: dependency to a workspace package
@@ -226,6 +297,18 @@ func NewProcessManager(gcInterval, idleTimeout time.Duration, tempDir string, lo
 	pm.startGarbageCollector()
 
 	return pm, nil
+}
+
+// InvalidateWorkspaceCache invalidates the global workspace package cache
+// This can be useful when workspace structure changes are detected
+func (pm *ProcessManager) InvalidateWorkspaceCache() {
+	invalidateWorkspaceCache()
+	pm.logger.Info("Workspace package cache invalidated")
+}
+
+// GetWorkspaceCacheStats returns workspace cache statistics for monitoring
+func (pm *ProcessManager) GetWorkspaceCacheStats() (bool, time.Duration, int) {
+	return getWorkspaceCacheStats()
 }
 
 // getOrCreateProcess gets an existing process for the given input or creates a new one

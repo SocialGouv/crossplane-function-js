@@ -1,4 +1,4 @@
-name: Publish kubernetes-models crd-generate
+name: 🍴 Publish kubernetes-models crd-generate
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ permissions:
 
 concurrency:
   group: publish-kubernetes-models-crd-generate
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build-and-publish:
@@ -24,6 +24,12 @@ jobs:
           path: kubernetes-models-ts
           fetch-depth: 1
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -32,12 +38,6 @@ jobs:
           always-auth: true
           cache: pnpm
           cache-dependency-path: kubernetes-models-ts/pnpm-lock.yaml
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
 
       - name: Install dependencies
         working-directory: kubernetes-models-ts

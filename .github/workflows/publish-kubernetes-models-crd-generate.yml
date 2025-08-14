@@ -45,13 +45,80 @@ jobs:
 
       - name: Build
         working-directory: kubernetes-models-ts
-        run: pnpm build
+        run: pnpm build -- --filter @kubernetes-models/crd-generate
 
-      - name: Rewrite package.json for publish
+      - name: Rewrite package.json for publish (rename + resolve workspace deps via pnpm)
         working-directory: kubernetes-models-ts
         shell: bash
         run: |
-          node -e "const fs=require('fs'); const p='utils/crd-generate/package.json'; const j=JSON.parse(fs.readFileSync(p,'utf8')); j.name='@crossplane-js/kubernetes-models-crd-generate'; j.publishConfig={...(j.publishConfig||{}), access:'public'}; if (j.private) delete j.private; fs.writeFileSync(p, JSON.stringify(j,null,2)+'\n');"
+          node - <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const cp = require('child_process');
+
+          const root = process.cwd();
+          const pkgPath = path.join('utils', 'crd-generate', 'package.json');
+          const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+
+          // Rename and ensure publishable
+          pkg.name = '@crossplane-js/kubernetes-models-crd-generate';
+          pkg.publishConfig = { ...(pkg.publishConfig || {}), access: 'public' };
+          if (pkg.private) delete pkg.private;
+
+          // Use pnpm to list all workspaces once
+          const out = cp.execSync('pnpm ls -r --depth -1 --json', { encoding: 'utf8' });
+          const list = JSON.parse(out);
+          const versions = new Map();
+          for (const p of list) {
+            if (p && p.name && p.version) versions.set(p.name, p.version);
+          }
+
+          const depSets = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'];
+
+          function mapWorkspaceSpecifier(spec, version) {
+            const s = spec.replace(/^workspace:/, '').trim();
+            if (s === '^') return '^' + version;
+            if (s === '~') return '~' + version;
+            if (s === '' || s === '*') return version;
+            if (s.startsWith('^')) return '^' + version;
+            if (s.startsWith('~')) return '~' + version;
+            return version;
+          }
+
+          const unresolved = [];
+          for (const set of depSets) {
+            const deps = pkg[set];
+            if (!deps) continue;
+            for (const [name, spec] of Object.entries(deps)) {
+              if (typeof spec === 'string' && spec.startsWith('workspace:')) {
+                const v = versions.get(name);
+                if (!v) {
+                  unresolved.push(name);
+                } else {
+                  deps[name] = mapWorkspaceSpecifier(spec, v);
+                }
+              }
+            }
+          }
+
+          if (unresolved.length) {
+            console.error('ERROR: Could not resolve workspace versions for:', unresolved.join(', '));
+            process.exit(1);
+          }
+
+          // Suffix version with commit and run identifiers (semver prerelease)
+          const base = (pkg.version || '0.0.0').split('-')[0];
+          const shortSha = cp.execSync('git rev-parse --short=12 HEAD', { encoding: 'utf8' }).trim();
+          const runNum = process.env.GITHUB_RUN_NUMBER || '0';
+          const runAttempt = process.env.GITHUB_RUN_ATTEMPT || '1';
+          const suffix = `sha.${shortSha}.r${runNum}.a${runAttempt}`;
+          pkg.version = `${base}-${suffix}`;
+
+          fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+          console.log('Rewrote workspace dependencies to monorepo versions for', pkgPath);
+          console.log('Final version:', pkg.version);
+          NODE
+
           echo "Updated package.json:"
           cat utils/crd-generate/package.json
 

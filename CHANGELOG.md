@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.22 (2025-08-14)
+
+
+### Bug Fixes
+
+* **tsconfig:** enforce esm spec no implicit extensions ([05ddf4a](https://github.com/SocialGouv/crossplane-function-js/commit/05ddf4ad3f419b51741c2d4d3fd79323ae9a0c5c))
+
 ## 0.0.21 (2025-08-11)
 
 

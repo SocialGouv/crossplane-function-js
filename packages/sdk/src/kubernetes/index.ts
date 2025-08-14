@@ -1,6 +1,6 @@
 import * as kubernetesModels from "kubernetes-models"
 
-import { withFieldRefsClassFactory } from "../utils/FieldRef"
+import { withFieldRefsClassFactory } from "../utils/FieldRef.ts"
 
 // Core v1 resources with FieldRef support
 export const v1 = {

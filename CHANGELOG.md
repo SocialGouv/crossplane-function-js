@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.23 (2025-08-14)
+
+
+### Bug Fixes
+
+* use @crossplane-js/kubernetes-models-crd-generate ([5fe6549](https://github.com/SocialGouv/crossplane-function-js/commit/5fe65496bf810d967e267e5a5aa80106289428c9))
+
 ## 0.0.22 (2025-08-14)
 
 

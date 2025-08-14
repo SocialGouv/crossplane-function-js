@@ -43,9 +43,9 @@ jobs:
         working-directory: kubernetes-models-ts
         run: pnpm install --frozen-lockfile=false
 
-      - name: Build
+      - name: Build (crd-generate only via turbo filter)
         working-directory: kubernetes-models-ts
-        run: pnpm build -- --filter @kubernetes-models/crd-generate
+        run: pnpm turbo run build --filter=@kubernetes-models/crd-generate
 
       - name: Rewrite package.json for publish (rename + resolve workspace deps via pnpm)
         working-directory: kubernetes-models-ts

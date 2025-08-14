@@ -48,12 +48,12 @@ kubectl apply -f tests/fixtures/crossplane-basics/provider-config.yaml
 # Create composition outputs
 echo "Preparing composition with function code..."
 yarn --cwd tests/fixtures/domain-sdk install
+yarn --cwd tests/fixtures/domain-sdk gen-models # just here to avoid forgetting to regen models
 yarn --cwd tests/fixtures/domain-sdk gen-manifests
 
 # Apply CRDs and Compositions
 echo "Applying XRD and Compositions..."
-kubectl apply -f tests/fixtures/domain-sdk/functions/xsimpleconfigmaps/xrd.yaml
-kubectl apply -f tests/fixtures/domain-sdk/manifests/xsimpleconfigmaps.compo.yaml
+kubectl apply -f tests/fixtures/domain-sdk/manifests
 
 # Wait for XRD to be established
 echo "Waiting for XRD to be established..."
@@ -63,29 +63,6 @@ kubectl wait --for=condition=established xrd/xsimpleconfigmaps.test.crossplane.i
   kubectl get xrd/xsimpleconfigmaps.test.crossplane.io -o yaml
   exit 1
 }
-
-# Get the CRD
-# Wait for the XSimpleConfigmap CRD to be established
-# echo "Waiting for XSimpleConfigmap CRD to be established..."
-# for i in {1..30}; do
-#   if kubectl get crd xsimpleconfigmaps.test.crossplane.io &> /dev/null; then
-#     echo "XSimpleConfigmap CRD is established!"
-#     break
-#   fi
-#   echo "Waiting for XSimpleConfigmap CRD to be established... ($i/30)"
-#   sleep 2
-# done
-# kubectl get crd xsimpleconfigmaps.test.crossplane.io -o yaml > tests/fixtures/domain-sdk/manifests/xsimpleconfigmaps.crd.yaml
-
-# Generate models from CRD
-yarn --cwd tests/fixtures/domain-sdk xrd2crd functions/xsimpleconfigmaps/xrd.yaml > tests/fixtures/domain-sdk/manifests/xsimpleconfigmaps.crd.yaml
-yarn crd-generate \
-  --customBaseClassImportPath @crossplane-js/sdk \
-  --modelDecorator @registerXrdModel \
-  --modelDecoratorPath @crossplane-js/sdk \
-  --input tests/fixtures/domain-sdk/manifests/xsimpleconfigmaps.crd.yaml \
-  --output tests/fixtures/domain-sdk/models
-
 
 # Create a test XSimpleConfigMap
 echo "(Re)Creating test XSimpleConfigMap..."

@@ -149,7 +149,7 @@ The CLI tool can be used to generate composition manifests from source files:
 2. Run the CLI tool:
 
    ```bash
-   npx @crossplane-js/cli compo
+   npx @crossplane-js/cli gen-manifests
    ```
 
 3. This will generate composition manifests in the `manifests/` directory.

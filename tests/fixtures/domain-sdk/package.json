@@ -10,8 +10,8 @@
     "@crossplane-js/cli": "link:../../../packages/cli"
   },
   "scripts": {
-    "compo": "node_modules/@crossplane-js/cli/cli compo",
-    "xrd2crd": "node_modules/@crossplane-js/cli/cli xrd2crd"
+    "gen-models": "node_modules/@crossplane-js/cli/cli gen-models",
+    "gen-manifests": "node_modules/@crossplane-js/cli/cli gen-manifests"
   },
   "packageManager": "yarn@4.7.0"
 }

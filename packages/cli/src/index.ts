@@ -6,7 +6,8 @@ import { Command } from "commander"
 import fs from "fs-extra"
 
 // Import commands
-import compoCommand from "./commands/compo/index.ts"
+import genManifestsCommand from "./commands/gen-manifests/index.ts"
+import genModelsCommand from "./commands/gen-models/index.ts"
 import xrd2crdCommand from "./commands/xrd2crd/index.ts"
 
 // Create a logger for this module
@@ -81,7 +82,8 @@ const main = async () => {
   program.name("xfuncjs").description(pkg.description).version(pkg.version)
 
   // Register commands
-  compoCommand(program)
+  genManifestsCommand(program)
+  genModelsCommand(program)
   xrd2crdCommand(program)
 
   // Parse command line arguments with Commander

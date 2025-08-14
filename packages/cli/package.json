@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@crossplane-js/libs": "workspace:^",
+    "@kubernetes-models/crd-generate": "patch:@kubernetes-models/crd-generate@npm%3A5.0.2#~/.yarn/patches/@kubernetes-models-crd-generate-npm-5.0.2-d0c40558b7.patch",
     "commander": "^13.1.0",
     "esbuild": "^0.25.4",
     "fs-extra": "^11.3.0",

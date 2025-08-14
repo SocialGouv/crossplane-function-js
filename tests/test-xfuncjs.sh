@@ -48,7 +48,7 @@ kubectl apply -f tests/fixtures/crossplane-basics/provider-config.yaml
 # Create composition outputs
 echo "Preparing composition with function code..."
 yarn --cwd tests/fixtures/domain-sdk install
-yarn --cwd tests/fixtures/domain-sdk compo
+yarn --cwd tests/fixtures/domain-sdk gen-manifests
 
 # Apply CRDs and Compositions
 echo "Applying XRD and Compositions..."

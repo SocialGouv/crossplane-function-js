@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from "uuid"
 import YAML from "yaml"
 
 // Create a logger for this module
-const moduleLogger = createLogger("compo")
+const moduleLogger = createLogger("gen-manifests")
 
 // Define interfaces for the manifest structure
 interface ManifestMetadata {
@@ -344,12 +344,12 @@ async function bundleTypeScript(
 }
 
 /**
- * Main function for the compo command
+ * Main function for the gen-manifests command
  * Processes function directories and generates composition manifests
  * @param options Command options
  * @returns Promise<void>
  */
-async function compoAction(
+async function genManifestsAction(
   options: { bundle?: boolean; bundleConfig?: string; embedDeps?: boolean } = {}
 ): Promise<void> {
   // Default to bundling enabled
@@ -663,21 +663,21 @@ async function compoAction(
 }
 
 /**
- * Register the compo command with the CLI
+ * Register the gen-manifests command with the CLI
  * @param program The Commander program instance
  */
 export default function (program: Command): void {
   program
-    .command("compo")
+    .command("gen-manifests")
     .description("Generate composition manifests from function directories")
     .option("--no-bundle", "Disable TypeScript bundling")
     .option("--bundle-config <json>", "Custom esbuild configuration (JSON string)")
     .option("--embed-deps", "Embed dependencies in the bundle (default: false)")
     .action(async options => {
       try {
-        await compoAction(options)
+        await genManifestsAction(options)
       } catch (err) {
-        moduleLogger.error(`Error running compo command: ${err}`)
+        moduleLogger.error(`Error running gen-manifests command: ${err}`)
         process.exit(1)
       }
     })

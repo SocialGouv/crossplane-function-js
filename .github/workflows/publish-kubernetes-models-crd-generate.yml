@@ -1,0 +1,62 @@
+name: Publish kubernetes-models crd-generate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-kubernetes-models-crd-generate
+  cancel-in-progress: false
+
+jobs:
+  build-and-publish:
+    name: Build and publish from 'featured' branch
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout SocialGouv/kubernetes-models-ts (featured)
+        uses: actions/checkout@v4
+        with:
+          repository: SocialGouv/kubernetes-models-ts
+          ref: featured
+          path: kubernetes-models-ts
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          always-auth: true
+          cache: pnpm
+          cache-dependency-path: kubernetes-models-ts/pnpm-lock.yaml
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Install dependencies
+        working-directory: kubernetes-models-ts
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Build
+        working-directory: kubernetes-models-ts
+        run: pnpm build
+
+      - name: Rewrite package.json for publish
+        working-directory: kubernetes-models-ts
+        shell: bash
+        run: |
+          node -e "const fs=require('fs'); const p='utils/crd-generate/package.json'; const j=JSON.parse(fs.readFileSync(p,'utf8')); j.name='@crossplane-js/kubernetes-models-crd-generate'; j.publishConfig={...(j.publishConfig||{}), access:'public'}; if (j.private) delete j.private; fs.writeFileSync(p, JSON.stringify(j,null,2)+'\n');"
+          echo "Updated package.json:"
+          cat utils/crd-generate/package.json
+
+      - name: Publish to npm
+        working-directory: kubernetes-models-ts/utils/crd-generate
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.SOCIALGROOVYBOT_NPM_TOKEN }}
+        run: npm publish --access public

@@ -1,10 +1,7 @@
-import { logger, FieldRef, withFieldRefsClassFactory, Model } from "@crossplane-js/sdk"
+import { logger, FieldRef, v1 } from "@crossplane-js/sdk"
 import type { CrossplaneDesiredResources, CrossplaneObservedResources } from "@crossplane-js/sdk"
 
-import { v1 } from "kubernetes-models"
 import type { XSimpleConfigMap } from "@/models/test.crossplane.io/v1beta1"
-
-const ConfigMap = withFieldRefsClassFactory(v1.ConfigMap)
 
 export default function(composite: XSimpleConfigMap, _resources: CrossplaneObservedResources): CrossplaneDesiredResources {
   logger.info("Composition function started")
@@ -23,14 +20,14 @@ export default function(composite: XSimpleConfigMap, _resources: CrossplaneObser
     uppercaseData[key.toUpperCase()] = data[key].toUpperCase();
   }
   
-  const testConfigMap = new ConfigMap({
+  const testConfigMap = new v1.ConfigMap({
     metadata: {
       name: "generated-configmap",
       namespace: "test-xfuncjs",
       // namespace: namespace,
       labels: {
         example: "true"
-      }
+      },
     },
     data: {
       ...uppercaseData,

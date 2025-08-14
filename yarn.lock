@@ -336,6 +336,7 @@ __metadata:
     "@types/jsonpath": "npm:^0.2.4"
     "@types/lodash": "npm:^4"
     jsonpath: "npm:^1.1.1"
+    kubernetes-models: "npm:^4.5.0"
     lodash: "npm:^4.17.21"
     pino: "npm:^9.6.0"
     yaml: "npm:^2.7.0"
@@ -5891,6 +5892,18 @@ __metadata:
   version: 6.0.3
   resolution: "kind-of@npm:6.0.3"
   checksum: 10c0/61cdff9623dabf3568b6445e93e31376bee1cdb93f8ba7033d86022c2a9b1791a1d9510e026e6465ebd701a6dd2f7b0808483ad8838341ac52f003f512e0b4c4
+  languageName: node
+  linkType: hard
+
+"kubernetes-models@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "kubernetes-models@npm:4.5.0"
+  dependencies:
+    "@kubernetes-models/apimachinery": "npm:^2.1.0"
+    "@kubernetes-models/base": "npm:^5.0.1"
+    "@kubernetes-models/validate": "npm:^4.0.0"
+    "@swc/helpers": "npm:^0.5.8"
+  checksum: 10c0/f890a42b28724704b6b2ccff301f08ab52e2d76bb4797344a7d10e663bd99e3d3c8a1b99cb8d69a8af47463bad147ed445fad1ea946cbb098aad3ca573a8d677
   languageName: node
   linkType: hard
 

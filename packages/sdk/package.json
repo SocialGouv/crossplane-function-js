@@ -10,6 +10,7 @@
     "@kubernetes-models/base": "^5.0.1",
     "@types/jsonpath": "^0.2.4",
     "jsonpath": "^1.1.1",
+    "kubernetes-models": "^4.5.0",
     "lodash": "^4.17.21",
     "pino": "^9.6.0",
     "yaml": "^2.7.0"

@@ -3,7 +3,7 @@ import { Command } from "commander"
 import fs from "fs-extra"
 import YAML from "yaml"
 
-import { convertXRDtoCRD, parseAndValidateXRD } from "./converter.js"
+import { convertXRDtoCRD, parseAndValidateXRD } from "./converter.ts"
 
 // Create a logger for this module
 const moduleLogger = createLogger("xrd2crd")

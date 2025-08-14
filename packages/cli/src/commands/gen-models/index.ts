@@ -8,7 +8,7 @@ import { Command } from "commander"
 import fs from "fs-extra"
 import YAML from "yaml"
 
-import { convertXRDtoCRD, parseAndValidateXRD } from "../xrd2crd/converter.js"
+import { convertXRDtoCRD, parseAndValidateXRD } from "../xrd2crd/converter.ts"
 
 // Create a logger for this module
 const moduleLogger = createLogger("gen-models")

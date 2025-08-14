@@ -116,6 +116,11 @@ export default defineConfig([
       ],
 
       "prettier/prettier": "error",
+
+      "import/extensions": ["error", "always", {
+        "ts": "always",
+        "js": "always",
+      }]
     },
   },
 ])

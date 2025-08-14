@@ -126,4 +126,4 @@ jobs:
         working-directory: kubernetes-models-ts/utils/crd-generate
         env:
           NODE_AUTH_TOKEN: ${{ secrets.SOCIALGROOVYBOT_NPM_TOKEN }}
-        run: npm publish --access public
+        run: npm publish --access public --tag featured

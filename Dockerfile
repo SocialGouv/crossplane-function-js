@@ -28,14 +28,10 @@ RUN YARN_PATH=$(find /app/.yarn/releases -type f -name "yarn-*.cjs" | sort | hea
 USER 1000
 WORKDIR /app
 
-RUN yarn fetch
+RUN yarn fetch workspaces focus @crossplane-js/server --production && yarn cache clean
 
 COPY --chown=1000:1000 package.json tsconfig.json ./
 COPY --chown=1000:1000 packages/ ./packages/
-
-# Install dependencies only (no build step needed)
-RUN yarn workspaces focus @crossplane-js/server --production && yarn cache clean
-
 
 FROM alpine:3 AS certs
 RUN apk --update add ca-certificates

@@ -10,8 +10,8 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	google.golang.org/grpc v1.71.1
 	google.golang.org/protobuf v1.36.6
-	k8s.io/apimachinery v0.32.3
-	k8s.io/client-go v0.32.3
+	k8s.io/apimachinery v0.34.0
+	k8s.io/client-go v0.34.0
 	k8s.io/utils v0.0.0-20241104100929-3ea5e8cea738
 	sigs.k8s.io/yaml v1.4.0
 )

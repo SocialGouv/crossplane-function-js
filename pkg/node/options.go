@@ -1,6 +1,8 @@
 package node
 
 import (
+	"fmt"
+	"net"
 	"time"
 )
 
@@ -84,4 +86,14 @@ func (pm *ProcessManager) getNextPort() int {
 	}
 
 	return port
+}
+
+// getAvailablePort asks the OS for a free ephemeral port.
+func (pm *ProcessManager) getAvailablePort() (int, error) {
+	l, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		return 0, fmt.Errorf("failed to find available port: %w", err)
+	}
+	defer l.Close()
+	return l.Addr().(*net.TCPAddr).Port, nil
 }

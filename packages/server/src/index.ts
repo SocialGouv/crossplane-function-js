@@ -94,7 +94,6 @@ const main = async () => {
       isDefault: true,
     })
     .description("Start the HTTP server for executing code")
-    .option("-p, --port <number>", "Port to listen on", String(DEFAULT_PORT))
     .action(async options => {
       // Get code file path from environment variable
       const codeFilePath = process.env.XFUNCJS_CODE_FILE_PATH
@@ -110,7 +109,7 @@ const main = async () => {
       }
 
       // Get the port from options or environment variable
-      const port = parseInt(options.port || process.env.PORT || String(DEFAULT_PORT), 10)
+      const port = parseInt(process.env.PORT || String(DEFAULT_PORT), 10)
 
       if (isNaN(port) || port < 1 || port > 65535) {
         moduleLogger.error(`Invalid port number: ${options.port}`)

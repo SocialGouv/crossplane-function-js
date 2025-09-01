@@ -181,7 +181,18 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, input *types.X
 	yarnExecPath := filepath.Join(uniqueDirPath, yarnPath)
 	procLogger.WithField("yarnExecPath", yarnExecPath).Info("Using yarn executable")
 
-	port := pm.getNextPort()
+	port, err := pm.getAvailablePort()
+	if err != nil {
+		// Clean up the temporary directory
+		if uniqueDirPath != "" {
+			procLogger.Info("Removing temporary directory after port selection failure")
+			if cleanupErr := os.RemoveAll(uniqueDirPath); cleanupErr != nil {
+				procLogger.WithField(logger.FieldError, cleanupErr.Error()).
+					Warn("Failed to remove temporary directory after port selection failure")
+			}
+		}
+		return nil, fmt.Errorf("failed to select a free port: %w", err)
+	}
 	procLogger = procLogger.WithField(logger.FieldPort, port)
 
 	// Create the Node.js process with the appropriate path to the index file
@@ -190,6 +201,8 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, input *types.X
 
 	// Use Node.js with TypeScript sources directly
 	cmd := exec.CommandContext(processCtx, "node", "/app/packages/server/src/index.ts")
+	// Ensure Node resolves workspace deps; set working directory to the server package (ensures tsx resolution)
+	cmd.Dir = "/app/packages/server"
 
 	// Ensure our custom ESM alias loader is enabled via NODE_OPTIONS
 	cmd.Env = append(os.Environ(),
@@ -198,6 +211,7 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, input *types.X
 		fmt.Sprintf("XFUNCJS_CODE_FILE_PATH=%s", tempFilePath),
 		"XFUNCJS_LOG_LEVEL=debug", // Ensure we capture all logs from Node.js
 		"LOG_LEVEL=debug",         // Fallback for Pino logger
+		"BIND_ADDR=127.0.0.1",     // Bind server to loopback only
 	)
 
 	// Create custom logWriters for both stdout and stderr

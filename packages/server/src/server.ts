@@ -129,14 +129,17 @@ export function createServer(port: number, codeFilePath: string) {
     }
   )
 
-  // Start the server - bind to all interfaces (0.0.0.0) to ensure it's accessible
-  const server = app.listen(port, "0.0.0.0", () => {
-    moduleLogger.info(`Server listening on port ${port} on all interfaces`)
+  // Start the server - bind to loopback by default for local parent process usage
+  const bindAddr = process.env.BIND_ADDR || "127.0.0.1"
+  const server = app.listen(port, bindAddr, () => {
+    moduleLogger.info(`Server listening on ${bindAddr}:${port}`)
   })
 
-  // Handle server errors
-  server.on("error", (err: Error) => {
-    moduleLogger.error(`Server error: ${err.message}`)
+  // Handle server errors - exit fast so parent (Go) can retry with a new port
+  server.on("error", (err: Error & { code?: string }) => {
+    moduleLogger.error(`Server error: ${err.message}${err?.code ? ` (code: ${err.code})` : ""}`)
+    // Exit immediately on listen/bind errors (e.g., EADDRINUSE/EACCES) to avoid long waits on readiness
+    process.exit(1)
   })
 
   return server

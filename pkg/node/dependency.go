@@ -29,6 +29,18 @@ func (dr *DependencyResolver) ResolveDependencies(inputDependencies map[string]s
 	for k, v := range inputDependencies {
 		resolvedDep := v
 
+		if strings.HasPrefix(k, "@crossplane-js/") {
+			// Resolve crossplane package dependencies
+			if resolved, _, resolveErr := ResolveWorkspacePackage(k, workspaceRoot, workspaceMap, logger); resolveErr != nil {
+				logger.WithField("dependency", k).
+					WithField("value", v).
+					WithField("error", resolveErr.Error()).
+					Warn("Failed to resolve crossplane dependency, using original value")
+			} else {
+				resolvedDep = resolved
+			}
+		}
+
 		if strings.HasPrefix(v, "link:") {
 			// Resolve workspace package dependencies
 			if resolved, _, resolveErr := ResolveWorkspacePackage(k, workspaceRoot, workspaceMap, logger); resolveErr != nil {

@@ -77,7 +77,7 @@ func (yq *YarnQueue) executeYarnInstall(job *YarnInstallJob) error {
 	jobLogger.Info("Starting queued yarn install")
 
 	// Create yarn command
-	yarnCmd := exec.CommandContext(job.Context, "yarn", "install")
+	yarnCmd := exec.CommandContext(job.Context, "yarn", "workspaces", "focus")
 	yarnCmd.Dir = job.WorkDir
 	yarnCmd.Env = os.Environ()
 

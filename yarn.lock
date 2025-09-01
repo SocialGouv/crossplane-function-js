@@ -287,7 +287,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@crossplane-js/dev@workspace:."
   dependencies:
-    "@crossplane-js/sdk": "workspace:^"
     "@eslint/compat": "npm:^1.2.7"
     "@eslint/eslintrc": "npm:^3.3.1"
     "@eslint/js": "npm:^9.23.0"

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.27 (2025-09-01)
+
+
+### Bug Fixes
+
+* gz+b64 for yarn.lock ([9391c96](https://github.com/SocialGouv/crossplane-function-js/commit/9391c96065f3bfedcc4f37bd8c7b36ddf68ae550))
+
 ## 0.0.26 (2025-09-01)
 
 

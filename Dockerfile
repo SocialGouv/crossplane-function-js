@@ -42,8 +42,6 @@ USER 1000
 WORKDIR /app
 ENTRYPOINT ["/app/xfuncjs-server"]
 
-ENV NODE_OPTIONS="--experimental-strip-types --experimental-transform-types --no-warnings"
-ENV NODE_NO_WARNINGS=1
 ENV YARN_CACHE_FOLDER=/tmp/yarn-cache
 ENV HOME=/tmp
 

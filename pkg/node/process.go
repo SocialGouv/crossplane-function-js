@@ -194,6 +194,7 @@ func (pm *ProcessManager) getOrCreateProcess(ctx context.Context, input *types.X
 	// Ensure our custom ESM alias loader is enabled via NODE_OPTIONS
 	cmd.Env = append(os.Environ(),
 		fmt.Sprintf("PORT=%d", port),
+		fmt.Sprintf("NODE_OPTIONS=%s", "--import tsx"),
 		fmt.Sprintf("XFUNCJS_CODE_FILE_PATH=%s", tempFilePath),
 		"XFUNCJS_LOG_LEVEL=debug", // Ensure we capture all logs from Node.js
 		"LOG_LEVEL=debug",         // Fallback for Pino logger

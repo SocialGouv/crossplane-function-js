@@ -234,6 +234,7 @@ func (yi *YarnInstaller) CreatePackageJSON(workDir string, dependencies map[stri
 	// Create simple package.json with dependencies
 	packageJSON := map[string]interface{}{
 		"name":         "xfuncjs-function",
+		"type":         "module",
 		"version":      "0.0.0",
 		"private":      true,
 		"dependencies": dependencies,

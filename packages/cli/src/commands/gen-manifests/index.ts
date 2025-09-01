@@ -1,6 +1,7 @@
 import { tmpdir } from "os"
 import path from "path"
 import { fileURLToPath } from "url"
+import { gzipSync } from "zlib"
 
 import { createLogger, getLatestKubernetesVersion } from "@crossplane-js/libs"
 import { Command } from "commander"
@@ -593,7 +594,17 @@ async function genManifestsAction(
 
         // Add yarn.lock to the manifest if found
         if (yarnLock) {
-          xfuncjsStep.input.spec.source.yarnLock = yarnLock
+          try {
+            const gz = gzipSync(Buffer.from(yarnLock, "utf8"))
+            const b64 = gz.toString("base64")
+            xfuncjsStep.input.spec.source.yarnLock = b64
+            moduleLogger.debug(
+              `Encoded yarn.lock: original ${yarnLock.length} chars -> gz ${gz.length} bytes -> b64 ${b64.length} chars`
+            )
+          } catch (e) {
+            moduleLogger.warn(`Failed to gzip/base64 yarn.lock, embedding raw: ${e}`)
+            xfuncjsStep.input.spec.source.yarnLock = yarnLock
+          }
         }
       }
 

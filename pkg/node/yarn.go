@@ -1,9 +1,13 @@
 package node
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -125,7 +129,32 @@ func (yi *YarnInstaller) PrepareYarnEnvironment(workDir string, yarnLock string,
 	// If yarn.lock is provided, write it to the temporary directory
 	if yarnLock != "" {
 		yarnLockPath := filepath.Join(workDir, "yarn.lock")
-		if err := os.WriteFile(yarnLockPath, []byte(yarnLock), 0644); err != nil {
+
+		// Attempt to base64-decode and gunzip the provided yarn.lock
+		var toWrite []byte
+		if decoded, err := base64.StdEncoding.DecodeString(yarnLock); err == nil {
+			if zr, err := gzip.NewReader(bytes.NewReader(decoded)); err == nil {
+				defer zr.Close()
+				if unzipped, err := io.ReadAll(zr); err == nil {
+					toWrite = unzipped
+					logger.Info("Decoded base64 and gunzipped yarn.lock")
+				} else {
+					logger.WithField("error", err.Error()).
+						Warn("Failed to read gunzipped yarn.lock, falling back to raw content")
+				}
+			} else {
+				logger.WithField("error", err.Error()).
+					Warn("Failed to create gzip reader for yarn.lock, falling back to raw content")
+			}
+		} else {
+			// Not base64-encoded; fall back to raw content
+		}
+
+		if toWrite == nil {
+			toWrite = []byte(yarnLock)
+		}
+
+		if err := os.WriteFile(yarnLockPath, toWrite, 0644); err != nil {
 			logger.WithField("error", err.Error()).
 				Warn("Failed to write yarn.lock to temporary directory")
 		} else {

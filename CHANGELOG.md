@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.29 (2025-09-02)
+
+
+### Features
+
+* override default composition ([2061e3b](https://github.com/SocialGouv/crossplane-function-js/commit/2061e3bffb695aeadf0c94240fad522e0247797b))
+
 ## 0.0.28 (2025-09-01)
 
 

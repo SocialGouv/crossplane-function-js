@@ -415,6 +415,7 @@ async function genManifestsAction(
 
       // Check if composition.yaml exists
       let manifest: Manifest
+      let usedDefaultTemplate = false
       const yamlFilePath = path.join(functionDir, "composition.yaml")
 
       if (fs.existsSync(yamlFilePath)) {
@@ -422,49 +423,57 @@ async function genManifestsAction(
         const yamlContent = fs.readFileSync(yamlFilePath, { encoding: "utf8" })
         manifest = YAML.parse(yamlContent)
       } else {
-        // Use the generic template from templates/composition.default.yaml
-        // Get the directory name from the import.meta.url
-        const __filename = fileURLToPath(import.meta.url)
-        const __dirname = path.dirname(__filename)
-        const genericTemplatePath = path.join(__dirname, "templates/composition.default.yaml")
+        // Try a root-level composition.default.yaml first, then fall back to packaged template
+        const rootDefaultPath = path.join(cwd(), "composition.default.yaml")
+        if (fs.existsSync(rootDefaultPath)) {
+          moduleLogger.info(`Using root composition template: ${rootDefaultPath}`)
+          const templateContent = fs.readFileSync(rootDefaultPath, { encoding: "utf8" })
+          manifest = YAML.parse(templateContent)
+          usedDefaultTemplate = true
+        } else {
+          // Use the generic template from templates/composition.default.yaml
+          // Get the directory name from the import.meta.url
+          const __filename = fileURLToPath(import.meta.url)
+          const __dirname = path.dirname(__filename)
+          const genericTemplatePath = path.join(__dirname, "templates/composition.default.yaml")
 
-        if (!fs.existsSync(genericTemplatePath)) {
-          moduleLogger.error(`Generic template not found: ${genericTemplatePath}`)
-          continue
+          if (!fs.existsSync(genericTemplatePath)) {
+            moduleLogger.error(`Generic template not found: ${genericTemplatePath}`)
+            continue
+          }
+
+          const templateContent = fs.readFileSync(genericTemplatePath, {
+            encoding: "utf8",
+          })
+          manifest = YAML.parse(templateContent)
+          usedDefaultTemplate = true
         }
+      }
 
-        const templateContent = fs.readFileSync(genericTemplatePath, {
-          encoding: "utf8",
-        })
-        manifest = YAML.parse(templateContent)
-
-        // Update the name in the manifest to match the function name
-        if (manifest.metadata && manifest.metadata.name) {
-          manifest.metadata.name = manifest.metadata.name.replace("__FUNCTION_NAME__", functionName)
-        }
-
-        // Update the apiVersion in the compositeTypeRef using the already loaded XRD
-        if (manifest.spec && manifest.spec.compositeTypeRef) {
-          const group = xrdManifest.spec.group
-          const version = getLatestKubernetesVersion(xrdManifest.spec.versions)
-          const apiVersion = `${group}/${version}`
-
-          manifest.spec.compositeTypeRef.apiVersion = apiVersion
-          manifest.spec.compositeTypeRef.kind = xrdManifest.spec.names.kind
-          moduleLogger.debug(
-            `Set compositeTypeRef.apiVersion to ${apiVersion} (latest version) from XRD for ${functionName}`
-          )
-        }
-
-        // Update the step name
-        if (manifest.spec && manifest.spec.pipeline && Array.isArray(manifest.spec.pipeline)) {
-          for (let i = 0; i < manifest.spec.pipeline.length; i++) {
-            const step = manifest.spec.pipeline[i].step
-            if (step) {
-              manifest.spec.pipeline[i].step = step.replace("__FUNCTION_NAME__", functionName)
-            }
+      // Always perform variable substitution templating, regardless of source
+      if (manifest.metadata && typeof manifest.metadata.name === "string") {
+        manifest.metadata.name = manifest.metadata.name.replace("__FUNCTION_NAME__", functionName)
+      }
+      if (manifest.spec && Array.isArray(manifest.spec.pipeline)) {
+        for (let i = 0; i < manifest.spec.pipeline.length; i++) {
+          const step = manifest.spec.pipeline[i].step
+          if (typeof step === "string") {
+            manifest.spec.pipeline[i].step = step.replace("__FUNCTION_NAME__", functionName)
           }
         }
+      }
+
+      // If using a default template (root or packaged), derive compositeTypeRef from XRD
+      if (usedDefaultTemplate && manifest.spec && manifest.spec.compositeTypeRef) {
+        const group = xrdManifest.spec.group
+        const version = getLatestKubernetesVersion(xrdManifest.spec.versions)
+        const apiVersion = `${group}/${version}`
+
+        manifest.spec.compositeTypeRef.apiVersion = apiVersion
+        manifest.spec.compositeTypeRef.kind = xrdManifest.spec.names.kind
+        moduleLogger.debug(
+          `Set compositeTypeRef.apiVersion to ${apiVersion} (latest version) from XRD for ${functionName}`
+        )
       }
 
       // Ensure the pipeline exists

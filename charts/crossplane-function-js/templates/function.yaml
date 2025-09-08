@@ -5,10 +5,13 @@ metadata:
   labels:
     {{- include "xfuncjs.labels" . | nindent 4 }}
 spec:
-  package: {{ .Values.function.package.repository }}/{{ .Values.function.package.name }}:{{ if .Values.function.package.tag }}{{ .Values.function.package.tag }}{{ else }}v{{ .Chart.AppVersion }}{{ end }}
+  package: {{ .Values.function.package.repository }}/{{ .Values.function.package.name }}:{{ if .Values.function.package.tag }}{{ .Values.function.package.tag | toString }}{{ else }}v{{ .Chart.AppVersion }}{{ end }}
   packagePullPolicy: {{ .Values.function.pullPolicy }}
   runtimeConfigRef:
     apiVersion: pkg.crossplane.io/v1beta1
     kind: DeploymentRuntimeConfig
     name: {{ .Values.runtimeConfig.name }}
+  revisionActivationPolicy: Automatic
+  revisionHistoryLimit: 1
+  skipDependencyResolution: false
 

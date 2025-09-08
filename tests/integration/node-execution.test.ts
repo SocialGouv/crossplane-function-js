@@ -164,7 +164,7 @@ describe('JavaScript Code Execution', () => {
     // Check the Crossplane Object resource
     expect(resultObj.resources).to.have.property('configmap');
     const crossplaneObj = resultObj.resources.configmap.resource;
-    expect(crossplaneObj).to.have.property('apiVersion', 'kubernetes.crossplane.io/v1alpha2');
+    expect(crossplaneObj).to.have.property('apiVersion', 'kubernetes.crossplane.io/v1alpha1');
     expect(crossplaneObj).to.have.property('kind', 'Object');
     expect(crossplaneObj).to.have.property('metadata');
     expect(crossplaneObj.metadata).to.have.property('name', 'generated-configmap');

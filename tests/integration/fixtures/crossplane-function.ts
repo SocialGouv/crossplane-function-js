@@ -36,7 +36,7 @@ export default function(input: FunctionInput): CrossplaneDesiredResources {
     resources: {
       configmap: {
         resource: {
-          apiVersion: "kubernetes.crossplane.io/v1alpha2",
+          apiVersion: "kubernetes.crossplane.io/v1alpha1",
           kind: "Object",
           metadata: {
             name: "generated-configmap",

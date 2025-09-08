@@ -1,12 +1,12 @@
 ---
-apiVersion: pkg.crossplane.io/v1beta1
+apiVersion: pkg.crossplane.io/v1
 kind: Function
 metadata:
   name: function-go-templating
 spec:
   package: xpkg.upbound.io/crossplane-contrib/function-go-templating:v0.0.0-20231101231317-cdb49945da4e
 ---
-apiVersion: pkg.crossplane.io/v1beta1
+apiVersion: pkg.crossplane.io/v1
 kind: Function
 metadata:
   name: function-auto-ready

@@ -1,7 +1,7 @@
-apiVersion: meta.pkg.crossplane.io/v1beta1
+apiVersion: meta.pkg.crossplane.io/v1
 kind: Function
 metadata:
   name: xfuncjs-server
 spec:
   crossplane:
-    version: ">=v1.0.0"
+    version: ">=v2.0.0"

@@ -7,17 +7,31 @@ spec:
     spec:
       selector:
         matchLabels:
-          pkg.crossplane.io/function: function-xfuncjs
+          pkg.crossplane.io/function: {{ .Values.function.name }}
       template:
         metadata:
           labels:
-            pkg.crossplane.io/function: function-xfuncjs
+            pkg.crossplane.io/function: {{ .Values.function.name }}
         spec:
+          serviceAccountName: {{ .Values.function.name }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
           volumes:
             - name: tmp
               emptyDir: {}
           containers:
             - name: package-runtime
+              image: {{ .Values.function.package.repository }}/{{ .Values.function.package.name }}:{{ if .Values.function.package.tag }}{{ .Values.function.package.tag | toString }}{{ else }}v{{ .Chart.AppVersion }}{{ end }}
+              imagePullPolicy: {{ .Values.function.pullPolicy }}
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 65532
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop:
+                  - ALL
               volumeMounts:
                 - name: tmp
                   mountPath: /tmp

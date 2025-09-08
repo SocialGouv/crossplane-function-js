@@ -52,7 +52,7 @@ graph TD
 
 ### Prerequisites
 
-- Kubernetes cluster with Crossplane installed
+- Kubernetes cluster with Crossplane v2.0.0 or later installed
 - Helm 3+
 
 ### Installing the Helm Chart
@@ -193,7 +193,7 @@ task clean-test-env
 The tests:
 
 1. Set up a Kind cluster with a local registry
-2. Install Crossplane
+2. Install Crossplane v2.x
 3. Deploy the XFuncJS server
 4. Apply test compositions and resources
 5. Verify that the resources are created correctly

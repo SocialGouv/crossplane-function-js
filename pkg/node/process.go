@@ -46,11 +46,11 @@ func NewProcessManager(gcInterval, idleTimeout time.Duration, tempDir string, lo
 		idleTimeout:         idleTimeout,
 		tempDir:             tempDir,
 		logger:              logger,
-		nodeServerPort:      3000,                   // Default port
-		nextPort:            3000,                   // Initialize next port to the default port
-		healthCheckWait:     30 * time.Second,       // Default timeout for health check
-		healthCheckInterval: 500 * time.Millisecond, // Default interval for health check polling
-		requestTimeout:      30 * time.Second,       // Default timeout for requests
+		nodeServerPort:      3000,                 // Default port
+		nextPort:            3000,                 // Initialize next port to the default port
+		healthCheckWait:     90 * time.Second,     // Default timeout for health check
+		healthCheckInterval: 1 * time.Millisecond, // Default interval for health check polling
+		requestTimeout:      30 * time.Second,     // Default timeout for requests
 	}
 
 	// Apply options

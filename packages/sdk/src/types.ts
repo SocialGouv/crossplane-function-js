@@ -21,6 +21,9 @@ export interface KubernetesResource {
   [key: string]: unknown
 }
 
+// Union type for resources that can be serialized to KubernetesResource
+export type KubernetesResourceLike = KubernetesResource | { toJSON(): KubernetesResource }
+
 // Crossplane composite resource
 export interface CrossplaneCompositeResource {
   resource: KubernetesResource
@@ -35,7 +38,7 @@ export interface CrossplaneObservedResources {
 
 // Crossplane resource entry
 export interface CrossplaneResourceEntry {
-  resource: KubernetesResource
+  resource: KubernetesResourceLike
   ready?: boolean
   connectionDetails?: string[]
 }

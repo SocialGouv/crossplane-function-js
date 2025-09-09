@@ -39,8 +39,6 @@ USER 1000
 WORKDIR /app
 ENTRYPOINT ["/app/xfuncjs-server"]
 
-# RUN npm i -g tsx
-
 ENV YARN_CACHE_FOLDER=/tmp/yarn-cache
 ENV HOME=/tmp
 

@@ -86,8 +86,8 @@ for i in {1..60}; do
     kubectl get simpleconfigmaps.test.crossplane.io -o yaml || true
     echo "Crossplane Function status:"
     kubectl get functions.pkg.crossplane.io || true
-    echo "FunctionRuntime status:"
-    kubectl get functionruntimes.pkg.crossplane.io || true
+    echo "Function pods status:"
+    kubectl get pods -n crossplane-system -l app.kubernetes.io/name=function-xfuncjs || true
   fi
   
   sleep 2
@@ -99,8 +99,8 @@ if [ "$configmap_created" = false ]; then
   kubectl get simpleconfigmaps.test.crossplane.io -o yaml || true
   echo "Final Crossplane Function status:"
   kubectl get functions.pkg.crossplane.io || true
-  echo "Final FunctionRuntime status:"
-  kubectl get functionruntimes.pkg.crossplane.io || true
+  echo "Final Function pods status:"
+  kubectl get pods -n crossplane-system -l app.kubernetes.io/name=function-xfuncjs || true
   exit 1
 fi
 

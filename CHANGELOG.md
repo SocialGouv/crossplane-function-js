@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.31 (2025-09-09)
+
+
+### Bug Fixes
+
+* increase default health wait ([85cdbbb](https://github.com/SocialGouv/crossplane-function-js/commit/85cdbbbd92bff8566710b970cfbaf6e29807862c))
+
 ## 0.0.30 (2025-09-08)
 
 

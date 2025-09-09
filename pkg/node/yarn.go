@@ -146,8 +146,6 @@ func (yi *YarnInstaller) PrepareYarnEnvironment(workDir string, yarnLock string,
 				logger.WithField("error", err.Error()).
 					Warn("Failed to create gzip reader for yarn.lock, falling back to raw content")
 			}
-		} else {
-			// Not base64-encoded; fall back to raw content
 		}
 
 		if toWrite == nil {

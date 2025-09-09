@@ -1,9 +1,9 @@
 import { logger, FieldRef, v1 } from "@crossplane-js/sdk"
 import type { CrossplaneDesiredResources, CrossplaneObservedResources } from "@crossplane-js/sdk"
 
-import type { XSimpleConfigMap } from "@/models/test.crossplane.io/v1beta1"
+import type { SimpleConfigMap } from "@/models/test.crossplane.io/v1beta1"
 
-export default function(composite: XSimpleConfigMap, _resources: CrossplaneObservedResources): CrossplaneDesiredResources {
+export default function(composite: SimpleConfigMap, _resources: CrossplaneObservedResources): CrossplaneDesiredResources {
   logger.info("Composition function started")
 
   const namespace = composite.getNamespace()

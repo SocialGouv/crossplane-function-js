@@ -1,5 +1,5 @@
 apiVersion: test.crossplane.io/v1beta1
-kind: XSimpleConfigMap
+kind: SimpleConfigMap
 metadata:
   name: sample-configmap
   namespace: test-xfuncjs

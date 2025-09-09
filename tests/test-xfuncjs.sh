@@ -57,15 +57,15 @@ kubectl apply -f tests/fixtures/domain-sdk/manifests
 
 # Wait for XRD to be established
 echo "Waiting for XRD to be established..."
-kubectl wait --for=condition=established xrd/xsimpleconfigmaps.test.crossplane.io --timeout=60s || {
+kubectl wait --for=condition=established xrd/simpleconfigmaps.test.crossplane.io --timeout=60s || {
   echo "XRD not established within timeout"
   echo "Current XRD status:"
-  kubectl get xrd/xsimpleconfigmaps.test.crossplane.io -o yaml
+  kubectl get xrd/simpleconfigmaps.test.crossplane.io -o yaml
   exit 1
 }
 
-# Create a test XSimpleConfigMap
-echo "(Re)Creating test XSimpleConfigMap..."
+# Create a test SimpleConfigMap
+echo "(Re)Creating test SimpleConfigMap..."
 kubectl delete -f tests/fixtures/domain-sdk/sample.yaml || true
 kubectl apply -f tests/fixtures/domain-sdk/sample.yaml
 
@@ -80,10 +80,10 @@ for i in {1..60}; do
   fi
   echo "Waiting for ConfigMap to be created... ($i/60)"
   
-  # Check the status of the XSimpleConfigMap
+  # Check the status of the SimpleConfigMap
   if [ $((i % 5)) -eq 0 ]; then
-    echo "XSimpleConfigMap status:"
-    kubectl get xsimpleconfigmaps.test.crossplane.io -o yaml || true
+    echo "SimpleConfigMap status:"
+    kubectl get simpleconfigmaps.test.crossplane.io -o yaml || true
     echo "Crossplane Function status:"
     kubectl get functions.pkg.crossplane.io || true
     echo "FunctionRuntime status:"
@@ -95,8 +95,8 @@ done
 
 if [ "$configmap_created" = false ]; then
   echo "ConfigMap was not created within timeout"
-  echo "Final XSimpleConfigMap status:"
-  kubectl get xsimpleconfigmaps.test.crossplane.io -o yaml || true
+  echo "Final SimpleConfigMap status:"
+  kubectl get simpleconfigmaps.test.crossplane.io -o yaml || true
   echo "Final Crossplane Function status:"
   kubectl get functions.pkg.crossplane.io || true
   echo "Final FunctionRuntime status:"

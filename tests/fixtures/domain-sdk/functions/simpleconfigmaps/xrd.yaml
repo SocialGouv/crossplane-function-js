@@ -1,14 +1,14 @@
 apiVersion: apiextensions.crossplane.io/v2
 kind: CompositeResourceDefinition
 metadata:
-  name: xsimpleconfigmaps.test.crossplane.io
+  name: simpleconfigmaps.test.crossplane.io
 spec:
   scope: Namespaced
   group: test.crossplane.io
   names:
-    kind: XSimpleConfigMap
-    plural: xsimpleconfigmaps
-    singular: xsimpleconfigmap
+    kind: SimpleConfigMap
+    plural: simpleconfigmaps
+    singular: simpleconfigmap
   versions:
     - name: v1beta1
       served: true

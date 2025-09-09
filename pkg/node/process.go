@@ -22,7 +22,7 @@ type ProcessManager struct {
 	gcInterval          time.Duration
 	idleTimeout         time.Duration
 	tempDir             string
-	logger              logger.LogrusLogger
+	logger              logger.Logger
 	healthCheckWait     time.Duration
 	healthCheckInterval time.Duration
 	requestTimeout      time.Duration

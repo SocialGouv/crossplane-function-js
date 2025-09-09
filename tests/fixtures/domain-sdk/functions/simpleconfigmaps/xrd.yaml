@@ -4,8 +4,11 @@ metadata:
   name: simpleconfigmaps.test.crossplane.io
 spec:
   scope: Namespaced
+  defaultCompositeDeletePolicy: Foreground
   group: test.crossplane.io
   names:
+    categories:
+      - crossplane
     kind: SimpleConfigMap
     plural: simpleconfigmaps
     singular: simpleconfigmap
@@ -22,5 +25,8 @@ spec:
               properties:
                 data:
                   type: object
+                  description: Key-value data to be transformed and stored in ConfigMap
                   additionalProperties:
                     type: string
+              required:
+                - data

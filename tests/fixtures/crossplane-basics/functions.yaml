@@ -9,6 +9,6 @@ spec:
 apiVersion: pkg.crossplane.io/v1
 kind: Function
 metadata:
-  name: function-auto-ready
+  name: crossplane-contrib-function-auto-ready
 spec:
   package: xpkg.upbound.io/crossplane-contrib/function-auto-ready:v0.0.0-20231101225931-60aea09d94c8

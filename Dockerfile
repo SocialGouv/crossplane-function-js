@@ -33,21 +33,18 @@ RUN yarn fetch workspaces focus @crossplane-js/server --production && yarn cache
 COPY --chown=1000:1000 package.json tsconfig.json ./
 COPY --chown=1000:1000 packages/ ./packages/
 
-FROM alpine:3 AS certs
-RUN apk --update add ca-certificates
-
 FROM node:$NODE_VERSION
 
 USER 1000
 WORKDIR /app
 ENTRYPOINT ["/app/xfuncjs-server"]
 
+# RUN npm i -g tsx
+
 ENV YARN_CACHE_FOLDER=/tmp/yarn-cache
 ENV HOME=/tmp
 
 COPY crossplane.yaml package.yaml /
-
-COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 COPY --from=go-builder --chown=1000:1000 /app/xfuncjs-server /app/xfuncjs-server
 

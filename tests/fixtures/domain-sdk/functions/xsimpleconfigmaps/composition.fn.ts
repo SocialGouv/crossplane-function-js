@@ -6,7 +6,7 @@ import type { XSimpleConfigMap } from "@/models/test.crossplane.io/v1beta1"
 export default function(composite: XSimpleConfigMap, _resources: CrossplaneObservedResources): CrossplaneDesiredResources {
   logger.info("Composition function started")
 
-  // const namespace = composite.getClaimNamespace()
+  const namespace = composite.getNamespace()
   const isReady = composite.isReady()
 
   logger.info(`Ready: ${isReady}`)
@@ -23,8 +23,7 @@ export default function(composite: XSimpleConfigMap, _resources: CrossplaneObser
   const testConfigMap = new v1.ConfigMap({
     metadata: {
       name: "generated-configmap",
-      namespace: "test-xfuncjs",
-      // namespace: namespace,
+      namespace: namespace,
       labels: {
         example: "true"
       },

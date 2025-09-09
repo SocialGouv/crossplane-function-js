@@ -97,22 +97,6 @@ export class Model<T> extends BaseModel<T> {
   }
 
   /**
-   * Get the claim namespace from annotations (legacy method)
-   * @returns The claim namespace
-   * @throws Error if the resource wasn't created via a claim
-   */
-  getClaimNamespace(): string {
-    const { name } = this.getMetadata()
-    const claimNamespace = this.getMetadata().labels?.["crossplane.io/claim-namespace"]
-
-    if (!claimNamespace) {
-      throw new Error(`Resource ${name} wasn't created via a claim`)
-    }
-
-    return claimNamespace
-  }
-
-  /**
    * Check if this resource is ready based on its status conditions
    * @returns true if the resource is ready, false otherwise
    */

@@ -2,6 +2,7 @@ apiVersion: test.crossplane.io/v1beta1
 kind: XSimpleConfigMap
 metadata:
   name: sample-configmap
+  namespace: test-xfuncjs
 spec:
   data:
     name: "John Doe"

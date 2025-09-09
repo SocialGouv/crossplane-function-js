@@ -18,7 +18,6 @@
         {
           default = pkgs.mkShell {
             packages = with pkgs; [
-              docker
               git
               nodejs_22
               yarn

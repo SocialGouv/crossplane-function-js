@@ -22,10 +22,7 @@ type ProcessManager struct {
 	gcInterval          time.Duration
 	idleTimeout         time.Duration
 	tempDir             string
-	logger              logger.Logger
-	nodeServerPort      int        // Base port for Node.js servers
-	nextPort            int        // Next port to assign
-	portMutex           sync.Mutex // Mutex for port assignment
+	logger              logger.LogrusLogger
 	healthCheckWait     time.Duration
 	healthCheckInterval time.Duration
 	requestTimeout      time.Duration
@@ -46,8 +43,6 @@ func NewProcessManager(gcInterval, idleTimeout time.Duration, tempDir string, lo
 		idleTimeout:         idleTimeout,
 		tempDir:             tempDir,
 		logger:              logger,
-		nodeServerPort:      3000,                 // Default port
-		nextPort:            3000,                 // Initialize next port to the default port
 		healthCheckWait:     90 * time.Second,     // Default timeout for health check
 		healthCheckInterval: 1 * time.Millisecond, // Default interval for health check polling
 		requestTimeout:      30 * time.Second,     // Default timeout for requests

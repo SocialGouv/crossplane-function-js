@@ -27,11 +27,6 @@ func NewServer(processManager *node.ProcessManager, logger logger.Logger) *Serve
 	}
 }
 
-// SetNodeServerPort sets the port for the Node.js HTTP server
-func (s *Server) SetNodeServerPort(port int) {
-	s.function.SetNodeServerPort(port)
-}
-
 // SetNodeHealthCheckConfig sets the health check configuration for the Node.js HTTP server
 func (s *Server) SetNodeHealthCheckConfig(wait, interval time.Duration) {
 	s.function.SetNodeHealthCheckConfig(wait, interval)

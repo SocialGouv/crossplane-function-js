@@ -27,7 +27,6 @@ config:
   # idleTimeout: "30m"
 
   # Node.js configuration
-  # nodeServerPort: 3000
   # healthCheckWait: "30s"
   # healthCheckInterval: "500ms"
   # nodeRequestTimeout: "30s"

@@ -27,7 +27,6 @@ type Config struct {
 	LogFormat string `envconfig:"LOG_FORMAT" default:"auto" description:"Log format (auto, text, json)"`
 
 	// Node.js server configuration
-	NodeServerPort      int           `envconfig:"NODE_SERVER_PORT" default:"3000" description:"Port for the Node.js HTTP server"`
 	HealthCheckWait     time.Duration `envconfig:"HEALTH_CHECK_WAIT" default:"30s" description:"Timeout for health check"`
 	HealthCheckInterval time.Duration `envconfig:"HEALTH_CHECK_INTERVAL" default:"500ms" description:"Interval for health check polling"`
 	NodeRequestTimeout  time.Duration `envconfig:"NODE_REQUEST_TIMEOUT" default:"30s" description:"Timeout for Node.js requests"`
@@ -86,9 +85,6 @@ func (c *Config) Validate() error {
 		if c.TLSKeyFile == "" {
 			return fmt.Errorf("TLS key file is required when TLS is enabled")
 		}
-	}
-	if c.NodeServerPort <= 0 {
-		return fmt.Errorf("Node server port must be positive")
 	}
 	if c.HealthCheckWait <= 0 {
 		return fmt.Errorf("health check wait must be positive")

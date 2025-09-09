@@ -33,7 +33,6 @@ func main() {
 	idleTimeout := flag.Duration("idle-timeout", cfg.IdleTimeout, "Idle process timeout")
 	logLevel := flag.String("log-level", cfg.LogLevel, "Log level (debug, info, warn, error)")
 	logFormat := flag.String("log-format", cfg.LogFormat, "Log format (auto, text, json). Auto uses text for TTY, JSON otherwise")
-	nodeServerPort := flag.Int("node-server-port", cfg.NodeServerPort, "Port for the Node.js HTTP server")
 	healthCheckWait := flag.Duration("health-check-wait", cfg.HealthCheckWait, "Timeout for health check")
 	healthCheckInterval := flag.Duration("health-check-interval", cfg.HealthCheckInterval, "Interval for health check polling")
 	requestTimeout := flag.Duration("request-timeout", cfg.NodeRequestTimeout, "Timeout for requests")
@@ -51,7 +50,6 @@ func main() {
 	cfg.IdleTimeout = *idleTimeout
 	cfg.LogLevel = *logLevel
 	cfg.LogFormat = *logFormat
-	cfg.NodeServerPort = *nodeServerPort
 	cfg.HealthCheckWait = *healthCheckWait
 	cfg.HealthCheckInterval = *healthCheckInterval
 	cfg.NodeRequestTimeout = *requestTimeout
@@ -84,7 +82,6 @@ func main() {
 		cfg.IdleTimeout,
 		cfg.TempDir,
 		log,
-		node.WithNodeServerPort(cfg.NodeServerPort),
 		node.WithHealthCheckWait(cfg.HealthCheckWait),
 		node.WithHealthCheckInterval(cfg.HealthCheckInterval),
 		node.WithRequestTimeout(cfg.NodeRequestTimeout),

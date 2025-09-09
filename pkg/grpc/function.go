@@ -13,7 +13,6 @@ type Function struct {
 	fnv1.UnimplementedFunctionRunnerServiceServer
 	processManager *node.ProcessManager
 	logger         logger.Logger
-	nodeServerPort int
 }
 
 // NewFunction creates a new Function
@@ -21,14 +20,7 @@ func NewFunction(processManager *node.ProcessManager, logger logger.Logger) *Fun
 	return &Function{
 		processManager: processManager,
 		logger:         logger,
-		nodeServerPort: 3000, // Default port
 	}
-}
-
-// SetNodeServerPort sets the port for the Node.js HTTP server
-func (f *Function) SetNodeServerPort(port int) {
-	f.nodeServerPort = port
-	f.processManager.SetNodeServerPort(port)
 }
 
 // SetNodeHealthCheckConfig sets the health check configuration for the Node.js HTTP server

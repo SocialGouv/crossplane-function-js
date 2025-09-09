@@ -54,10 +54,6 @@ spec:
                 - name: XFUNCJS_IDLE_TIMEOUT
                   value: {{ .Values.config.idleTimeout }}
                 {{- end }}
-                {{- if .Values.config.nodeServerPort }}
-                - name: XFUNCJS_NODE_SERVER_PORT
-                  value: "{{ .Values.config.nodeServerPort }}"
-                {{- end }}
                 {{- if .Values.config.healthCheckWait }}
                 - name: XFUNCJS_HEALTH_CHECK_WAIT
                   value: {{ .Values.config.healthCheckWait }}

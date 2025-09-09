@@ -33,7 +33,6 @@ The following table lists the configurable parameters of the XFuncJS chart and t
 | `config.tempDir`                  | Temporary directory for code files           | `""` (uses default)      |
 | `config.gcInterval`               | Garbage collection interval                  | `""` (uses default)      |
 | `config.idleTimeout`              | Idle process timeout                         | `""` (uses default)      |
-| `config.nodeServerPort`           | Port for the Node.js HTTP server             | `""` (uses default)      |
 | `config.healthCheckWait`          | Timeout for health check                     | `""` (uses default)      |
 | `config.healthCheckInterval`      | Interval for health check polling            | `""` (uses default)      |
 | `config.nodeRequestTimeout`       | Timeout for Node.js requests                 | `""` (uses default)      |

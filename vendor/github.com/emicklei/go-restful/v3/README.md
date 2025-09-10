@@ -1,5 +1,5 @@
-# go-restful
-
+go-restful
+==========
 package for building REST-style Web Services using Google Go
 
 [![Build Status](https://travis-ci.org/emicklei/go-restful.png)](https://travis-ci.org/emicklei/go-restful)
@@ -18,7 +18,7 @@ REST asks developers to use HTTP methods explicitly and in a way that's consiste
 - DELETE = Delete if you are requesting the server to delete the resource
 - PATCH = Update partial content of a resource
 - OPTIONS = Get information about the communication options for the request URI
-
+    
 ### Usage
 
 #### Without Go Modules
@@ -53,23 +53,23 @@ ws.
 ws.Route(ws.GET("/{user-id}").To(u.findUser).
 	Doc("get a user").
 	Param(ws.PathParameter("user-id", "identifier of the user").DataType("string")).
-	Writes(User{}))
+	Writes(User{}))		
 ...
-
+	
 func (u UserResource) findUser(request *restful.Request, response *restful.Response) {
 	id := request.PathParameter("user-id")
 	...
 }
 ```
-
-[Full API of a UserResource](https://github.com/emicklei/go-restful/blob/v3/examples/user-resource/restful-user-resource.go)
-
+	
+[Full API of a UserResource](https://github.com/emicklei/go-restful/blob/v3/examples/user-resource/restful-user-resource.go) 
+		
 ### Features
 
-- Routes for request &#8594; function mapping with path parameter (e.g. {id} but also prefix\_{var} and {var}\_suffix) support
+- Routes for request &#8594; function mapping with path parameter (e.g. {id} but also prefix_{var} and {var}_suffix) support
 - Configurable router:
-  - (default) Fast routing algorithm that allows static elements, [google custom method](https://cloud.google.com/apis/design/custom_methods), regular expressions and dynamic parameters in the URL path (e.g. /resource/name:customVerb, /meetings/{id} or /static/{subpath:\*})
-  - Routing algorithm after [JSR311](http://jsr311.java.net/nonav/releases/1.1/spec/spec.html) that is implemented using (but does **not** accept) regular expressions
+	- (default) Fast routing algorithm that allows static elements, [google custom method](https://cloud.google.com/apis/design/custom_methods), regular expressions and dynamic parameters in the URL path (e.g. /resource/name:customVerb, /meetings/{id} or /static/{subpath:*})
+	- Routing algorithm after [JSR311](http://jsr311.java.net/nonav/releases/1.1/spec/spec.html) that is implemented using (but does **not** accept) regular expressions
 - Request API for reading structs from JSON/XML and accessing parameters (path,query,header)
 - Response API for writing structs to JSON/XML and setting headers
 - Customizable encoding using EntityReaderWriter registration
@@ -87,7 +87,6 @@ func (u UserResource) findUser(request *restful.Request, response *restful.Respo
 - Inject your own http.Handler using the `HttpMiddlewareHandlerToFilter` function
 
 ## How to customize
-
 There are several hooks to customize the behavior of the go-restful package.
 
 - Router algorithm
@@ -96,8 +95,8 @@ There are several hooks to customize the behavior of the go-restful package.
 - Trace logging
 - Compression
 - Encoders for other serializers
-- Use [jsoniter](https://github.com/json-iterator/go) by building this package using a build tag, e.g. `go build -tags=jsoniter .`
-- Use the package variable `TrimRightSlashEnabled` (default true) to control the behavior of matching routes that end with a slash `/`
+- Use [jsoniter](https://github.com/json-iterator/go) by building this package using a build tag, e.g. `go build -tags=jsoniter .` 
+- Use the package variable `TrimRightSlashEnabled` (default true) to control the behavior of matching routes that end with a slash `/` 
 
 ## Resources
 
@@ -108,6 +107,6 @@ There are several hooks to customize the behavior of the go-restful package.
 - [showcase: Zazkia - tcp proxy for testing resiliency](https://github.com/emicklei/zazkia)
 - [showcase: Mora - MongoDB REST Api server](https://github.com/emicklei/mora)
 
-Type `git shortlog -s` for a full list of contributors.
+Type ```git shortlog -s``` for a full list of contributors.
 
 © 2012 - 2023, http://ernestmicklei.com. MIT License. Contributions are welcome.

@@ -27,9 +27,9 @@ type Config struct {
 	LogFormat string `envconfig:"LOG_FORMAT" default:"auto" description:"Log format (auto, text, json)"`
 
 	// Node.js server configuration
-	HealthCheckWait     time.Duration `envconfig:"HEALTH_CHECK_WAIT" default:"30s" description:"Timeout for health check"`
-	HealthCheckInterval time.Duration `envconfig:"HEALTH_CHECK_INTERVAL" default:"500ms" description:"Interval for health check polling"`
-	NodeRequestTimeout  time.Duration `envconfig:"NODE_REQUEST_TIMEOUT" default:"30s" description:"Timeout for Node.js requests"`
+	HealthCheckWait     time.Duration `envconfig:"HEALTH_CHECK_WAIT" default:"900s" description:"Timeout for health check"`
+	HealthCheckInterval time.Duration `envconfig:"HEALTH_CHECK_INTERVAL" default:"1s" description:"Interval for health check polling"`
+	NodeRequestTimeout  time.Duration `envconfig:"NODE_REQUEST_TIMEOUT" default:"5s" description:"Timeout for Node.js requests"`
 
 	// Yarn configuration
 	MaxConcurrentYarnInstalls int `envconfig:"MAX_CONCURRENT_YARN_INSTALLS" default:"3" description:"Maximum concurrent yarn install operations"`

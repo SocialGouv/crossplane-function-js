@@ -43,9 +43,9 @@ func NewProcessManager(gcInterval, idleTimeout time.Duration, tempDir string, lo
 		idleTimeout:         idleTimeout,
 		tempDir:             tempDir,
 		logger:              logger,
-		healthCheckWait:     90 * time.Second,     // Default timeout for health check
-		healthCheckInterval: 1 * time.Millisecond, // Default interval for health check polling
-		requestTimeout:      30 * time.Second,     // Default timeout for requests
+		healthCheckWait:     60 * time.Second, // Default timeout for health check
+		healthCheckInterval: 1 * time.Second,  // Default interval for health check polling
+		requestTimeout:      5 * time.Second,  // Default timeout for requests
 	}
 
 	// Apply options

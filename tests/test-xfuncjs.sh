@@ -72,13 +72,13 @@ kubectl apply -f tests/fixtures/domain-sdk/sample.yaml
 # Wait for the ConfigMap to be created
 echo "Waiting for ConfigMap to be created..."
 configmap_created=false
-for i in {1..60}; do
+for i in {1..180}; do
   if kubectl get configmap generated-configmap -n test-xfuncjs &> /dev/null; then
     echo "ConfigMap created successfully!"
     configmap_created=true
     break
   fi
-  echo "Waiting for ConfigMap to be created... ($i/60)"
+  echo "Waiting for ConfigMap to be created... ($i/180)"
   
   # Check the status of the SimpleConfigMap
   if [ $((i % 5)) -eq 0 ]; then

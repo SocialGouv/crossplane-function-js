@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.33 (2025-09-11)
+
+
+### Bug Fixes
+
+* replace nix by devbox ([b197c4e](https://github.com/SocialGouv/crossplane-function-js/commit/b197c4e90d54206fcc397dd2a4cd66218c15c9b8))
+
 ## 0.0.32 (2025-09-11)
 
 ## 0.0.31 (2025-09-09)

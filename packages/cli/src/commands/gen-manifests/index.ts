@@ -382,12 +382,14 @@ async function genManifestsAction(
       process.exit(1)
     }
 
-    // Create the manifests directory if it doesn't exist
+    // Clean up and recreate the manifests directory
     const manifestsDir = path.join(cwd(), "manifests")
-    if (!fs.existsSync(manifestsDir)) {
-      moduleLogger.info(`Creating manifests directory: ${manifestsDir}`)
-      fs.mkdirSync(manifestsDir)
+    if (fs.existsSync(manifestsDir)) {
+      moduleLogger.info(`Removing existing manifests directory: ${manifestsDir}`)
+      fs.rmSync(manifestsDir, { recursive: true, force: true })
     }
+    moduleLogger.info(`Creating fresh manifests directory: ${manifestsDir}`)
+    fs.mkdirSync(manifestsDir, { recursive: true })
 
     // Get all direct subdirectories of the functions directory
     const functionDirs = fs
@@ -649,30 +651,24 @@ async function genManifestsAction(
         }
       }
 
-      // Generate final output using the already loaded XRD data
-      let finalOutput: string
-
-      if (xrdManifest && xrdContent) {
-        // Generate multi-document YAML with XRD first, then composition
-        const xrdYaml = YAML.stringify(xrdManifest)
-        const compositionYaml = YAML.stringify(manifest)
-
-        // Combine with document separator
-        finalOutput = `${xrdYaml}---\n${compositionYaml}`
-
-        moduleLogger.info(`Including XRD from ${xrdFilePath} for ${functionName}`)
-      } else {
-        // No XRD file, use composition only (existing behavior)
-        finalOutput = YAML.stringify(manifest)
+      // Create function-specific directory in manifests
+      const functionManifestDir = path.join(manifestsDir, functionName)
+      if (!fs.existsSync(functionManifestDir)) {
+        fs.mkdirSync(functionManifestDir, { recursive: true })
+        moduleLogger.debug(`Created function manifest directory: ${functionManifestDir}`)
       }
 
-      // Generate the output file
-      const outputPath = path.join(manifestsDir, `${functionName}.compo.yaml`)
+      // Copy XRD file directly (no need to read content)
+      const outputXrdPath = path.join(functionManifestDir, "xrd.yaml")
+      fs.copyFileSync(xrdFilePath, outputXrdPath)
+      moduleLogger.info(`Copied XRD file for ${functionName}: ${outputXrdPath}`)
 
-      // Write the output file
-      fs.writeFileSync(outputPath, finalOutput)
+      // Generate composition file separately
+      const compositionYaml = YAML.stringify(manifest)
+      const outputCompositionPath = path.join(functionManifestDir, "composition.yaml")
+      fs.writeFileSync(outputCompositionPath, compositionYaml)
 
-      moduleLogger.info(`Generated manifest for ${functionName}: ${outputPath}`)
+      moduleLogger.info(`Generated composition for ${functionName}: ${outputCompositionPath}`)
     }
 
     moduleLogger.info("Composition manifest generation completed")

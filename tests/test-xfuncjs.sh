@@ -53,7 +53,7 @@ yarn --cwd tests/fixtures/domain-sdk gen-manifests
 
 # Apply CRDs and Compositions
 echo "Applying XRD and Compositions..."
-kubectl apply -f tests/fixtures/domain-sdk/manifests
+kubectl apply -f tests/fixtures/domain-sdk/manifests/simpleconfigmaps
 
 # Wait for XRD to be established
 echo "Waiting for XRD to be established..."

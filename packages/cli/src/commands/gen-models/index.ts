@@ -98,8 +98,13 @@ async function genModelsAction(): Promise<void> {
     const xrdFiles = await findXRDFiles()
     moduleLogger.info(`Found ${xrdFiles.length} XRD file(s): ${xrdFiles.join(", ")}`)
 
-    // Ensure models directory exists
+    // Clean up and recreate the models directory
     const modelsDir = "models"
+    if (await fs.pathExists(modelsDir)) {
+      moduleLogger.info(`Removing existing models directory: ${modelsDir}`)
+      await fs.remove(modelsDir)
+    }
+    moduleLogger.info(`Creating fresh models directory: ${modelsDir}`)
     await fs.ensureDir(modelsDir)
 
     // Process each XRD file

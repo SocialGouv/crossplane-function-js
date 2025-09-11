@@ -21,6 +21,7 @@ type Config struct {
 	TLSEnabled  bool   `envconfig:"TLS_ENABLED" default:"false" description:"Enable TLS"`
 	TLSCertFile string `envconfig:"TLS_CERT_FILE" description:"Path to TLS certificate file"`
 	TLSKeyFile  string `envconfig:"TLS_KEY_FILE" description:"Path to TLS key file"`
+	Insecure    bool   `json:"-" description:"Disable TLS (insecure mode for testing)"`
 
 	// Logging configuration
 	LogLevel  string `envconfig:"LOG_LEVEL" default:"info" description:"Log level (debug, info, warn, error)"`
@@ -78,7 +79,7 @@ func (c *Config) Validate() error {
 	if c.IdleTimeout <= 0 {
 		return fmt.Errorf("idle timeout must be positive")
 	}
-	if c.TLSEnabled {
+	if c.TLSEnabled && !c.Insecure {
 		if c.TLSCertFile == "" {
 			return fmt.Errorf("TLS certificate file is required when TLS is enabled")
 		}

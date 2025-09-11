@@ -39,6 +39,7 @@ func main() {
 	tlsEnabled := flag.Bool("tls-enabled", cfg.TLSEnabled, "Enable TLS")
 	tlsCertFile := flag.String("tls-cert-file", cfg.TLSCertFile, "Path to TLS certificate file")
 	tlsKeyFile := flag.String("tls-key-file", cfg.TLSKeyFile, "Path to TLS key file")
+	insecure := flag.Bool("insecure", false, "Disable TLS (insecure mode for testing)")
 	flag.Parse()
 
 	// Override config with command line flags (highest priority)
@@ -53,12 +54,19 @@ func main() {
 	cfg.HealthCheckWait = *healthCheckWait
 	cfg.HealthCheckInterval = *healthCheckInterval
 	cfg.NodeRequestTimeout = *requestTimeout
-	cfg.TLSEnabled = *tlsEnabled
-	if *tlsCertFile != "" {
-		cfg.TLSCertFile = *tlsCertFile
-	}
-	if *tlsKeyFile != "" {
-		cfg.TLSKeyFile = *tlsKeyFile
+	
+	// Handle --insecure flag (overrides all TLS settings)
+	if *insecure {
+		cfg.TLSEnabled = false
+		cfg.Insecure = true
+	} else {
+		cfg.TLSEnabled = *tlsEnabled
+		if *tlsCertFile != "" {
+			cfg.TLSCertFile = *tlsCertFile
+		}
+		if *tlsKeyFile != "" {
+			cfg.TLSKeyFile = *tlsKeyFile
+		}
 	}
 
 	// Create logger
@@ -69,6 +77,11 @@ func main() {
 
 	// Log configuration source information
 	log.Info("Configuration loaded from environment variables and command line flags")
+
+	// Log insecure mode warning
+	if cfg.Insecure {
+		log.Warn("Server starting in INSECURE mode - TLS disabled for testing purposes")
+	}
 
 	// Validate configuration
 	if err := cfg.Validate(); err != nil {

@@ -69,7 +69,7 @@ For more details on chart configuration options, see the [chart documentation](c
 ### Prerequisites
 
 - [direnv](https://direnv.net/)
-- [Nix](https://nixos.org/download.html)
+- [Devbox](https://www.jetify.com/devbox/docs/installing_devbox/)
 
 ### Setting Up the Development Environment
 
@@ -80,16 +80,41 @@ For more details on chart configuration options, see the [chart documentation](c
    cd crossplane-function-js
    ```
 
-2. Allow direnv:
+2. Allow direnv to load the Devbox environment:
 
    ```bash
    direnv allow
    ```
 
+   This will automatically activate the Devbox development environment with all required tools:
+   - Node.js (latest)
+   - Go (latest)
+   - Yarn (latest)
+   - Kubernetes tools (kubectl, helm, kind, k9s)
+   - Development utilities (jq, go-task)
+
 3. Install dependencies:
    ```bash
    yarn
    ```
+
+### Development Tools
+
+The development environment provides the following tools via Devbox:
+
+- **Node.js**: Latest version for JavaScript/TypeScript development
+- **Go**: Latest version for the gRPC server
+- **Yarn**: Package manager for Node.js dependencies
+- **kubectl**: Kubernetes command-line tool
+- **Helm**: Kubernetes package manager
+- **Kind**: Kubernetes in Docker for local testing
+- **K9s**: Terminal-based Kubernetes cluster management
+- **jq**: JSON processor for data manipulation
+- **go-task**: Task runner for development workflows
+
+The environment is automatically configured with:
+- `KUBECONFIG` set to `$PWD/.kubeconfig` for local cluster management
+- All tools available in the shell PATH
 
 ## Usage
 

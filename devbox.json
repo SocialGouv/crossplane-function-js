@@ -1,0 +1,36 @@
+{
+    "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.16.0/.schema/devbox.schema.json",
+    "packages": [
+      "git",
+      "nodejs@latest",
+      "yarn@latest",
+      "jq@latest",
+      "go@latest",
+      "go-task@latest",
+      "kubectl@latest",
+      "kubernetes-helm@latest",
+      "kind@latest",
+      "k9s@latest"
+    ],
+    "shell": {
+      "init_hook": [
+        "# Set up local KUBECONFIG",
+        "export KUBECONFIG=\"$PWD/.kubeconfig\"",
+        "",
+        "# Create .kubeconfig if it doesn't exist",
+        "if [ ! -f \"$KUBECONFIG\" ]; then",
+        "  echo \"Creating empty .kubeconfig file\"",
+        "  touch \"$KUBECONFIG\"",
+        "fi",
+        "",
+        "echo \"KUBECONFIG set to $KUBECONFIG\"",
+        "echo \"Development environment ready with latest tools!\""
+      ],
+      "scripts": {
+        "test": [
+          "echo \"Error: no test specified\" && exit 1"
+        ]
+      }
+    }
+  }
+  

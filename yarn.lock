@@ -269,6 +269,7 @@ __metadata:
   dependencies:
     "@crossplane-js/kubernetes-models-crd-generate": "npm:5.0.2-sha.6721c6987b6a.r5.a1"
     "@crossplane-js/libs": "workspace:^"
+    "@kubernetes-models/read-input": "npm:^3.1.1"
     "@types/lodash": "npm:^4"
     "@types/uuid": "npm:^10.0.0"
     commander: "npm:^13.1.0"

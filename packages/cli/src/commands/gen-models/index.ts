@@ -4,7 +4,8 @@ import path from "path"
 import { fileURLToPath } from "url"
 
 import { createLogger } from "@crossplane-js/libs"
-import { Command } from "commander"
+import { readInput } from "@kubernetes-models/read-input"
+import { type Command } from "commander"
 import fs from "fs-extra"
 import YAML from "yaml"
 
@@ -18,6 +19,20 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 // packages/cli/src/commands/gen-models -> packages/cli
 const cliRoot = path.resolve(__dirname, "../../..")
+
+/**
+ * Fetch extra CRDs
+ * @param urls Array of CRD urls
+ * @returns Promise<string[]> Array of CRD paths
+ */
+async function fetchExtraCRDs(paths: string[]): Promise<string[]> {
+  const extraDocuments: string[] = []
+  for (const path of paths) {
+    moduleLogger.info("Reading extra CRD: %s", path)
+    extraDocuments.push(await readInput(path))
+  }
+  return extraDocuments
+}
 
 /**
  * Find all XRD files in the functions directory
@@ -59,20 +74,11 @@ async function runCrdGenerate(crdYaml: string, outputPath: string): Promise<void
     const outputAbs = path.resolve(process.cwd(), outputPath)
     await new Promise<void>((resolve, reject) => {
       // we use spawning instead of importing lib, because of this https://github.com/tommy351/kubernetes-models-ts/issues/241
-      const args = [
-        "crd-generate",
-        "--customBaseClassImportPath",
-        "@crossplane-js/sdk",
-        "--modelDecorator",
-        "@registerXrdModel",
-        "--modelDecoratorPath",
-        "@crossplane-js/sdk",
-        "--input",
-        inputFile,
-        "--output",
-        outputAbs,
-      ]
-      const child = spawn("yarn", args, { cwd: cliRoot, stdio: ["ignore", "inherit", "inherit"] })
+      const args = ["crd-generate", "--input", inputFile, "--output", outputAbs]
+      const child = spawn("yarn", args, {
+        cwd: cliRoot,
+        stdio: ["ignore", "inherit", "inherit"],
+      })
       child.on("error", err => reject(err))
       child.on("exit", code => {
         if (code === 0) resolve()
@@ -93,6 +99,8 @@ async function runCrdGenerate(crdYaml: string, outputPath: string): Promise<void
 async function genModelsAction(): Promise<void> {
   try {
     moduleLogger.info("Starting model generation...")
+
+    const documents: string[] = []
 
     // Find all XRD files
     const xrdFiles = await findXRDFiles()
@@ -119,9 +127,7 @@ async function genModelsAction(): Promise<void> {
         // Convert XRD to CRD
         const crd = convertXRDtoCRD(xrd)
         const crdYaml = YAML.stringify(crd)
-
-        // Generate models using crd-generate (via child process)
-        await runCrdGenerate(crdYaml, modelsDir)
+        documents.push(crdYaml)
 
         moduleLogger.info(`✓ Generated models for ${xrdPath}`)
       } catch (error) {
@@ -129,6 +135,22 @@ async function genModelsAction(): Promise<void> {
         throw error
       }
     }
+
+    // Get extra CRD urls from config file
+    if (await fs.exists("config.yaml")) {
+      moduleLogger.info("Config file exists, searching extra CRDs...")
+      const configFile = await fs.readFile("config.yaml", "utf8")
+      const config = YAML.parse(configFile)
+      // FIXME handle config.extraCrds not existing
+      const crds = await fetchExtraCRDs(config.extraCrds)
+      for (const crd of crds) {
+        documents.push(crd)
+      }
+    }
+
+    // Generate models using crd-generate (via child process)
+    const allCrds = documents.join("\n---\n")
+    await runCrdGenerate(allCrds, modelsDir)
 
     moduleLogger.info(`✓ Model generation completed. Models saved to '${modelsDir}/' directory.`)
   } catch (error) {

@@ -1,0 +1,32 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: uppercaseconfigmaps.test.crossplane.io
+spec:
+  scope: Namespaced
+  defaultCompositeDeletePolicy: Foreground
+  group: test2.crossplane.io
+  names:
+    categories:
+      - crossplane
+    kind: UppercaseConfigMap
+    plural: uppercaseconfigmaps
+    singular: uppsercaseconfigmap
+  versions:
+    - name: v1beta1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                dataToUppercase:
+                  type: object
+                  description: Key-value data to be uppercased and stored in ConfigMap
+                  additionalProperties:
+                    type: string
+              required:
+                - data

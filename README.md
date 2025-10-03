@@ -164,10 +164,12 @@ The CLI tool can be used to generate composition manifests from source files:
    functions/
    ├── example1/
    │   ├── composition.fn.ts
+   │   ├── xrd.yaml
    │   ├── package.json (optional)
    │   └── composition.yaml (optional)
    └── example2/
        ├── composition.fn.ts
+       ├── xrd.yaml
        └── package.json
    ```
 
@@ -199,6 +201,33 @@ The CLI handles dependencies and yarn.lock files as follows:
 - **yarn.lock**: Similarly, the `__YARN_LOCK__` placeholder will be replaced with the content of the `yarn.lock` file in the same directory as the `composition.fn.ts` file. If no `yarn.lock` exists in that directory, it will use the `yarn.lock` from the parent directory.
 
 This approach allows you to have function-specific dependencies or share dependencies across all functions.
+
+### Generating models
+
+To help in writing compositions, the CLI tool can generate type-safe models for
+the following:
+* Base Kubernetes resources
+* CRDs derived from the XRDs of your custom resources
+* External extra CRDs defined in a configuration file (optional)
+
+Run the CLI tool:
+
+  ```bash
+  npx @crossplane-js/cli gen-models
+  ```
+
+To generate a `models/` directory containing models that can be imported in
+your composition functions.
+
+To generate models for extra CRDs, create a `config.yaml` in the base
+directory, next to the `functions/` directory with a `extraCrds` field
+containing an array of extra CRDs urls to use in model generation, e.g.:
+
+```yaml
+extraCrds:
+  - https://github.com/fluxcd/source-controller/releases/download/v1.7.0/source-controller.crds.yaml
+```
+
 
 ## Testing
 

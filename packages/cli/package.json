@@ -1,6 +1,6 @@
 {
   "name": "@crossplane-js/cli",
-  "version": "0.0.33",
+  "version": "0.0.34",
   "description": "Command-line interface for Crossplane XFuncJS",
   "license": "MIT",
   "type": "module",

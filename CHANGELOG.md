@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.34 (2025-10-06)
+
+
+### Features
+
+* **cli/gen-models:** Allow generating models from external CRDs through a config file ([#37](https://github.com/SocialGouv/crossplane-function-js/issues/37)) ([e4ba415](https://github.com/SocialGouv/crossplane-function-js/commit/e4ba41575dafff5787c22c93bbeafee7c28c334a))
+
 ## 0.0.33 (2025-09-11)
 
 

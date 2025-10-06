@@ -277,6 +277,7 @@ __metadata:
     fs-extra: "npm:^11.3.0"
     lodash: "npm:^4.17.21"
     tsx: "npm:^4.19.4"
+    typescript: "npm:^5.8.2"
     uuid: "npm:^11.1.0"
     yaml: "npm:^2.7.0"
   bin:

@@ -10,6 +10,7 @@ import type { BuildOptions, Plugin } from "esbuild"
 import fs from "fs-extra"
 import { v4 as uuidv4 } from "uuid"
 import YAML from "yaml"
+
 import { analyzeModelImports, toVirtualEntryImports } from "../../libs/import-analysis.ts"
 
 // Create a logger for this module
@@ -108,7 +109,7 @@ function loadTsConfig(configPath: string, _baseDir?: string): TypeScriptConfig |
     return null
   }
 }
- 
+
 /**
  * Converts TypeScript path mappings to esbuild alias format
  * @param tsConfig TypeScript configuration

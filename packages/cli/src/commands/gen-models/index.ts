@@ -153,10 +153,15 @@ async function genModelsAction(): Promise<void> {
       moduleLogger.info("Config file exists, searching extra CRDs...")
       const configFile = await fs.readFile("config.yaml", "utf8")
       const config = YAML.parse(configFile)
-      // FIXME handle config.extraCrds not existing
-      const crds = await fetchExtraCRDs(config.extraCrds)
-      for (const crd of crds) {
-        documents.push(crd)
+      if (!config.extraCrds) {
+        moduleLogger.info("Config file has no extra CRDs")
+      } else if (!Array.isArray(config.extraCrds)) {
+        moduleLogger.warn("Config file extraCrds field is not an array!")
+      } else {
+        const crds = await fetchExtraCRDs(config.extraCrds)
+        for (const crd of crds) {
+          documents.push(crd)
+        }
       }
     }
 

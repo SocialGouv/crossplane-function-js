@@ -74,7 +74,19 @@ async function runCrdGenerate(crdYaml: string, outputPath: string): Promise<void
     const outputAbs = path.resolve(process.cwd(), outputPath)
     await new Promise<void>((resolve, reject) => {
       // we use spawning instead of importing lib, because of this https://github.com/tommy351/kubernetes-models-ts/issues/241
-      const args = ["crd-generate", "--input", inputFile, "--output", outputAbs]
+      const args = [
+        "crd-generate",
+        "--customBaseClassImportPath",
+        "@crossplane-js/sdk",
+        "--modelDecorator",
+        "@registerXrdModel",
+        "--modelDecoratorPath",
+        "@crossplane-js/sdk",
+        "--input",
+        inputFile,
+        "--output",
+        outputAbs,
+      ]
       const child = spawn("yarn", args, {
         cwd: cliRoot,
         stdio: ["ignore", "inherit", "inherit"],

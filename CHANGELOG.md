@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.35 (2025-10-06)
+
+
+### Bug Fixes
+
+* static selective model import ([#38](https://github.com/SocialGouv/crossplane-function-js/issues/38)) ([99610e1](https://github.com/SocialGouv/crossplane-function-js/commit/99610e173e96d0550c1e43a229b313c18d4be418))
+
 ## 0.0.34 (2025-10-06)
 
 

@@ -1,0 +1,2 @@
+extraCrds:
+  - https://github.com/fluxcd/source-controller/releases/download/v1.7.0/source-controller.crds.yaml

@@ -11,6 +11,8 @@ import fs from "fs-extra"
 import { v4 as uuidv4 } from "uuid"
 import YAML from "yaml"
 
+import { analyzeModelImports, toVirtualEntryImports } from "../../libs/import-analysis.ts"
+
 // Create a logger for this module
 const moduleLogger = createLogger("gen-manifests")
 
@@ -170,27 +172,47 @@ async function bundleTypeScript(
     // Get original file size for logging
     const originalSize = fs.statSync(filePath).size
 
-    // Check if models/index.ts exists and prepare to auto-import it
+    // Determine package root and function dir
     const packageRoot = process.cwd()
-    const modelsIndexPath = path.join(packageRoot, "models", "index.ts")
-    const shouldAutoImportModels = fs.existsSync(modelsIndexPath)
+    const functionDir = path.dirname(filePath)
 
-    // Create virtual entry content that imports models and re-exports the function
-    const relativeFunctionPath = path.relative(packageRoot, filePath).replace(/\\/g, "/")
-    let virtualEntryContent = ""
+    // Determine tsconfig path for import analysis
+    const analysisFunctionTsConfigPath = path.join(functionDir, "tsconfig.json")
+    const analysisCwdTsConfigPath = path.join(packageRoot, "tsconfig.json")
+    const chosenTsConfigPath = fs.existsSync(analysisFunctionTsConfigPath)
+      ? analysisFunctionTsConfigPath
+      : fs.existsSync(analysisCwdTsConfigPath)
+        ? analysisCwdTsConfigPath
+        : undefined
 
-    if (shouldAutoImportModels) {
-      virtualEntryContent += `import './models';\n`
-      moduleLogger.debug(`Auto-importing models from: ${modelsIndexPath}`)
+    // Analyze imports to detect used models under models/
+    const modelsDir = path.join(packageRoot, "models")
+    let modelImports: string[] = []
+    if (fs.existsSync(modelsDir)) {
+      try {
+        const matches = await analyzeModelImports(filePath, modelsDir, chosenTsConfigPath)
+        modelImports = toVirtualEntryImports(matches, packageRoot)
+        if (modelImports.length) {
+          moduleLogger.debug(`Auto-importing specific models:\n${modelImports.join("\n")}`)
+        } else {
+          moduleLogger.debug("No model imports detected under models/")
+        }
+      } catch (e) {
+        moduleLogger.warn(`Model import analysis failed, continuing without auto-imports: ${e}`)
+      }
     }
 
-    // Import and re-export the function as default
+    // Create virtual entry content that imports detected models and re-exports the function
+    const relativeFunctionPath = path.relative(packageRoot, filePath).replace(/\\/g, "/")
+    let virtualEntryContent = ""
+    if (modelImports.length) {
+      virtualEntryContent += modelImports.join("\n") + "\n"
+    }
     virtualEntryContent += `export { default } from './${relativeFunctionPath}';\n`
 
     moduleLogger.debug(`Virtual entry content:\n${virtualEntryContent}`)
 
     // Load TypeScript configuration and extract aliases
-    const functionDir = path.dirname(filePath)
     let tsConfig: TypeScriptConfig | null = null
     let esbuildAlias: Record<string, string> | undefined = undefined
 

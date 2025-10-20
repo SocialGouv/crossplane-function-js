@@ -3,7 +3,7 @@
     "packages": [
       "git",
       "nodejs@latest",
-      "yarn@latest",
+      "yarn@1.22.22",
       "jq@latest",
       "go@latest",
       "go-task@latest",

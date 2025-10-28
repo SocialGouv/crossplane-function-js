@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.39 (2025-10-28)
+
+
+### Bug Fixes
+
+* **up:** @crossplane-js/kubernetes-models-crd-generate (try workaround vitest global Object collide) ([f11eccc](https://github.com/SocialGouv/crossplane-function-js/commit/f11eccca4f95cf1fe3b5065d7403412bce52847d))
+
 ## 0.0.38 (2025-10-28)
 
 ## 0.0.37 (2025-10-28)

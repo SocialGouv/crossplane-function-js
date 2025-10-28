@@ -9,7 +9,7 @@
     "xfuncjs": "./cli"
   },
   "dependencies": {
-    "@crossplane-js/kubernetes-models-crd-generate": "5.0.2-sha.eafd45db8919.r7.a1",
+    "@crossplane-js/kubernetes-models-crd-generate": "5.0.2-sha.ba86cb51f0e5.r8.a1",
     "@crossplane-js/libs": "workspace:^",
     "@kubernetes-models/read-input": "^3.1.1",
     "commander": "^13.1.0",

@@ -267,7 +267,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@crossplane-js/cli@workspace:packages/cli"
   dependencies:
-    "@crossplane-js/kubernetes-models-crd-generate": "npm:5.0.2-sha.ba86cb51f0e5.r8.a1"
+    "@crossplane-js/kubernetes-models-crd-generate": "npm:5.0.2-sha.1aa41dd2b1fa.r10.a1"
     "@crossplane-js/libs": "workspace:^"
     "@kubernetes-models/read-input": "npm:^3.1.1"
     "@types/lodash": "npm:^4"
@@ -318,9 +318,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@crossplane-js/kubernetes-models-crd-generate@npm:5.0.2-sha.ba86cb51f0e5.r8.a1":
-  version: 5.0.2-sha.ba86cb51f0e5.r8.a1
-  resolution: "@crossplane-js/kubernetes-models-crd-generate@npm:5.0.2-sha.ba86cb51f0e5.r8.a1"
+"@crossplane-js/kubernetes-models-crd-generate@npm:5.0.2-sha.1aa41dd2b1fa.r10.a1":
+  version: 5.0.2-sha.1aa41dd2b1fa.r10.a1
+  resolution: "@crossplane-js/kubernetes-models-crd-generate@npm:5.0.2-sha.1aa41dd2b1fa.r10.a1"
   dependencies:
     "@kubernetes-models/generate": "npm:^2.4.0"
     "@kubernetes-models/read-input": "npm:^3.1.1"
@@ -331,7 +331,7 @@ __metadata:
     yargs: "npm:^17.6.0"
   bin:
     crd-generate: bin/crd-generate.js
-  checksum: 10c0/7f919eccac0ce7ee595a61ddcfb581b5bebcc3c774b6c1cad87218522016247e0ccdb27b14bcc9e0e96abe18740d1698294860db8fc2614bbe4694f3e17b31c5
+  checksum: 10c0/1cce95f7fed54f96fca2290287717df315f3cd9b672915ea93729216cbc6d3eb756eb73ea9ca92882a78792a3d67da91d898dfcb7bfb2dbb09f917c99b24aef9
   languageName: node
   linkType: hard
 

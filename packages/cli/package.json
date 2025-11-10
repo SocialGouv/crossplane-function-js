@@ -12,7 +12,7 @@
     "@crossplane-js/kubernetes-models-crd-generate": "5.0.2-sha.1aa41dd2b1fa.r10.a1",
     "@crossplane-js/libs": "workspace:^",
     "@kubernetes-models/read-input": "^3.1.1",
-    "commander": "^13.1.0",
+    "commander": "^14.0.0",
     "esbuild": "^0.25.4",
     "fs-extra": "^11.3.0",
     "lodash": "^4.17.21",

@@ -4,9 +4,9 @@ Flect does not try to reinvent the wheel! Instead, it uses the already great whe
 
 Thank you to the following **GIANTS**:
 
-- [github.com/davecgh/go-spew](https://godoc.org/github.com/davecgh/go-spew)
-- [github.com/pmezard/go-difflib](https://godoc.org/github.com/pmezard/go-difflib)
-- [github.com/stretchr/objx](https://godoc.org/github.com/stretchr/objx)
-- [github.com/stretchr/testify](https://godoc.org/github.com/stretchr/testify)
-- [gopkg.in/check.v1](https://godoc.org/gopkg.in/check.v1)
-- [gopkg.in/yaml.v3](https://godoc.org/gopkg.in/yaml.v3)
+* [github.com/davecgh/go-spew](https://godoc.org/github.com/davecgh/go-spew)
+* [github.com/pmezard/go-difflib](https://godoc.org/github.com/pmezard/go-difflib)
+* [github.com/stretchr/objx](https://godoc.org/github.com/stretchr/objx)
+* [github.com/stretchr/testify](https://godoc.org/github.com/stretchr/testify)
+* [gopkg.in/check.v1](https://godoc.org/gopkg.in/check.v1)
+* [gopkg.in/yaml.v3](https://godoc.org/gopkg.in/yaml.v3)

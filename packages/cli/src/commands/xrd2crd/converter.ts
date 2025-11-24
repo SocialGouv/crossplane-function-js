@@ -279,7 +279,7 @@ export function convertXRDtoCRD(xrd: XRD): CRD {
         const processedSchema = replaceIntOrString(versionSchema)
 
         // Merge the XRD schema with the XR template
-        const mergedSchema = lodash.merge({}, processedSchema, XR_SCHEMA_TEMPLATE)
+        const mergedSchema = lodash.merge({}, XR_SCHEMA_TEMPLATE, processedSchema)
 
         return {
           name: version.name,

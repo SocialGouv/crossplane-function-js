@@ -1,7 +1,7 @@
 import { createLogger } from "@crossplane-js/libs"
 
 import { createModel } from "./model.ts"
-import type { NodeResponse, NodeError, FunctionInput } from "./types.ts"
+import type { NodeResponse, NodeError, FunctionInput, RunFunctionRequest } from "./types.ts"
 
 // Create a logger for this module
 const moduleLogger = createLogger("executor")
@@ -63,7 +63,18 @@ export async function executeCode(
 
         const compositeResource = inputData?.observed?.composite?.resource
         const composite = createModel(compositeResource)
-        result = await module.default(composite)
+
+        // Extra resources injected by Crossplane based on previously requested
+        // extraResourceRequirements. These are forwarded to the user function
+        // alongside the composite inside a single RunFunctionRequest object.
+        const extraResources = inputData?.extraResources
+
+        const req: RunFunctionRequest = {
+          composite,
+          extraResources,
+        }
+
+        result = await module.default(req)
 
         moduleLogger.debug("Function execution completed")
       } catch (execErr) {

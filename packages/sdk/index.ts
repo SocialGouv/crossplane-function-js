@@ -7,6 +7,7 @@ export type * from "./src/types.ts"
 export * from "./src/Model/index.ts"
 export * from "./src/utils/FieldRef.ts"
 export * from "./src/utils/secretUtils.ts"
+export * from "./src/utils/compositeUtils.ts"
 
 // Export Kubernetes resources with FieldRef support
 export * from "./src/kubernetes/index.ts"

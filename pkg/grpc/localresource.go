@@ -11,6 +11,8 @@ import (
 
 // JSResponse represents the response from a JavaScript function
 type JSResponse struct {
+	// Composite represents the desired composite resource itself
+	Composite *JSResource `json:"composite,omitempty"`
 	// Resources is a map of resource name to resource object
 	Resources map[string]JSResource `json:"resources"`
 	// Events is a list of events to create
@@ -33,6 +35,13 @@ type ExtraResourceRequirement struct {
 	MatchLabels map[string]string `json:"matchLabels,omitempty"`
 	// MatchName defines the name to match the resource
 	MatchName string `json:"matchName,omitempty"`
+	// Namespace optionally constrains the selector to a single namespace.
+	//
+	// When omitted, Crossplane will:
+	//   - match cluster-scoped resources, or
+	//   - match namespaced resources by labels across all namespaces
+	//     (per the v1beta1 ResourceSelector semantics).
+	Namespace string `json:"namespace,omitempty"`
 }
 
 // ToResourceSelector converts the ExtraResourceRequirement to a fnv1.ResourceSelector
@@ -46,14 +55,16 @@ func (e *ExtraResourceRequirement) ToResourceSelector() *fnv1.ResourceSelector {
 		out.Match = &fnv1.ResourceSelector_MatchLabels{
 			MatchLabels: &fnv1.MatchLabels{Labels: e.MatchLabels},
 		}
-		return out
-	}
-
-	if e.MatchName != "" {
+	} else if e.MatchName != "" {
 		out.Match = &fnv1.ResourceSelector_MatchName{
 			MatchName: e.MatchName,
 		}
 	}
+
+	// Note: the v1 ResourceSelector type from function-sdk-go currently has no
+	// explicit Namespace field in this environment, so we can't forward
+	// ExtraResourceRequirement.Namespace yet. Leaving it here keeps the JSON
+	// contract ready for future SDKs without breaking compilation today.
 
 	return out
 }
@@ -123,7 +134,36 @@ func ObservedToMap(observed map[resource.Name]resource.ObservedComposed) map[str
 
 // ProcessResources processes the resources from the JavaScript function response
 func ProcessResources(rsp *fnv1.RunFunctionResponse, dxr *resource.Composite, desired map[resource.Name]*resource.DesiredComposed, jsResponse *JSResponse) error {
-	// Process resources
+	// First, process the desired composite resource if provided
+	if jsResponse.Composite != nil {
+		var compositeMap map[string]interface{}
+		if err := json.Unmarshal(jsResponse.Composite.Resource, &compositeMap); err != nil {
+			return errors.Wrapf(err, "error unmarshaling composite resource")
+		}
+
+		// Remove the namespace from the resource metadata if it exists
+		// This prevents Crossplane from trying to add it to resourceRefs
+		if metadata, ok := compositeMap["metadata"].(map[string]interface{}); ok {
+			if _, ok := metadata["namespace"].(string); ok {
+				delete(metadata, "namespace")
+			}
+		}
+
+		// Set the desired composite resource object (spec, status, metadata, etc.)
+		dxr.Resource.Object = compositeMap
+
+		// Apply connection details for the composite if provided
+		if len(jsResponse.Composite.ConnectionDetails) > 0 {
+			if dxr.ConnectionDetails == nil {
+				dxr.ConnectionDetails = make(map[string][]byte)
+			}
+			for k, v := range jsResponse.Composite.ConnectionDetails {
+				dxr.ConnectionDetails[k] = []byte(v)
+			}
+		}
+	}
+
+	// Then process composed resources as before
 	for name, res := range jsResponse.Resources {
 		// Parse the resource
 		var resourceMap map[string]interface{}
@@ -159,6 +199,9 @@ func ProcessResources(rsp *fnv1.RunFunctionResponse, dxr *resource.Composite, de
 			// They will be collected by Crossplane from the actual resources
 			// But for the composite resource (XR), we can set connection details
 			if string(name) == "composite" {
+				if dxr.ConnectionDetails == nil {
+					dxr.ConnectionDetails = make(map[string][]byte)
+				}
 				for k, v := range res.ConnectionDetails {
 					dxr.ConnectionDetails[k] = []byte(v)
 				}

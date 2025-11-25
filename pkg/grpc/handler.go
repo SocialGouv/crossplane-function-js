@@ -92,7 +92,7 @@ type resourceBundle struct {
 	dxr            *resource.Composite
 	observed       map[resource.Name]resource.ObservedComposed
 	desired        map[resource.Name]*resource.DesiredComposed
-	extraResources map[string][]resource.Extra
+	extraResources map[string][]resource.Required
 	credentials    map[string]resource.Credentials
 }
 
@@ -125,10 +125,11 @@ func prepareResources(req *fnv1.RunFunctionRequest) (*resourceBundle, error) {
 		return nil, errors.Wrapf(err, "cannot get observed composed resources from %T", req)
 	}
 
-	// Get extra resources
+	// Get required resources from the new required_resources field and merge any
+	// legacy extra_resources for backwards compatibility.
 	extraResources, err := request.GetExtraResources(req)
 	if err != nil {
-		return nil, errors.Wrapf(err, "cannot get extra resources from %T", req)
+		return nil, errors.Wrapf(err, "cannot get required/extra resources from %T", req)
 	}
 
 	// Initialize credentials map

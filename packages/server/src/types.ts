@@ -22,7 +22,38 @@ export interface KubernetesResource {
 }
 
 /**
- * Crossplane composite resource
+ * Extra resource requirement (for additional resources needed by the function)
+ */
+export interface ExtraResourceRequirement {
+  apiVersion: string
+  kind: string
+  matchLabels?: Record<string, string>
+  matchName?: string
+  /**
+   * Optional namespace to constrain the selector.
+   * - Omit to match cluster-scoped resources, or to match namespaced
+   *   resources by labels across all namespaces.
+   */
+  namespace?: string
+}
+
+/**
+ * Desired composite resource entry returned by a composition function
+ */
+export interface CompositeResourceEntry {
+  /**
+   * Full composite resource object (apiVersion, kind, metadata, spec, status, ...)
+   */
+  resource: KubernetesResource
+
+  /**
+   * Connection details to expose on the composite resource
+   */
+  connectionDetails?: Record<string, string>
+}
+
+/**
+ * Crossplane composite resource (observed)
  */
 export interface CrossplaneCompositeResource {
   resource: KubernetesResource
@@ -38,7 +69,7 @@ export interface CrossplaneObservedResources {
 }
 
 /**
- * Crossplane resource entry
+ * Crossplane resource entry (desired composed resources)
  */
 export interface CrossplaneResourceEntry {
   resource: KubernetesResource
@@ -50,7 +81,20 @@ export interface CrossplaneResourceEntry {
  * Crossplane desired resources
  */
 export interface CrossplaneDesiredResources {
+  /**
+   * Desired composed resources
+   */
   resources: Record<string, CrossplaneResourceEntry>
+
+  /**
+   * Desired state of the composite resource itself (spec, status, metadata, connection details)
+   */
+  composite?: CompositeResourceEntry
+
+  /**
+   * Extra resource requirements requested by the function
+   */
+  extraResourceRequirements?: Record<string, ExtraResourceRequirement>
 }
 
 /**
@@ -80,6 +124,22 @@ export type FunctionResult = CrossplaneDesiredResources | Record<string, unknown
  * Function input type
  */
 export type FunctionInput = CrossplaneInput | Record<string, unknown>
+
+/**
+ * Root object passed by the Node.js executor to user composition functions.
+ *
+ * This represents the runtime request shape when running under Crossplane:
+ * - `composite` is typically a domain model instance created by createModel.
+ * - `extraResources` contains any resources injected based on
+ *   extraResourceRequirements from a previous run.
+ */
+export interface RunFunctionRequest<
+  TComposite = unknown,
+  TExtraResources = Record<string, unknown[]>
+> {
+  composite: TComposite
+  extraResources?: TExtraResources
+}
 
 /**
  * Type for composition functions

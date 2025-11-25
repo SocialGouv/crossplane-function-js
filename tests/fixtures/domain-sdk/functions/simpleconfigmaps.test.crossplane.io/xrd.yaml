@@ -30,3 +30,8 @@ spec:
                     type: string
               required:
                 - data
+            status:
+              type: object
+              properties:
+                foo:
+                  type: string

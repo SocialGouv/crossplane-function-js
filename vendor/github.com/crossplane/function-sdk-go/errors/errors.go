@@ -16,7 +16,7 @@ limitations under the License.
 
 // Package errors is a github.com/pkg/errors compatible API for native errors.
 //
-// Copied over from github.com/crossplane/crossplane-runtime/pkg/errors for
+// Copied over from github.com/crossplane/crossplane-runtime/v2/pkg/errors for
 // better discoverability and possibly diverge in the future.
 package errors
 
@@ -103,7 +103,7 @@ func Wrap(err error, message string) error {
 	return WithMessage(err, message)
 }
 
-// Wrapf is an alias for WithMessagef
+// Wrapf is an alias for WithMessagef.
 func Wrapf(err error, format string, args ...any) error {
 	return WithMessagef(err, format, args...)
 }
@@ -157,6 +157,7 @@ type multiError struct {
 func (m multiError) Error() string {
 	return m.aggregate.Error()
 }
+
 func (m multiError) Unwrap() []error {
 	return m.aggregate.Errors()
 }

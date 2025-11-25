@@ -23,17 +23,20 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
-	"github.com/crossplane/crossplane-runtime/pkg/fieldpath"
-	"github.com/crossplane/crossplane-runtime/pkg/resource"
+	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/fieldpath"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
 
 	"github.com/crossplane/function-sdk-go/errors"
 )
 
-// Scheme used to determine the type of any runtime.Object passed to From.
-var Scheme *runtime.Scheme
+// NOTE(negz): I don't love the package-scoped state here but this seems like
+// the nicest API to offer callers.
 
-func init() {
+// Scheme used to determine the type of any runtime.Object passed to From.
+var Scheme *runtime.Scheme //nolint:gochecknoglobals // See comment above.
+
+func init() { //nolint:gochecknoinits // See comment above.
 	Scheme = runtime.NewScheme()
 }
 
@@ -119,10 +122,12 @@ type Unstructured struct {
 	unstructured.Unstructured
 }
 
-var _ runtime.Object = &Unstructured{}
-var _ metav1.Object = &Unstructured{}
-var _ runtime.Unstructured = &Unstructured{}
-var _ resource.Composed = &Unstructured{}
+var (
+	_ runtime.Object       = &Unstructured{}
+	_ metav1.Object        = &Unstructured{}
+	_ runtime.Unstructured = &Unstructured{}
+	_ resource.Composed    = &Unstructured{}
+)
 
 // DeepCopy this composed resource.
 func (cd *Unstructured) DeepCopy() *Unstructured {
@@ -184,20 +189,6 @@ func (cd *Unstructured) SetWriteConnectionSecretToReference(r *xpv1.SecretRefere
 	_ = fieldpath.Pave(cd.Object).SetValue("spec.writeConnectionSecretToRef", r)
 }
 
-// GetPublishConnectionDetailsTo of this Composed resource.
-func (cd *Unstructured) GetPublishConnectionDetailsTo() *xpv1.PublishConnectionDetailsTo {
-	out := &xpv1.PublishConnectionDetailsTo{}
-	if err := fieldpath.Pave(cd.Object).GetValueInto("spec.publishConnectionDetailsTo", out); err != nil {
-		return nil
-	}
-	return out
-}
-
-// SetPublishConnectionDetailsTo of this Composed resource.
-func (cd *Unstructured) SetPublishConnectionDetailsTo(ref *xpv1.PublishConnectionDetailsTo) {
-	_ = fieldpath.Pave(cd.Object).SetValue("spec.publishConnectionDetailsTo", ref)
-}
-
 // GetValue of the supplied field path.
 func (cd *Unstructured) GetValue(path string) (any, error) {
 	return fieldpath.Pave(cd.Object).GetValue(path)
@@ -240,7 +231,6 @@ func (cd *Unstructured) GetInteger(path string) (int64, error) {
 	i64, err := p.GetInteger(path)
 	if err == nil {
 		return i64, nil
-
 	}
 
 	// If not, try return (and truncate) a float64.

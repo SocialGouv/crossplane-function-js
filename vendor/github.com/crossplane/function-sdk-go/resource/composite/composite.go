@@ -27,10 +27,10 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
-	"github.com/crossplane/crossplane-runtime/pkg/fieldpath"
-	"github.com/crossplane/crossplane-runtime/pkg/resource"
-	"github.com/crossplane/crossplane-runtime/pkg/resource/unstructured/reference"
+	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/fieldpath"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/resource/unstructured/reference"
 )
 
 // New returns a new unstructured composite resource (XR).
@@ -43,10 +43,12 @@ type Unstructured struct {
 	unstructured.Unstructured
 }
 
-var _ runtime.Object = &Unstructured{}
-var _ metav1.Object = &Unstructured{}
-var _ runtime.Unstructured = &Unstructured{}
-var _ resource.Composite = &Unstructured{}
+var (
+	_ runtime.Object       = &Unstructured{}
+	_ metav1.Object        = &Unstructured{}
+	_ runtime.Unstructured = &Unstructured{}
+	_ resource.Composite   = &Unstructured{}
+)
 
 // DeepCopy this composite resource.
 func (xr *Unstructured) DeepCopy() *Unstructured {
@@ -196,20 +198,6 @@ func (xr *Unstructured) SetWriteConnectionSecretToReference(ref *xpv1.SecretRefe
 	_ = fieldpath.Pave(xr.Object).SetValue("spec.writeConnectionSecretToRef", ref)
 }
 
-// GetPublishConnectionDetailsTo of this composite resource.
-func (xr *Unstructured) GetPublishConnectionDetailsTo() *xpv1.PublishConnectionDetailsTo {
-	out := &xpv1.PublishConnectionDetailsTo{}
-	if err := fieldpath.Pave(xr.Object).GetValueInto("spec.publishConnectionDetailsTo", out); err != nil {
-		return nil
-	}
-	return out
-}
-
-// SetPublishConnectionDetailsTo of this composite resource.
-func (xr *Unstructured) SetPublishConnectionDetailsTo(ref *xpv1.PublishConnectionDetailsTo) {
-	_ = fieldpath.Pave(xr.Object).SetValue("spec.publishConnectionDetailsTo", ref)
-}
-
 // GetCondition of this composite resource.
 func (xr *Unstructured) GetCondition(ct xpv1.ConditionType) xpv1.Condition {
 	conditioned := xpv1.ConditionedStatus{}
@@ -307,7 +295,6 @@ func (xr *Unstructured) GetInteger(path string) (int64, error) {
 	i64, err := p.GetInteger(path)
 	if err == nil {
 		return i64, nil
-
 	}
 
 	// If not, try return (and truncate) a float64.

@@ -12,7 +12,7 @@ types and methods. Afero has an exceptionally clean interface and simple design
 without needless constructors or initialization methods.
 
 Afero is also a library providing a base set of interoperable backend
-filesystems that make it easy to work with afero while retaining all the power
+filesystems that make it easy to work with, while retaining all the power
 and benefit of the os and ioutil packages.
 
 Afero provides significant improvements over using the os package alone, most
@@ -23,16 +23,17 @@ package as it provides an additional abstraction that makes it easy to use a
 memory backed file system during testing. It also adds support for the http
 filesystem for full interoperability.
 
+
 ## Afero Features
 
-- A single consistent API for accessing a variety of filesystems
-- Interoperation between a variety of file system types
-- A set of interfaces to encourage and enforce interoperability between backends
-- An atomic cross platform memory backed file system
-- Support for compositional (union) file systems by combining multiple file systems acting as one
-- Specialized backends which modify existing filesystems (Read Only, Regexp filtered)
-- A set of utility functions ported from io, ioutil & hugo to be afero aware
-- Wrapper for go 1.16 filesystem abstraction `io/fs.FS`
+* A single consistent API for accessing a variety of filesystems
+* Interoperation between a variety of file system types
+* A set of interfaces to encourage and enforce interoperability between backends
+* An atomic cross platform memory backed file system
+* Support for compositional (union) file systems by combining multiple file systems acting as one
+* Specialized backends which modify existing filesystems (Read Only, Regexp filtered)
+* A set of utility functions ported from io, ioutil & hugo to be afero aware
+* Wrapper for go 1.16 filesystem abstraction `io/fs.FS`
 
 # Using Afero
 
@@ -40,10 +41,10 @@ Afero is easy to use and easier to adopt.
 
 A few different ways you could use Afero:
 
-- Use the interfaces alone to define your own file system.
-- Wrapper for the OS packages.
-- Define different filesystems for different parts of your application.
-- Use Afero for mock filesystems while testing
+* Use the interfaces alone to define your own file system.
+* Wrapper for the OS packages.
+* Define different filesystems for different parts of your application.
+* Use Afero for mock filesystems while testing
 
 ## Step 1: Install Afero
 
@@ -52,7 +53,6 @@ First use go get to install the latest version of the library.
     $ go get github.com/spf13/afero
 
 Next include Afero in your application.
-
 ```go
 import "github.com/spf13/afero"
 ```
@@ -60,7 +60,6 @@ import "github.com/spf13/afero"
 ## Step 2: Declare a backend
 
 First define a package variable and set it to a pointer to a filesystem.
-
 ```go
 var AppFs = afero.NewMemMapFs()
 
@@ -68,7 +67,6 @@ or
 
 var AppFs = afero.NewOsFs()
 ```
-
 It is important to note that if you repeat the composite literal you
 will be using a completely new and isolated filesystem. In the case of
 OsFs it will still use the same underlying filesystem but will reduce
@@ -80,23 +78,20 @@ Throughout your application use any function and method like you normally
 would.
 
 So if my application before had:
-
 ```go
 os.Open("/tmp/foo")
 ```
-
 We would replace it with:
-
 ```go
 AppFs.Open("/tmp/foo")
 ```
 
 `AppFs` being the variable we defined above.
 
+
 ## List of all available functions
 
 File System Methods Available:
-
 ```go
 Chmod(name string, mode os.FileMode) : error
 Chown(name string, uid, gid int) : error
@@ -112,9 +107,7 @@ RemoveAll(path string) : error
 Rename(oldname, newname string) : error
 Stat(name string) : os.FileInfo, error
 ```
-
 File Interfaces and Methods Available:
-
 ```go
 io.Closer
 io.Reader
@@ -131,7 +124,6 @@ Sync() : error
 Truncate(size int64) : error
 WriteString(s string) : ret int, err error
 ```
-
 In some applications it may make sense to define a new package that
 simply exports the file system variable for easy access from anywhere.
 
@@ -160,7 +152,6 @@ Walk(root string, walkFn filepath.WalkFunc) error
 WriteFile(filename string, data []byte, perm os.FileMode) error
 WriteReader(path string, r io.Reader) (err error)
 ```
-
 For a complete list see [Afero's GoDoc](https://godoc.org/github.com/spf13/afero)
 
 They are available under two different approaches to use. You can either call
@@ -193,11 +184,11 @@ and the file access would be fast while also saving you from all the annoying
 issues with deleting temporary files, Windows file locking, etc. The MemMapFs
 backend is perfect for testing.
 
-- Much faster than performing I/O operations on disk
-- Avoid security issues and permissions
-- Far more control. 'rm -rf /' with confidence
-- Test setup is far more easier to do
-- No test cleanup needed
+* Much faster than performing I/O operations on disk
+* Avoid security issues and permissions
+* Far more control. 'rm -rf /' with confidence
+* Test setup is far more easier to do
+* No test cleanup needed
 
 One way to accomplish this is to define a variable as mentioned above.
 In your application this will be set to afero.NewOsFs() during testing you
@@ -209,7 +200,6 @@ appropriate in my application code. This approach ensures that Tests are order
 independent, with no test relying on the state left by an earlier test.
 
 Then in my tests I would initialize a new MemMapFs for each test:
-
 ```go
 func TestExist(t *testing.T) {
 	appFS := afero.NewMemMapFs()
@@ -276,10 +266,10 @@ Afero has experimental support for Google Cloud Storage (GCS). You can either se
 `NewGcsFS` to configure access to your GCS bucket.
 
 Some known limitations of the existing implementation:
+* No Chmod support - The GCS ACL could probably be mapped to *nix style permissions but that would add another level of complexity and is ignored in this version.
+* No Chtimes support - Could be simulated with attributes (gcs a/m-times are set implicitly) but that's is left for another version.
+* Not thread safe - Also assumes all file operations are done through the same instance of the GcsFs. File operations between different GcsFs instances are not guaranteed to be consistent.
 
-- No Chmod support - The GCS ACL could probably be mapped to \*nix style permissions but that would add another level of complexity and is ignored in this version.
-- No Chtimes support - Could be simulated with attributes (gcs a/m-times are set implicitly) but that's is left for another version.
-- Not thread safe - Also assumes all file operations are done through the same instance of the GcsFs. File operations between different GcsFs instances are not guaranteed to be consistent.
 
 ## Filtering Backends
 
@@ -396,13 +386,14 @@ overlay will be removed/renamed.
 In this example all write operations will only occur in memory (MemMapFs)
 leaving the base filesystem (OsFs) untouched.
 
+
 ## Desired/possible backends
 
 The following is a short list of possible backends we hope someone will
 implement:
 
-- SSH
-- S3
+* SSH
+* S3
 
 # About the project
 
@@ -440,10 +431,10 @@ See the [Releases Page](https://github.com/spf13/afero/releases).
 
 Names in no particular order:
 
-- [spf13](https://github.com/spf13)
-- [jaqx0r](https://github.com/jaqx0r)
-- [mbertschler](https://github.com/mbertschler)
-- [xor-gate](https://github.com/xor-gate)
+* [spf13](https://github.com/spf13)
+* [jaqx0r](https://github.com/jaqx0r)
+* [mbertschler](https://github.com/mbertschler)
+* [xor-gate](https://github.com/xor-gate)
 
 ## License
 

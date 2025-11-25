@@ -113,13 +113,31 @@ func GetDesiredComposedResources(req *v1.RunFunctionRequest) (map[resource.Name]
 	return dcds, nil
 }
 
-// GetExtraResources from the supplied request.
-func GetExtraResources(req *v1.RunFunctionRequest) (map[string][]resource.Extra, error) {
-	out := make(map[string][]resource.Extra, len(req.GetExtraResources()))
-	for name, ers := range req.GetExtraResources() {
-		out[name] = []resource.Extra{}
+// GetRequiredResources from the supplied request using the new required_resources field.
+func GetRequiredResources(req *v1.RunFunctionRequest) (map[string][]resource.Required, error) {
+	out := make(map[string][]resource.Required, len(req.GetRequiredResources()))
+	for name, ers := range req.GetRequiredResources() {
+		out[name] = []resource.Required{}
 		for _, i := range ers.GetItems() {
-			r := &resource.Extra{Resource: &unstructured.Unstructured{}}
+			r := &resource.Required{Resource: &unstructured.Unstructured{}}
+			if err := resource.AsObject(i.GetResource(), r.Resource); err != nil {
+				return nil, err
+			}
+			out[name] = append(out[name], *r)
+		}
+	}
+	return out, nil
+}
+
+// GetExtraResources from the supplied request using the deprecated extra_resources field.
+//
+// Deprecated: Use GetRequiredResources.
+func GetExtraResources(req *v1.RunFunctionRequest) (map[string][]resource.Required, error) {
+	out := make(map[string][]resource.Required, len(req.GetExtraResources()))
+	for name, ers := range req.GetExtraResources() {
+		out[name] = []resource.Required{}
+		for _, i := range ers.GetItems() {
+			r := &resource.Required{Resource: &unstructured.Unstructured{}}
 			if err := resource.AsObject(i.GetResource(), r.Resource); err != nil {
 				return nil, err
 			}

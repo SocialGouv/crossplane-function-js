@@ -5,7 +5,7 @@ go 1.24.9
 toolchain go1.24.10
 
 require (
-	github.com/crossplane/crossplane-runtime v1.18.0
+	github.com/crossplane/crossplane-runtime v1.20.0
 	github.com/crossplane/function-sdk-go v0.5.0
 	github.com/google/uuid v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0

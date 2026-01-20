@@ -5,5 +5,12 @@
   "eslint.validate": ["javascript"],
   "[javascript]": {
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+
+  // Use the default shell and avoid broken nix shell
+
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.profiles.linux": {
+    "bash": { "path": "/usr/bin/bash", "args": ["-l"] }
   }
 }

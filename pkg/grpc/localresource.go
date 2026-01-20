@@ -66,6 +66,10 @@ func (e *ExtraResourceRequirement) ToResourceSelector() *fnv1.ResourceSelector {
 	// ExtraResourceRequirement.Namespace yet. Leaving it here keeps the JSON
 	// contract ready for future SDKs without breaking compilation today.
 
+	if e.Namespace != "" {
+		out.Namespace = &e.Namespace
+	}
+
 	return out
 }
 

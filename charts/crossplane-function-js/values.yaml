@@ -20,6 +20,7 @@ config:
   # Logging configuration
   logLevel: "debug"  # debug, info, warn, error
   logFormat: "auto" # auto, text, json
+  logCrossplaneIo: false
 
   # Server configuration
   # tempDir: "/tmp/xfuncjs-server"
@@ -37,3 +38,4 @@ config:
     enabled: false
     # certFile: "/certs/tls.crt"
     # keyFile: "/certs/tls.key"
+

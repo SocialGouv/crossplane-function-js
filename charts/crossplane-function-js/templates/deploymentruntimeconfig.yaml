@@ -78,6 +78,8 @@ spec:
                 - name: XFUNCJS_TLS_KEY_FILE
                   value: {{ .Values.config.tls.keyFile }}
                 {{- end }}
+                - name: XFUNCJS_LOG_CROSSPLANE_IO
+                  value: {{ .Values.config.logCrossplaneIo | quote }}
               ports:
                 - containerPort: 9443
                   name: grpc

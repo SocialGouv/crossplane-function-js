@@ -42,7 +42,8 @@ echo "Deploying XFuncJS Helm chart..."
 helm upgrade --install xfuncjs ./charts/crossplane-function-js \
   --set function.package.repository=${REGISTRY_IP}:5000 \
   --set function.package.name=xfuncjs-server \
-  --set function.package.tag=${TAG_TIMESTAMP}
+  --set function.package.tag=${TAG_TIMESTAMP} \
+  --set config.logCrossplaneIo=true
 
 # Wait for the Function to be installed
 echo "Waiting for Function to be installed..."

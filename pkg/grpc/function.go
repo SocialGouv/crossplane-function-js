@@ -13,6 +13,7 @@ type Function struct {
 	fnv1.UnimplementedFunctionRunnerServiceServer
 	processManager *node.ProcessManager
 	logger         logger.Logger
+	logCrossplaneIO bool
 }
 
 // NewFunction creates a new Function
@@ -21,6 +22,12 @@ func NewFunction(processManager *node.ProcessManager, logger logger.Logger) *Fun
 		processManager: processManager,
 		logger:         logger,
 	}
+}
+
+// SetLogCrossplaneIO enables/disables logging of full Crossplane RunFunction
+// request/response payloads (redacted) at DEBUG level.
+func (f *Function) SetLogCrossplaneIO(enabled bool) {
+	f.logCrossplaneIO = enabled
 }
 
 // SetNodeHealthCheckConfig sets the health check configuration for the Node.js HTTP server

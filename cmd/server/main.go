@@ -33,6 +33,7 @@ func main() {
 	idleTimeout := flag.Duration("idle-timeout", cfg.IdleTimeout, "Idle process timeout")
 	logLevel := flag.String("log-level", cfg.LogLevel, "Log level (debug, info, warn, error)")
 	logFormat := flag.String("log-format", cfg.LogFormat, "Log format (auto, text, json). Auto uses text for TTY, JSON otherwise")
+	logCrossplaneIO := flag.Bool("log-crossplane-io", cfg.LogCrossplaneIO, "Log full Crossplane RunFunction request/response at DEBUG (redacted)")
 	healthCheckWait := flag.Duration("health-check-wait", cfg.HealthCheckWait, "Timeout for health check")
 	healthCheckInterval := flag.Duration("health-check-interval", cfg.HealthCheckInterval, "Interval for health check polling")
 	requestTimeout := flag.Duration("request-timeout", cfg.NodeRequestTimeout, "Timeout for requests")
@@ -51,6 +52,7 @@ func main() {
 	cfg.IdleTimeout = *idleTimeout
 	cfg.LogLevel = *logLevel
 	cfg.LogFormat = *logFormat
+	cfg.LogCrossplaneIO = *logCrossplaneIO
 	cfg.HealthCheckWait = *healthCheckWait
 	cfg.HealthCheckInterval = *healthCheckInterval
 	cfg.NodeRequestTimeout = *requestTimeout
@@ -107,6 +109,7 @@ func main() {
 
 	// Create gRPC server
 	grpcServer := grpc.NewServer(processManager, log)
+	grpcServer.SetLogCrossplaneIO(cfg.LogCrossplaneIO)
 
 	// Create HTTP server for health checks
 	httpServer := http.NewServer(processManager, log)

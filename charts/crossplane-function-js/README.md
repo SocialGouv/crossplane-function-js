@@ -15,6 +15,14 @@ helm install crossplane-function-js oci://ghcr.io/socialgouv/helm/crossplane-fun
 
 ## Configuration
 
+### Crossplane request/response logging
+
+You can enable DEBUG logging of the full Crossplane Function `RunFunction` request/response payloads.
+
+- Env: `XFUNCJS_LOG_CROSSPLANE_IO=true`
+
+When enabled, payloads are logged from [`Function.RunFunction()`](../../pkg/grpc/handler.go:22). Sensitive fields are redacted (credentials, connectionDetails, and common secret-like keys), but logs should still be treated as potentially sensitive.
+
 The following table lists the configurable parameters of the XFuncJS chart and their default values.
 
 | Parameter                         | Description                                  | Default                  |

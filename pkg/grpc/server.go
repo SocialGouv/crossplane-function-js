@@ -27,6 +27,12 @@ func NewServer(processManager *node.ProcessManager, logger logger.Logger) *Serve
 	}
 }
 
+// SetLogCrossplaneIO enables/disables logging of full Crossplane RunFunction request/response
+// payloads (redacted) at DEBUG level.
+func (s *Server) SetLogCrossplaneIO(enabled bool) {
+	s.function.SetLogCrossplaneIO(enabled)
+}
+
 // SetNodeHealthCheckConfig sets the health check configuration for the Node.js HTTP server
 func (s *Server) SetNodeHealthCheckConfig(wait, interval time.Duration) {
 	s.function.SetNodeHealthCheckConfig(wait, interval)

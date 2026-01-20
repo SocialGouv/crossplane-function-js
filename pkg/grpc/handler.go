@@ -23,6 +23,10 @@ func (f *Function) RunFunction(ctx context.Context, req *fnv1.RunFunctionRequest
 	log := f.logger.WithValues("tag", req.GetMeta().GetTag())
 	log.Info("Running Function")
 
+	if f.logCrossplaneIO {
+		logCrossplaneRequest(log, req)
+	}
+
 	// Create a response with default TTL
 	rsp := response.To(req, response.DefaultTTL)
 
@@ -64,10 +68,16 @@ func (f *Function) RunFunction(ctx context.Context, req *fnv1.RunFunctionRequest
 	// Build response
 	if err := buildResponse(rsp, jsResponse, resources, f.logger); err != nil {
 		response.Fatal(rsp, err)
+		if f.logCrossplaneIO {
+			logCrossplaneResponse(log, rsp)
+		}
 		return rsp, nil
 	}
 
 	f.logger.Info("Successfully processed JavaScript function resources")
+	if f.logCrossplaneIO {
+		logCrossplaneResponse(log, rsp)
+	}
 	return rsp, nil
 }
 

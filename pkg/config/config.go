@@ -26,6 +26,9 @@ type Config struct {
 	// Logging configuration
 	LogLevel  string `envconfig:"LOG_LEVEL" default:"info" description:"Log level (debug, info, warn, error)"`
 	LogFormat string `envconfig:"LOG_FORMAT" default:"auto" description:"Log format (auto, text, json)"`
+	// When enabled, logs full Crossplane RunFunction request/response payloads at DEBUG.
+	// WARNING: Payloads may contain secrets; redaction is applied but review before use.
+	LogCrossplaneIO bool `envconfig:"LOG_CROSSPLANE_IO" default:"false" description:"Enable DEBUG logging of Crossplane RunFunction request/response (redacted)"`
 
 	// Node.js server configuration
 	HealthCheckWait     time.Duration `envconfig:"HEALTH_CHECK_WAIT" default:"900s" description:"Timeout for health check"`

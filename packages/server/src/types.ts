@@ -135,7 +135,7 @@ export type FunctionInput = CrossplaneInput | Record<string, unknown>
  */
 export interface RunFunctionRequest<
   TComposite = unknown,
-  TExtraResources = Record<string, unknown[]>
+  TExtraResources = Record<string, unknown[]>,
 > {
   composite: TComposite
   extraResources?: TExtraResources

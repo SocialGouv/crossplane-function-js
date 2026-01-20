@@ -1,6 +1,6 @@
 {
   "name": "@crossplane-js/dev",
-  "version": "0.0.47",
+  "version": "0.0.48",
   "description": "Development tooling for Crossplane XFuncJS",
   "license": "MIT",
   "packageManager": "yarn@4.8.1",

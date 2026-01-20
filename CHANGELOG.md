@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.47 (2026-01-20)
+
+
+### Bug Fixes
+
+* log input data for js function ([#47](https://github.com/SocialGouv/crossplane-function-js/issues/47)) ([8224bf6](https://github.com/SocialGouv/crossplane-function-js/commit/8224bf657c235da0f0d4f41baa1f4abfacda4fd0))
+
 ## 0.0.46 (2026-01-20)
 
 

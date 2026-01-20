@@ -23,9 +23,9 @@ jobs:
     
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: 'yarn'
@@ -54,9 +54,8 @@ jobs:
       
       # Publish libs package
       - id: publish-libs
-        uses: JS-DevTools/npm-publish@v3
+        uses: JS-DevTools/npm-publish@v4
         with:
-          token: ${{ secrets.SOCIALGROOVYBOT_NPM_TOKEN }}
           package: packages/libs/package.json
           tag: ${{ steps.npm-tag.outputs.tag }}
       

@@ -137,7 +137,7 @@ func prepareResources(req *fnv1.RunFunctionRequest) (*resourceBundle, error) {
 
 	// Get required resources from the new required_resources field and merge any
 	// legacy extra_resources for backwards compatibility.
-	extraResources, err := request.GetExtraResources(req)
+	extraResources, err := request.GetRequiredResources(req)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot get required/extra resources from %T", req)
 	}

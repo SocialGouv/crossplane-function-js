@@ -67,8 +67,7 @@ export async function executeCode(
         // Extra resources injected by Crossplane based on previously requested
         // extraResourceRequirements. These are forwarded to the user function
         // alongside the composite inside a single RunFunctionRequest object.
-        moduleLogger.debug({inputData}, "Input data for function execution")
-        const extraResources = inputData?.required_resources
+        const extraResources = inputData?.extraResources
 
         const req: RunFunctionRequest = {
           composite,

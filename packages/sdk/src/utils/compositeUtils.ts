@@ -1,11 +1,11 @@
-import type { KubernetesResource, KubernetesResourceLike } from '../types.ts'
+import type { KubernetesResource, KubernetesResourceLike } from "../types.ts"
 
 /**
  * Normalize a KubernetesResourceLike into a plain KubernetesResource.
  * If the object implements toJSON(), that result is used.
  */
 function normalizeResource(resource: KubernetesResourceLike): KubernetesResource {
-  if (typeof (resource as any)?.toJSON === 'function') {
+  if (typeof (resource as any)?.toJSON === "function") {
     return (resource as any).toJSON() as KubernetesResource
   }
   return resource as KubernetesResource
@@ -25,9 +25,7 @@ function normalizeResource(resource: KubernetesResourceLike): KubernetesResource
  * - intentionally drop spec and all other metadata fields so JS cannot
  *   accidentally try to own spec or server-managed metadata.
  */
-export function toDesiredCompositeResource(
-  resource: KubernetesResourceLike
-): KubernetesResource {
+export function toDesiredCompositeResource(resource: KubernetesResourceLike): KubernetesResource {
   const normalized = normalizeResource(resource)
 
   return {

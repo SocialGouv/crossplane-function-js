@@ -91,7 +91,7 @@ export type FunctionInput = CrossplaneInput | Record<string, unknown>
 // RunFunctionRequest but is generic so domain SDKs can type it nicely.
 export interface RunFunctionRequest<
   TComposite = KubernetesResourceLike,
-  TExtraResources = Record<string, unknown[]>
+  TExtraResources = Record<string, unknown[]>,
 > {
   composite: TComposite
   extraResources?: TExtraResources

@@ -2,5 +2,5 @@ apiVersion: v2
 name: crossplane-function-js
 description: A Helm chart for Crossplane Function JS with Crossplane v2 compatibility
 type: application
-version: 0.0.40
-appVersion: 0.0.40
+version: 0.0.41
+appVersion: 0.0.41

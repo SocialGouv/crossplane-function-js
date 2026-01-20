@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.41 (2026-01-20)
+
+
+### Bug Fixes
+
+* up npm token ([9978eca](https://github.com/SocialGouv/crossplane-function-js/commit/9978ecabe6419d88c90f7eb4dfa79209fb5cd1a9))
+
 ## 0.0.40 (2026-01-20)
 
 

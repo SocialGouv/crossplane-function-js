@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.44 (2026-01-20)
+
+
+### Bug Fixes
+
+* **debug:** add logCrossplaneIo ([e9eadf2](https://github.com/SocialGouv/crossplane-function-js/commit/e9eadf291e2cc586bda81a6c2be5b8c1070565fc))
+
 ## 0.0.43 (2026-01-20)
 
 

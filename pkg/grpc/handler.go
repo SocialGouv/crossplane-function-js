@@ -316,7 +316,7 @@ func buildResponse(rsp *fnv1.RunFunctionResponse, jsResponse *JSResponse, resour
 		if rsp.Requirements == nil {
 			rsp.Requirements = &fnv1.Requirements{}
 		}
-		rsp.Requirements.ExtraResources = extraResources
+		rsp.Requirements.Resources = extraResources
 	}
 
 	// Process conditions if present

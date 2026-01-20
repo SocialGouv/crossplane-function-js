@@ -1,6 +1,6 @@
 {
   "name": "@crossplane-js/sdk",
-  "version": "0.0.44",
+  "version": "0.0.45",
   "packageManager": "yarn@4.8.1",
   "type": "module",
   "main": "index.ts",

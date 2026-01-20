@@ -9,6 +9,11 @@
   "scripts": {
     "start": "node src/index.ts"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SocialGouv/crossplane-function-js",
+    "directory": "packages/server"
+  },
   "dependencies": {
     "@crossplane-js/libs": "workspace:^",
     "@crossplane-js/sdk": "workspace:^",

@@ -5,6 +5,11 @@
   "license": "MIT",
   "type": "module",
   "main": "src/index.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SocialGouv/crossplane-function-js",
+    "directory": "packages/cli"
+  },
   "bin": {
     "xfuncjs": "./cli"
   },

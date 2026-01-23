@@ -3,7 +3,7 @@
   "version": "0.0.49",
   "description": "Development tooling for Crossplane XFuncJS",
   "license": "MIT",
-  "packageManager": "yarn@4.8.1",
+  "packageManager": "yarn@4.12.0",
   "type": "module",
   "repository": {
     "type": "git",

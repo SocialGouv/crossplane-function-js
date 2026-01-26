@@ -62,15 +62,6 @@ func ProcessResources(rsp *fnv1.RunFunctionResponse, dxr *resource.Composite, de
 			return errors.Wrapf(err, "error unmarshaling resource %s", name)
 		}
 
-		// Remove the namespace from the resource metadata if it exists
-		// This prevents Crossplane from trying to add it to resourceRefs
-		if metadata, ok := resourceMap["metadata"].(map[string]interface{}); ok {
-			if _, ok := metadata["namespace"].(string); ok {
-				// Remove the namespace from the resource metadata
-				delete(metadata, "namespace")
-			}
-		}
-
 		// Create a new desired composed resource
 		cd := resource.NewDesiredComposed()
 		cd.Resource.Object = resourceMap

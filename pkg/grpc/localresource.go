@@ -145,14 +145,6 @@ func ProcessResources(rsp *fnv1.RunFunctionResponse, dxr *resource.Composite, de
 			return errors.Wrapf(err, "error unmarshaling composite resource")
 		}
 
-		// Remove the namespace from the resource metadata if it exists
-		// This prevents Crossplane from trying to add it to resourceRefs
-		if metadata, ok := compositeMap["metadata"].(map[string]interface{}); ok {
-			if _, ok := metadata["namespace"].(string); ok {
-				delete(metadata, "namespace")
-			}
-		}
-
 		// Set the desired composite resource object (spec, status, metadata, etc.)
 		dxr.Resource.Object = compositeMap
 
@@ -173,15 +165,6 @@ func ProcessResources(rsp *fnv1.RunFunctionResponse, dxr *resource.Composite, de
 		var resourceMap map[string]interface{}
 		if err := json.Unmarshal(res.Resource, &resourceMap); err != nil {
 			return errors.Wrapf(err, "error unmarshaling resource %s", name)
-		}
-
-		// Remove the namespace from the resource metadata if it exists
-		// This prevents Crossplane from trying to add it to resourceRefs
-		if metadata, ok := resourceMap["metadata"].(map[string]interface{}); ok {
-			if _, ok := metadata["namespace"].(string); ok {
-				// Remove the namespace from the resource metadata
-				delete(metadata, "namespace")
-			}
 		}
 
 		// Create a new desired composed resource

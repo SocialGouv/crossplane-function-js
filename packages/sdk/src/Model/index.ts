@@ -216,9 +216,15 @@ export class Model<T> extends BaseModel<T> {
         of: {
           apiVersion: (this as any).apiVersion,
           kind: (this as any).kind,
-          resourceRef: { name: this.getMetadata().name },
+          resourceRef: {
+            name: this.getMetadata().name,
+          },
         },
       },
+    }
+
+    if (this.getMetadata().namespace) {
+      usage.spec.of.resourceRef.namespace = this.getMetadata().namespace
     }
 
     if (byResource) {
@@ -226,6 +232,10 @@ export class Model<T> extends BaseModel<T> {
         apiVersion: (byResource as any).apiVersion,
         kind: (byResource as any).kind,
         resourceRef: { name: byResource.getMetadata().name },
+      }
+
+      if (byResource.getMetadata().namespace) {
+        usage.spec.by.resourceRef.namespace = byResource.getMetadata().namespace
       }
     }
 

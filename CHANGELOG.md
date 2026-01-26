@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.52 (2026-01-26)
+
+
+### Bug Fixes
+
+* namespace resource ref (might have to revert) ([fd26e68](https://github.com/SocialGouv/crossplane-function-js/commit/fd26e68c45c9deacdcdd3fcc5668af9d01164fdb))
+
 ## 0.0.51 (2026-01-26)
 
 

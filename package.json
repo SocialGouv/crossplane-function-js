@@ -20,7 +20,7 @@
     "test:integration": "mocha --require ts-node/register 'tests/integration/**/*.test.ts'",
     "prepare": "husky",
     "lint": "eslint --ext .js,.ts .",
-    "lint:fix": "eslint --ext .js,.ts .",
+    "lint:fix": "eslint --ext .js,.ts . --fix",
     "format": "prettier --write \"**/*.{js,ts,json,md,yaml,yml}\"",
     "type-check": "tsc --noEmit",
     "release": "commit-and-tag-version"

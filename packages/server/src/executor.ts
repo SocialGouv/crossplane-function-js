@@ -60,7 +60,7 @@ export async function executeCode(
       let result
       try {
         const inputData = input as any
-        moduleLogger.info({inputData}, "Function input data")
+        moduleLogger.info({ inputData }, "Function input data")
 
         const compositeResource = inputData?.observed?.composite?.resource
         const composite = createModel(compositeResource)

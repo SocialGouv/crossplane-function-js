@@ -96,6 +96,16 @@ export class Model<T> extends BaseModel<T> {
     return self.status || {}
   }
 
+  getKind(): string {
+    const self = this as any
+    return self.kind
+  }
+
+  getApiVersion(): string {
+    const self = this as any
+    return self.apiVersion
+  }
+
   /**
    * Check if this resource is ready based on its status conditions
    * @returns true if the resource is ready, false otherwise

@@ -60,9 +60,14 @@ export async function executeCode(
       let result
       try {
         const inputData = input as any
+        moduleLogger.info({inputData}, "Function input data")
 
         const compositeResource = inputData?.observed?.composite?.resource
         const composite = createModel(compositeResource)
+
+        // // Add observed resources
+        // const observedResources = inputData?.observed?.resources
+        // moduleLogger.info({observedResources}, "Observed resources")
 
         // Extra resources injected by Crossplane based on previously requested
         // extraResourceRequirements. These are forwarded to the user function

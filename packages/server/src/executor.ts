@@ -66,7 +66,7 @@ export async function executeCode(
 
         // // Add observed resources
         const observedResources = inputData?.observed?.resources
-        moduleLogger.info({observedResources}, "Observed resources")
+        moduleLogger.info({ observedResources }, "Observed resources")
 
         // Extra resources injected by Crossplane based on previously requested
         // extraResourceRequirements. These are forwarded to the user function

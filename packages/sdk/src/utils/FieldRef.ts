@@ -55,7 +55,7 @@ export class FieldRef<T> extends String {
     valueTransformer?: (value: any) => T
   ) {
     if (!valueContainer) {
-      valueContainer = { }
+      valueContainer = {}
     }
     const value = FieldRef.getValue<T>(valueContainer, path, fallback, valueTransformer)
     super(value[0])

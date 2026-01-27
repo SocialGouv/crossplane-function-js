@@ -49,11 +49,14 @@ export class FieldRef<T> extends String {
    * @param valueTransformer Optional function to transform the found value
    */
   constructor(
-    valueContainer: Record<string, any>,
+    valueContainer: Record<string, any> | undefined,
     path: string,
     fallback: T,
     valueTransformer?: (value: any) => T
   ) {
+    if (!valueContainer) {
+      valueContainer = { }
+    }
     const value = FieldRef.getValue<T>(valueContainer, path, fallback, valueTransformer)
     super(value[0])
     this.resolved = value[1]

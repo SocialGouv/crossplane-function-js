@@ -41,14 +41,6 @@ export class CrossplaneFunctionResponse {
       return this.extraResources[name] || undefined
     }
   }
-
-  toDesiredResources(): CrossplaneDesiredResources {
-    return {
-      resources: this.resources,
-      composite: this.composite,
-      extraResourceRequirements: this.extraResourceRequirements,
-    }
-  }
 }
 
 export function buildResponse(

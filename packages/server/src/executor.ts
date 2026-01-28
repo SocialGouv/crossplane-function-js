@@ -73,10 +73,13 @@ export async function executeCode(
         // alongside the composite inside a single RunFunctionRequest object.
         const extraResources = inputData?.extraResources
 
+        const context = inputData?.context || {}
+
         const req: RunFunctionRequest = {
           composite,
           observed: observedResources,
           extraResources,
+          context,
         }
 
         result = await module.default(req)

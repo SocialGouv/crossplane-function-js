@@ -37,6 +37,7 @@ export function createServer(port: number, codeFilePath: string) {
   const executeHandler: RequestHandler = async (req, res, _next) => {
     try {
       const { input } = req.body as NodeRequest
+      moduleLogger.info({ input }, "CrossplaneFunctionBody")
 
       // Log request metadata without sensitive content
       moduleLogger.debug("=== REQUEST RECEIVED ===")

@@ -104,9 +104,13 @@ type resourceBundle struct {
 	desired        map[resource.Name]*resource.DesiredComposed
 	extraResources map[string][]resource.Required
 	credentials    map[string]resource.Credentials
+	context        *structpb.Struct
 }
 
 func prepareResources(req *fnv1.RunFunctionRequest) (*resourceBundle, error) {
+	// Get context
+	context := req.GetContext()
+
 	// Get the observed composite resource
 	oxr, err := request.GetObservedCompositeResource(req)
 	if err != nil {
@@ -161,6 +165,7 @@ func prepareResources(req *fnv1.RunFunctionRequest) (*resourceBundle, error) {
 		desired:        desired,
 		extraResources: extraResources,
 		credentials:    credentials,
+		context:        context,
 	}, nil
 }
 
@@ -189,6 +194,10 @@ func createEnhancedInput(xfuncjsInput *types.XFuncJSInput, resources *resourceBu
 			connectionDetails[k] = string(v)
 		}
 		compositeMap["connectionDetails"] = connectionDetails
+	}
+
+	if resources.context != nil {
+		enhancedInput["context"] = resources.context.AsMap()
 	}
 
 	// Add extra resources if present

@@ -109,8 +109,13 @@ echo "Verifying ConfigMap data..."
 configmap_data=$(kubectl get configmap generated-configmap -n test-xfuncjs -o jsonpath='{.data}')
 echo "ConfigMap data: $configmap_data"
 
+# Verify FieldRef resolution (label should match XR name)
+echo "Verifying FieldRef-derived label on ConfigMap..."
+xr_name_label=$(kubectl get configmap generated-configmap -n test-xfuncjs -o jsonpath='{.metadata.labels.crossplane-js\.dev/xr-name}')
+echo "ConfigMap label crossplane-js.dev/xr-name: $xr_name_label"
+
 # Check if the data was transformed correctly (uppercase)
-if [[ $configmap_data == *"NAME"* && $configmap_data == *"JOHN DOE"* ]]; then
+if [[ $configmap_data == *"NAME"* && $configmap_data == *"JOHN DOE"* && $xr_name_label == "sample-configmap" ]]; then
   echo "Test PASSED: ConfigMap data was transformed correctly!"
   exit 0
 else

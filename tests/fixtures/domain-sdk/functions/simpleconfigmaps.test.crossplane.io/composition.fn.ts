@@ -1,6 +1,6 @@
 import {
   logger,
-  // FieldRef,
+  FieldRef,
   v1,
   toDesiredCompositeResource,
 } from '@crossplane-js/sdk'
@@ -35,6 +35,15 @@ export default function (
     metadata: {
       name: 'generated-configmap',
       namespace: namespace || 'test-xfuncjs',
+      labels: {
+        // Validate FieldRef resolution end-to-end: this should become the XR name.
+        // `composite` here is the XR model instance.
+        'crossplane-js.dev/xr-name': new FieldRef(
+          composite as any,
+          '$.metadata.name',
+          'MISSING-XR-NAME'
+        ),
+      },
     },
     data: transformedData,
   })

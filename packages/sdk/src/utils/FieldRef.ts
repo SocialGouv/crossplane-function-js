@@ -18,6 +18,7 @@ import jsonpath from "jsonpath"
  */
 export class FieldRef<T> extends String {
   private resolved: boolean
+  private rawValue: T
 
   /**
    * Get a value from an object using JSONPath syntax
@@ -59,6 +60,7 @@ export class FieldRef<T> extends String {
     }
     const value = FieldRef.getValue<T>(valueContainer, path, fallback, valueTransformer)
     super(value[0])
+    this.rawValue = value[0]
     this.resolved = value[1]
   }
 
@@ -68,6 +70,16 @@ export class FieldRef<T> extends String {
    */
   canResolve(): boolean {
     return this.resolved
+  }
+
+  /**
+   * Returns the resolved value with its original type.
+   *
+   * Note: `FieldRef<T>` extends `String` for historical ergonomics, but its runtime
+   * representation should serialize to the original JSON type (string/number/boolean/object).
+   */
+  getRawValue(): T {
+    return this.rawValue
   }
 }
 
@@ -86,6 +98,27 @@ type WithFieldRefs<T> = T extends string
           ? { [K in keyof T]: WithFieldRefs<T[K]> }
           : T
 
+// NOTE: This library wraps *concrete* Kubernetes model classes.
+// Using an `abstract new` signature here causes TS to treat the wrapped class
+// as abstract, making `new v1.ConfigMap(...)` fail with TS2511.
+type AnyConstructor = new (...args: any[]) => any
+
+type ReplaceFirstArg<Args extends readonly unknown[], NewFirst> = Args extends readonly [
+  unknown,
+  ...infer Rest,
+]
+  ? readonly [NewFirst, ...Rest]
+  : readonly [NewFirst]
+
+/**
+ * A constructor type that preserves the original class type `T` (including statics)
+ * but widens the first constructor argument to accept FieldRef-enabled values.
+ */
+export type WithFieldRefsConstructor<T extends AnyConstructor> = T &
+  (new (
+    ...args: ReplaceFirstArg<ConstructorParameters<T>, WithFieldRefs<ConstructorParameters<T>[0]>>
+  ) => InstanceType<T>)
+
 /**
  * Factory function that creates a new class allowing FieldRef values in place of primitive types
  * @param BaseClass The original Kubernetes model class
@@ -93,12 +126,15 @@ type WithFieldRefs<T> = T extends string
  */
 export function withFieldRefsClassFactory<T extends new (data?: any) => any>(
   BaseClass: T
-): new (data?: WithFieldRefs<ConstructorParameters<T>[0]>) => InstanceType<T> {
+): WithFieldRefsConstructor<T> {
   return class extends (BaseClass as any) {
-    constructor(data?: WithFieldRefs<ConstructorParameters<T>[0]>) {
-      // Process the data to resolve FieldRef instances
-      const processedData = processFieldRefs(data)
-      super(processedData)
+    constructor(...args: any[]) {
+      // Process the first argument (typically the model data) to resolve FieldRef instances,
+      // while preserving any additional constructor parameters.
+      if (args.length > 0) {
+        args[0] = processFieldRefs(args[0])
+      }
+      super(...args)
     }
 
     // Override toJSON to ensure FieldRefs are properly serialized
@@ -119,7 +155,8 @@ function processFieldRefs(obj: any): any {
 
   // If it's a FieldRef, return its string value
   if (obj instanceof FieldRef) {
-    return obj.toString()
+    // Preserve the original JSON type (e.g. number/boolean) rather than forcing string.
+    return obj.getRawValue()
   }
 
   // If it's an array, process each element

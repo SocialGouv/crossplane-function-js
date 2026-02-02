@@ -1,6 +1,8 @@
 import type { IObjectMeta } from "@kubernetes-models/apimachinery/apis/meta/v1/ObjectMeta"
 import { Model as BaseModel } from "@kubernetes-models/base"
 
+import { withFieldRefsClassFactory } from "../utils/FieldRef.ts"
+
 type Condition = Array<{
   type: string
   status: string
@@ -28,22 +30,26 @@ export interface XrdModelRegistry {
 const xrdModelRegistry: XrdModelRegistry = {}
 
 /**
- * Register an XRD model class with the global registry
- * @param group - The API group (e.g., "workspace.fabrique.social.gouv.fr")
- * @param kind - The resource kind (e.g., "XRedis")
- * @returns Class decorator function
+ * Wrap an XRD model class to:
+ * - register it in the global XRD registry
+ * - enable FieldRef support on its constructor input
  */
-export function registerXrdModel(group: string, kind: string) {
+export function wrapXrdModel(group: string, kind: string) {
   return function <T extends new (...args: any[]) => Model<any>>(target: T): T {
     const registryKey = `${group}/${kind}`
 
+    // Wrap once so that:
+    // - the decorated export is FieldRef-enabled
+    // - the registry returns/instantiates the same FieldRef-enabled class
+    const wrapped = withFieldRefsClassFactory(target)
+
     xrdModelRegistry[registryKey] = {
-      modelClass: target as any,
+      modelClass: wrapped as any,
       group,
       kind,
     }
 
-    return target
+    return wrapped
   }
 }
 
@@ -208,8 +214,8 @@ export class Model<T> extends BaseModel<T> {
     const usage: any = {
       apiVersion: "apiextensions.crossplane.io/v1alpha1",
       kind: "Usage",
-      getMetadata() {
-        return usageName
+      metadata: {
+        name: usageName,
       },
       spec: {
         replayDeletion: true,
@@ -225,6 +231,14 @@ export class Model<T> extends BaseModel<T> {
 
     if (this.getMetadata().namespace) {
       usage.spec.of.resourceRef.namespace = this.getMetadata().namespace
+    }
+
+    // Namespace the Usage itself when used inside a namespace.
+    // (Crossplane Usage is cluster-scoped in some versions, but namespaced in others.
+    // Having metadata.namespace set when available is generally harmless for server-side apply.
+    // If your cluster enforces cluster-scope, you can drop this field.)
+    if (this.getMetadata().namespace) {
+      usage.metadata.namespace = this.getMetadata().namespace
     }
 
     if (byResource) {

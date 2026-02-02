@@ -18,7 +18,7 @@
     "build": "yarn workspace @crossplane-js/server build",
     "test": "mocha --require ts-node/register 'tests/**/*.test.ts'",
     "test:integration": "mocha --require ts-node/register 'tests/integration/**/*.test.ts'",
-    "prepare": "husky",
+    "postinstall": "husky",
     "lint": "eslint --ext .js,.ts .",
     "lint:fix": "eslint --ext .js,.ts . --fix",
     "format": "prettier --write \"**/*.{js,ts,json,md,yaml,yml}\"",

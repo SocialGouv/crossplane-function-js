@@ -102,7 +102,7 @@ type AnyConstructor = abstract new (...args: any[]) => any
 
 type ReplaceFirstArg<Args extends readonly unknown[], NewFirst> = Args extends readonly [
   unknown,
-  ...infer Rest
+  ...infer Rest,
 ]
   ? readonly [NewFirst, ...Rest]
   : readonly [NewFirst]

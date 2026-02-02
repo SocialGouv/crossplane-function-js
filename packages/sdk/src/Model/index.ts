@@ -1,5 +1,6 @@
 import type { IObjectMeta } from "@kubernetes-models/apimachinery/apis/meta/v1/ObjectMeta"
 import { Model as BaseModel } from "@kubernetes-models/base"
+
 import { withFieldRefsClassFactory } from "../utils/FieldRef.ts"
 
 type Condition = Array<{

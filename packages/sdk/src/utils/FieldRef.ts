@@ -98,7 +98,10 @@ type WithFieldRefs<T> = T extends string
           ? { [K in keyof T]: WithFieldRefs<T[K]> }
           : T
 
-type AnyConstructor = abstract new (...args: any[]) => any
+// NOTE: This library wraps *concrete* Kubernetes model classes.
+// Using an `abstract new` signature here causes TS to treat the wrapped class
+// as abstract, making `new v1.ConfigMap(...)` fail with TS2511.
+type AnyConstructor = new (...args: any[]) => any
 
 type ReplaceFirstArg<Args extends readonly unknown[], NewFirst> = Args extends readonly [
   unknown,
@@ -112,7 +115,7 @@ type ReplaceFirstArg<Args extends readonly unknown[], NewFirst> = Args extends r
  * but widens the first constructor argument to accept FieldRef-enabled values.
  */
 export type WithFieldRefsConstructor<T extends AnyConstructor> = T &
-  (abstract new (
+  (new (
     ...args: ReplaceFirstArg<ConstructorParameters<T>, WithFieldRefs<ConstructorParameters<T>[0]>>
   ) => InstanceType<T>)
 

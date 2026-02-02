@@ -87,6 +87,7 @@ For more details on chart configuration options, see the [chart documentation](c
    ```
 
    This will automatically activate the Devbox development environment with all required tools:
+
    - Node.js (latest)
    - Go (latest)
    - Yarn (latest)
@@ -113,6 +114,7 @@ The development environment provides the following tools via Devbox:
 - **go-task**: Task runner for development workflows
 
 The environment is automatically configured with:
+
 - `KUBECONFIG` set to `$PWD/.kubeconfig` for local cluster management
 - All tools available in the shell PATH
 
@@ -206,15 +208,16 @@ This approach allows you to have function-specific dependencies or share depende
 
 To help in writing compositions, the CLI tool can generate type-safe models for
 the following:
-* Base Kubernetes resources
-* CRDs derived from the XRDs of your custom resources
-* External extra CRDs defined in a configuration file (optional)
+
+- Base Kubernetes resources
+- CRDs derived from the XRDs of your custom resources
+- External extra CRDs defined in a configuration file (optional)
 
 Run the CLI tool:
 
-  ```bash
-  npx @crossplane-js/cli gen-models
-  ```
+```bash
+npx @crossplane-js/cli gen-models
+```
 
 To generate a `models/` directory containing models that can be imported in
 your composition functions.
@@ -228,8 +231,16 @@ extraCrds:
   - https://github.com/fluxcd/source-controller/releases/download/v1.7.0/source-controller.crds.yaml
 ```
 
-
 ## Testing
+
+### E2E: FieldRef resolution
+
+The E2E fixture function for `SimpleConfigMap` uses a [`FieldRef`](packages/sdk/src/utils/FieldRef.ts:19) to populate a label on the composed `ConfigMap`:
+
+- label: `crossplane-js.dev/xr-name`
+- value: resolved from the XR JSONPath `$.metadata.name`
+
+The bash E2E harness asserts the label resolves to `sample-configmap` (see [`tests/test-xfuncjs.sh`](tests/test-xfuncjs.sh:1)).
 
 The project includes end-to-end tests that use a Kind cluster to verify functionality:
 

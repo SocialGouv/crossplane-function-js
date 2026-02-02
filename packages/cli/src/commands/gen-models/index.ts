@@ -79,7 +79,7 @@ async function runCrdGenerate(crdYaml: string, outputPath: string): Promise<void
         "--customBaseClassImportPath",
         "@crossplane-js/sdk",
         "--modelDecorator",
-        "@registerXrdModel",
+        "@wrapXrdModel",
         "--modelDecoratorPath",
         "@crossplane-js/sdk",
         "--input",

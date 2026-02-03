@@ -1,21 +1,29 @@
-import { Model } from "../Model/index.ts"
 import {
-  CompositeResourceEntry,
-  CrossplaneDesiredResources,
   CrossplaneResourceEntry,
   ExtraResourceRequirement,
-  KubernetesMetadata,
   KubernetesResource,
+  KubernetesResourceLike,
 } from "../types.ts"
 
-export class CrossplaneFunctionResponse {
+interface CrossplaneFunctionComposite<T extends KubernetesResourceLike = KubernetesResourceLike> {
+  resource: T
+  connectionDetails?: Record<string, string>
+}
+
+interface CrossplaneFunctionDesiredResource<T extends KubernetesResourceLike = KubernetesResourceLike> {
   resources: Record<string, CrossplaneResourceEntry>
-  composite: CompositeResourceEntry | undefined
+  composite: CrossplaneFunctionComposite<T>
+  extraResourceRequirements?: Record<string, ExtraResourceRequirement>
+}
+
+export class CrossplaneFunctionResponse<T extends KubernetesResourceLike = KubernetesResourceLike> {
+  resources: Record<string, CrossplaneResourceEntry>
+  composite: CrossplaneFunctionComposite<T>
   extraResourceRequirements: Record<string, ExtraResourceRequirement> | undefined
   extraResources: Record<string, KubernetesResource[]> | undefined
 
   constructor(
-    desired: CrossplaneDesiredResources,
+    desired: CrossplaneFunctionDesiredResource<T>,
     extraResources?: Record<string, KubernetesResource[]>
   ) {
     this.resources = desired.resources
@@ -28,43 +36,33 @@ export class CrossplaneFunctionResponse {
     this.resources[name] = resource
   }
 
-  requestExtraResource(
+  requestExtraResource<T extends KubernetesResource | KubernetesResourceLike = KubernetesResource>(
     name: string,
     requirement: ExtraResourceRequirement
-  ): KubernetesResource[] | undefined {
+  ): T[] | undefined {
     if (!this.extraResourceRequirements) {
       this.extraResourceRequirements = {}
     }
     this.extraResourceRequirements[name] = requirement
 
     if (this.extraResources) {
-      return this.extraResources[name] || undefined
+      return this.extraResources[name] as T[] || undefined
     }
   }
 }
 
-export function buildResponse(
-  composite: Model<KubernetesResource>,
+export function buildResponse<T extends KubernetesResourceLike = KubernetesResourceLike>(
+  composite: T,
   extraResources?: Record<string, KubernetesResource[]>
-): CrossplaneFunctionResponse {
-  const desired: CrossplaneDesiredResources = {
+): CrossplaneFunctionResponse<T> {
+  const desired: CrossplaneFunctionDesiredResource<T> = {
     resources: {},
     composite: {
-      resource: {
-        apiVersion: composite.getApiVersion(),
-        kind: composite.getKind(),
-        metadata: {
-          ...composite.getMetadata(),
-          managedFields: undefined,
-        } as KubernetesMetadata,
-        status: {
-          ...composite.getStatus(),
-        },
-      },
+      resource: composite,
       connectionDetails: {},
     },
     extraResourceRequirements: {},
   }
 
-  return new CrossplaneFunctionResponse(desired, extraResources)
+  return new CrossplaneFunctionResponse<T>(desired, extraResources)
 }

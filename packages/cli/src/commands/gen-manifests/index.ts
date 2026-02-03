@@ -446,6 +446,7 @@ async function genManifestsAction(
         // Use the function's own composition.yaml as template
         const yamlContent = fs.readFileSync(yamlFilePath, { encoding: "utf8" })
         manifest = YAML.parse(yamlContent)
+        usedDefaultTemplate = true
       } else {
         // Try a root-level composition.default.yaml first, then fall back to packaged template
         const rootDefaultPath = path.join(cwd(), "composition.default.yaml")

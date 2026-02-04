@@ -1,7 +1,7 @@
 import type { IObjectMeta } from "@kubernetes-models/apimachinery/apis/meta/v1/ObjectMeta"
 import { Model as BaseModel } from "@kubernetes-models/base"
 
-import { withFieldRefsClassFactory } from "../utils/FieldRef.ts"
+import { withFieldRefsClassFactory, type WithFieldRefsConstructor } from "../utils/FieldRef.ts"
 
 type Condition = Array<{
   type: string
@@ -34,23 +34,26 @@ const xrdModelRegistry: XrdModelRegistry = {}
  * - register it in the global XRD registry
  * - enable FieldRef support on its constructor input
  */
-export function wrapXrdModel(group: string, kind: string) {
-  return function <T extends new (...args: any[]) => Model<any>>(target: T): T {
-    const registryKey = `${group}/${kind}`
+export function wrapXrdModel<T extends new (...args: any[]) => Model<any>>(
+  target: T,
+  group: string,
+  kind: string
+): WithFieldRefsConstructor<T> {
+  const registryKey = `${group}/${kind}`
 
-    // Wrap once so that:
-    // - the decorated export is FieldRef-enabled
-    // - the registry returns/instantiates the same FieldRef-enabled class
-    const wrapped = withFieldRefsClassFactory(target)
+  // Wrap once so that:
+  // - the exported class is FieldRef-enabled
+  // - the registry returns/instantiates the same FieldRef-enabled class
+  const wrapped = withFieldRefsClassFactory(target)
 
-    xrdModelRegistry[registryKey] = {
-      modelClass: wrapped as any,
-      group,
-      kind,
-    }
-
-    return wrapped
+  xrdModelRegistry[registryKey] = {
+    modelClass: wrapped as any,
+    group,
+    kind,
   }
+
+  // Ensure callers get the widened constructor type (accepts FieldRef-enabled values).
+  return wrapped as WithFieldRefsConstructor<T>
 }
 
 /**

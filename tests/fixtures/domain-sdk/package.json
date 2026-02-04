@@ -13,5 +13,5 @@
     "gen-models": "node_modules/@crossplane-js/cli/cli gen-models",
     "gen-manifests": "node_modules/@crossplane-js/cli/cli gen-manifests"
   },
-  "packageManager": "yarn@4.7.0"
+  "packageManager": "yarn@4.12.0"
 }

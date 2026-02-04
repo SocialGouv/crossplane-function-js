@@ -26,7 +26,7 @@ export default function (
   // Transform data to uppercase for testing (same as original test logic)
   const transformedData: Record<string, string> = {}
   Object.entries(composite.spec.data).forEach(([key, value]) => {
-    transformedData[key.toUpperCase()] = value.toUpperCase()
+    transformedData[key.toUpperCase()] = String(value).toUpperCase()
   })
 
   const testConfigMap = new v1.ConfigMap({

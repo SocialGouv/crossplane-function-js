@@ -235,6 +235,8 @@ extraCrds:
 
 ### E2E: FieldRef resolution
 
+Important: [`FieldRef`](packages/sdk/src/utils/FieldRef.ts:19) is resolved immediately by the JS function runtime (via the SDK's `withFieldRefsClassFactory()`), **not** later by Crossplane. In other words, this is a convenience for authoring composition functions; Crossplane does not interpret `FieldRef` objects.
+
 The E2E fixture function for `SimpleConfigMap` uses a [`FieldRef`](packages/sdk/src/utils/FieldRef.ts:19) to populate a label on the composed `ConfigMap`:
 
 - label: `crossplane-js.dev/xr-name`

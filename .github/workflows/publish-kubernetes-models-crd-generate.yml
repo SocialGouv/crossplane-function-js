@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout SocialGouv/kubernetes-models-ts (featured)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: SocialGouv/kubernetes-models-ts
           ref: featured
@@ -124,6 +124,4 @@ jobs:
 
       - name: Publish to npm
         working-directory: kubernetes-models-ts/utils/crd-generate
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.SOCIALGROOVYBOT_NPM_TOKEN }}
         run: npm publish --access public --tag featured

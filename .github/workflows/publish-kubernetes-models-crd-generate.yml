@@ -35,7 +35,6 @@ jobs:
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
-          always-auth: true
           cache: pnpm
           cache-dependency-path: kubernetes-models-ts/pnpm-lock.yaml
 

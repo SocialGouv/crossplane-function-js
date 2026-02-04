@@ -57,13 +57,20 @@ jobs:
           const cp = require('child_process');
 
           const root = process.cwd();
-          const pkgPath = path.join('utils', 'crd-generate', 'package.json');
-          const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+           const pkgPath = path.join('utils', 'crd-generate', 'package.json');
+           const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
 
-          // Rename and ensure publishable
-          pkg.name = '@crossplane-js/kubernetes-models-crd-generate';
-          pkg.publishConfig = { ...(pkg.publishConfig || {}), access: 'public' };
-          if (pkg.private) delete pkg.private;
+           // Rename and ensure publishable
+           pkg.name = '@crossplane-js/kubernetes-models-crd-generate';
+           // Ensure the published package points to this repository
+           const repoUrl = 'https://github.com/SocialGouv/crossplane-function-js';
+           if (!pkg.repository || typeof pkg.repository !== 'object') {
+             pkg.repository = { type: 'git', url: repoUrl };
+           } else {
+             pkg.repository = { ...pkg.repository, type: pkg.repository.type || 'git', url: repoUrl };
+           }
+           pkg.publishConfig = { ...(pkg.publishConfig || {}), access: 'public' };
+           if (pkg.private) delete pkg.private;
 
           // Use pnpm to list all workspaces once
           const out = cp.execSync('pnpm ls -r --depth -1 --json', { encoding: 'utf8' });

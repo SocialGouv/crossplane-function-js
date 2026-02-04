@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.60 (2026-02-04)
+
+### Bug Fixes
+
+- **model:** withFieldRefsClassFactory typing ([f8f7196](https://github.com/SocialGouv/crossplane-function-js/commit/f8f7196c84a2cbf6469fc52e89c8c739f4837ca1))
+
 ## 0.0.59 (2026-02-02)
 
 ### Bug Fixes

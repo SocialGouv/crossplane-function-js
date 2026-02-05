@@ -10,7 +10,9 @@ interface CrossplaneFunctionComposite<T extends KubernetesResourceLike = Kuberne
   connectionDetails?: Record<string, string>
 }
 
-interface CrossplaneFunctionDesiredResource<T extends KubernetesResourceLike = KubernetesResourceLike> {
+interface CrossplaneFunctionDesiredResource<
+  T extends KubernetesResourceLike = KubernetesResourceLike,
+> {
   resources: Record<string, CrossplaneResourceEntry>
   composite: CrossplaneFunctionComposite<T>
   extraResourceRequirements?: Record<string, ExtraResourceRequirement>
@@ -46,7 +48,7 @@ export class CrossplaneFunctionResponse<T extends KubernetesResourceLike = Kuber
     this.extraResourceRequirements[name] = requirement
 
     if (this.extraResources) {
-      return this.extraResources[name] as T[] || undefined
+      return (this.extraResources[name] as T[]) || undefined
     }
   }
 }

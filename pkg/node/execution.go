@@ -109,7 +109,7 @@ func (pm *ProcessManager) ExecuteFunction(ctx context.Context, input *types.XFun
 	// If we've exhausted all retries, return a more detailed error
 	if resourceInfo != nil {
 		return "", fmt.Errorf("failed to execute function for resource %s/%s after %d attempts: %w",
-			resourceInfo.Kind, resourceInfo.Name, maxRetries, lastErr)
+			resourceInfo.XRKind, resourceInfo.XRName, maxRetries, lastErr)
 	}
 
 	return "", fmt.Errorf("all retry attempts failed for spec hash %s: %w", specHash[:8], lastErr)

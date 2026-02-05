@@ -2,30 +2,37 @@ package types
 
 // ResourceInfo holds information about a Crossplane resource
 type ResourceInfo struct {
-	Version   string
-	Kind      string
-	Name      string
-	Namespace string
+	// XR-specific fields.
+	XRAPIVersion string
+	XRGroup      string
+	XRVersion    string
+	XRKind       string
+	XRName       string
+	XRNamespace  string
 }
 
 // ToFields converts ResourceInfo to a map of logger fields
 func (r *ResourceInfo) ToFields() map[string]interface{} {
 	fields := make(map[string]interface{})
 
-	if r.Version != "" {
-		fields["resource.version"] = r.Version
+	// XR fields (explicitly required for XR-related logs).
+	if r.XRAPIVersion != "" {
+		fields["xr.apiVersion"] = r.XRAPIVersion
 	}
-
-	if r.Kind != "" {
-		fields["resource.kind"] = r.Kind
+	if r.XRGroup != "" {
+		fields["xr.group"] = r.XRGroup
 	}
-
-	if r.Name != "" {
-		fields["resource.name"] = r.Name
+	if r.XRVersion != "" {
+		fields["xr.version"] = r.XRVersion
 	}
-
-	if r.Namespace != "" {
-		fields["resource.namespace"] = r.Namespace
+	if r.XRKind != "" {
+		fields["xr.kind"] = r.XRKind
+	}
+	if r.XRName != "" {
+		fields["xr.name"] = r.XRName
+	}
+	if r.XRNamespace != "" {
+		fields["xr.namespace"] = r.XRNamespace
 	}
 
 	return fields

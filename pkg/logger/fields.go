@@ -16,11 +16,13 @@ const (
 	FieldDuration  = "duration_ms"
 	FieldStatus    = "status"
 
-	// Resource fields
-	FieldResourceVersion   = "resource.version"
-	FieldResourceKind      = "resource.kind"
-	FieldResourceName      = "resource.name"
-	FieldResourceNamespace = "resource.namespace"
+	// XR (Composite Resource) fields
+	FieldXRAPIVersion = "xr.apiVersion"
+	FieldXRGroup      = "xr.group"
+	FieldXRVersion    = "xr.version"
+	FieldXRKind       = "xr.kind"
+	FieldXRName       = "xr.name"
+	FieldXRNamespace  = "xr.namespace"
 
 	// Code fields
 	FieldCodeHash = "code_hash"

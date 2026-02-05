@@ -20,7 +20,7 @@ import (
 
 // RunFunction implements the RunFunction method of the FunctionRunnerService interface
 func (f *Function) RunFunction(ctx context.Context, req *fnv1.RunFunctionRequest) (*fnv1.RunFunctionResponse, error) {
-	log := f.logger.WithValues("tag", req.GetMeta().GetTag())
+	log := logger.LoggerFromContext(ctx, f.logger).WithValues("tag", req.GetMeta().GetTag())
 	log.Info("Running Function")
 
 	if f.logCrossplaneIO {
@@ -33,6 +33,7 @@ func (f *Function) RunFunction(ctx context.Context, req *fnv1.RunFunctionRequest
 	// Parse and validate input
 	xfuncjsInput, err := parseInput(req)
 	if err != nil {
+		log.WithField(logger.FieldError, err.Error()).Error("Fatal: invalid input")
 		response.Fatal(rsp, err)
 		return rsp, nil
 	}
@@ -40,6 +41,7 @@ func (f *Function) RunFunction(ctx context.Context, req *fnv1.RunFunctionRequest
 	// Prepare resources
 	resources, err := prepareResources(req)
 	if err != nil {
+		log.WithField(logger.FieldError, err.Error()).Error("Fatal: failed to prepare resources")
 		response.Fatal(rsp, err)
 		return rsp, nil
 	}
@@ -47,6 +49,7 @@ func (f *Function) RunFunction(ctx context.Context, req *fnv1.RunFunctionRequest
 	// Create enhanced input for JavaScript function
 	enhancedInput, err := createEnhancedInput(xfuncjsInput, resources)
 	if err != nil {
+		log.WithField(logger.FieldError, err.Error()).Error("Fatal: failed to create enhanced input")
 		response.Fatal(rsp, errors.Wrapf(err, "failed to create enhanced input"))
 		return rsp, nil
 	}
@@ -54,6 +57,7 @@ func (f *Function) RunFunction(ctx context.Context, req *fnv1.RunFunctionRequest
 	// Execute function
 	result, err := f.executeFunction(ctx, xfuncjsInput, enhancedInput)
 	if err != nil {
+		log.WithField(logger.FieldError, err.Error()).Error("Fatal: function execution failed")
 		response.Fatal(rsp, err)
 		return rsp, nil
 	}
@@ -61,12 +65,14 @@ func (f *Function) RunFunction(ctx context.Context, req *fnv1.RunFunctionRequest
 	// Process result
 	jsResponse, err := processResult(result)
 	if err != nil {
+		log.WithField(logger.FieldError, err.Error()).Error("Fatal: invalid function result")
 		response.Fatal(rsp, err)
 		return rsp, nil
 	}
 
 	// Build response
 	if err := buildResponse(rsp, jsResponse, resources, f.logger); err != nil {
+		log.WithField(logger.FieldError, err.Error()).Error("Fatal: failed to build response")
 		response.Fatal(rsp, err)
 		if f.logCrossplaneIO {
 			logCrossplaneResponse(log, rsp)

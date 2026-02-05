@@ -120,6 +120,21 @@ The environment is automatically configured with:
 
 ## Usage
 
+## Logging
+
+The Go function runner emits structured logs. For requests related to a Crossplane XR (Composite Resource), logs are enriched with the following fields (when available):
+
+- `xr.apiVersion`
+- `xr.group`
+- `xr.version`
+- `xr.kind`
+- `xr.name`
+- `xr.namespace`
+
+These fields are extracted from the incoming `RunFunctionRequest` (best-effort) and attached to the request-scoped logger.
+
+Additionally, when the function returns a Crossplane _fatal_ result (`response.Fatal(...)`), the Go server logs an `ERROR` line right before returning the fatal result so it is visible in logs even though the gRPC call itself returns successfully.
+
 ### Creating a Composition with Inline Code
 
 Here's an example of a composition that uses inline JavaScript code:

@@ -259,6 +259,28 @@ The E2E fixture function for `SimpleConfigMap` uses a [`FieldRef`](packages/sdk/
 
 The bash E2E harness asserts the label resolves to `sample-configmap` (see [`tests/test-xfuncjs.sh`](tests/test-xfuncjs.sh:1)).
 
+### E2E: extraResources retrieval (namespace-scoped, all-namespaces, cluster-scoped)
+
+The E2E fixture function for `SimpleConfigMap` requests extra resources via
+`extraResourceRequirements` and asserts Crossplane injects them back in
+`extraResources` on subsequent function runs.
+
+The harness in [`tests/test-xfuncjs.sh`](tests/test-xfuncjs.sh:1) creates fixture
+resources:
+
+- `ConfigMap/test-xfuncjs/extra-ns-only` (labels: `crossplane-js.dev/e2e=extra`, `crossplane-js.dev/scope=ns-only`)
+- `ConfigMap/test-xfuncjs/extra-all-ns-1` (labels: `crossplane-js.dev/e2e=extra`, `crossplane-js.dev/scope=all-ns`)
+- `ConfigMap/test-xfuncjs-2/extra-all-ns-2` (same labels)
+- the namespace `test-xfuncjs` itself (cluster-scoped object)
+
+The function then publishes the observed injection results as annotations on the
+composed `ConfigMap/generated-configmap`, and the harness hard-asserts the counts
+converge to:
+
+- `e2e-extra-ns-cm-count=1`
+- `e2e-extra-allns-cm-count=2`
+- `e2e-extra-namespace-count=1`
+
 The project includes end-to-end tests that use a Kind cluster to verify functionality:
 
 ```bash

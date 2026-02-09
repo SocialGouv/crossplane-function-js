@@ -44,6 +44,44 @@ export default function (
           'MISSING-XR-NAME'
         ),
       },
+      annotations: (() => {
+        // Expose extraResource injection results in a deterministic way that the
+        // bash E2E harness can assert on.
+        //
+        // Note: Crossplane may call the function at least twice:
+        // 1) first without extraResources (we request them)
+        // 2) then again with extraResources populated
+        //
+        // These annotations will converge to expected values once Crossplane
+        // injects the requested extra resources.
+        const extra = (extraResources || {}) as Record<string, any[]>
+
+        const nsCMs = extra.nsConfigMap || []
+        const allNsCMs = extra.allNsConfigMaps || []
+        const nsObjs = extra.testNamespace || []
+
+        const names = (items: any[]) =>
+          items
+            .map((i) => {
+              const n = i?.metadata?.name
+              const ns = i?.metadata?.namespace
+              return ns ? `${ns}/${n}` : n
+            })
+            .filter(Boolean)
+            .sort()
+            .join(',')
+
+        return {
+          'crossplane-js.dev/e2e-extra-ns-cm-count': String(nsCMs.length),
+          'crossplane-js.dev/e2e-extra-allns-cm-count': String(allNsCMs.length),
+          'crossplane-js.dev/e2e-extra-namespace-count': String(nsObjs.length),
+
+          // Useful for debugging failures in CI.
+          'crossplane-js.dev/e2e-extra-ns-cm-names': names(nsCMs),
+          'crossplane-js.dev/e2e-extra-allns-cm-names': names(allNsCMs),
+          'crossplane-js.dev/e2e-extra-namespace-names': names(nsObjs),
+        }
+      })(),
     },
     data: transformedData,
   })
@@ -69,23 +107,37 @@ export default function (
         ready: true,
       },
     },
-    // Example extra resource requirement (optional – adjust or remove as needed)
+    // Extra resources requested from Crossplane and injected back into the next
+    // function run.
     extraResourceRequirements: {
-      // This doesn't work and seem to be a problem on the Crossplane side
-      // exampleRequirement: {
-      //   apiVersion: 'v1',
-      //   kind: 'Namespace',
-      //   matchLabels: {
-      //     "kubernetes.io/metadata.name": "crossplane-system",
-      //   }
-      // },
-      exampleRequirement2: {
+      // 1) Namespaced retrieval: constrained to the XR namespace
+      nsConfigMap: {
+        apiVersion: 'v1',
+        kind: 'ConfigMap',
+        namespace: namespace || 'test-xfuncjs',
+        matchLabels: {
+          'crossplane-js.dev/e2e': 'extra',
+          'crossplane-js.dev/scope': 'ns-only',
+        },
+      },
+
+      // 2) Namespaced resource type, but cluster-wide search across all
+      // namespaces (namespace omitted)
+      allNsConfigMaps: {
         apiVersion: 'v1',
         kind: 'ConfigMap',
         matchLabels: {
-          "fou": "barjo",
-        }
-      }
+          'crossplane-js.dev/e2e': 'extra',
+          'crossplane-js.dev/scope': 'all-ns',
+        },
+      },
+
+      // 3) Cluster-scoped retrieval
+      testNamespace: {
+        apiVersion: 'v1',
+        kind: 'Namespace',
+        matchName: namespace || 'test-xfuncjs',
+      },
     },
   }
 

@@ -15,11 +15,60 @@ trap 'handle_error $LINENO' ERR
 echo "Creating test namespace..."
 kubectl create namespace test-xfuncjs --dry-run=client -o yaml | kubectl apply -f -
 
+# Create extra resource fixtures for extraResourceRequirements e2e validation
+echo "Creating extra-resource fixtures (ConfigMaps + secondary namespace)..."
+kubectl create namespace test-xfuncjs-2 --dry-run=client -o yaml | kubectl apply -f -
+
+# 1) Namespaced-only (should match exactly 1 in test-xfuncjs)
+kubectl apply -f - <<'YAML'
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: extra-ns-only
+  namespace: test-xfuncjs
+  labels:
+    crossplane-js.dev/e2e: extra
+    crossplane-js.dev/scope: ns-only
+data:
+  hello: world
+YAML
+
+# 2) All-namespaces (should match exactly 2: one per namespace)
+kubectl apply -f - <<'YAML'
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: extra-all-ns-1
+  namespace: test-xfuncjs
+  labels:
+    crossplane-js.dev/e2e: extra
+    crossplane-js.dev/scope: all-ns
+data:
+  hello: world
+YAML
+
+kubectl apply -f - <<'YAML'
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: extra-all-ns-2
+  namespace: test-xfuncjs-2
+  labels:
+    crossplane-js.dev/e2e: extra
+    crossplane-js.dev/scope: all-ns
+data:
+  hello: world
+YAML
+
 
 # Apply the first part of provider in cluster (Provider, DeploymentRuntimeConfig, ClusterRoleBinding)
 echo "Applying Provider Kubernetes..."
 kubectl apply -f tests/fixtures/crossplane-basics/provider-in-cluster.yaml
 kubectl apply -f tests/fixtures/crossplane-basics/functions.yaml
+
+# Ensure Crossplane can fetch cluster-scoped resources for Composition extraResourceRequirements
+echo "Applying Crossplane extraResources E2E RBAC (namespaces get/list/watch)..."
+kubectl apply -f tests/fixtures/crossplane-basics/crossplane-extraresources-rbac.yaml
 
 # Wait for the Provider to be installed and its CRDs to be registered
 echo "Waiting for Provider Kubernetes to be installed..."
@@ -74,9 +123,18 @@ echo "Waiting for ConfigMap to be created..."
 configmap_created=false
 for i in {1..180}; do
   if kubectl get configmap generated-configmap -n test-xfuncjs &> /dev/null; then
-    echo "ConfigMap created successfully!"
-    configmap_created=true
-    break
+    # Also ensure the extraResources-driven annotations are present and match
+    # expected counts. The function may run once before Crossplane injects
+    # extraResources.
+    extra_ns_cm_count=$(kubectl get configmap generated-configmap -n test-xfuncjs -o jsonpath='{.metadata.annotations.crossplane-js\.dev/e2e-extra-ns-cm-count}' 2>/dev/null || true)
+    extra_allns_cm_count=$(kubectl get configmap generated-configmap -n test-xfuncjs -o jsonpath='{.metadata.annotations.crossplane-js\.dev/e2e-extra-allns-cm-count}' 2>/dev/null || true)
+    extra_namespace_count=$(kubectl get configmap generated-configmap -n test-xfuncjs -o jsonpath='{.metadata.annotations.crossplane-js\.dev/e2e-extra-namespace-count}' 2>/dev/null || true)
+    if [[ "$extra_ns_cm_count" == "1" && "$extra_allns_cm_count" == "2" && "$extra_namespace_count" == "1" ]]; then
+      echo "ConfigMap created successfully (and extraResources annotations converged)!"
+      configmap_created=true
+      break
+    fi
+    echo "ConfigMap exists but extraResources annotations not ready yet: ns=$extra_ns_cm_count allns=$extra_allns_cm_count namespace=$extra_namespace_count"
   fi
   echo "Waiting for ConfigMap to be created... ($i/180)"
   
@@ -114,8 +172,23 @@ echo "Verifying FieldRef-derived label on ConfigMap..."
 xr_name_label=$(kubectl get configmap generated-configmap -n test-xfuncjs -o jsonpath='{.metadata.labels.crossplane-js\.dev/xr-name}')
 echo "ConfigMap label crossplane-js.dev/xr-name: $xr_name_label"
 
-# Check if the data was transformed correctly (uppercase)
-if [[ $configmap_data == *"NAME"* && $configmap_data == *"JOHN DOE"* && $xr_name_label == "sample-configmap" ]]; then
+# Verify extraResourceRequirements injection (counts published as annotations)
+echo "Verifying extraResources injection (via annotations)..."
+extra_ns_cm_count=$(kubectl get configmap generated-configmap -n test-xfuncjs -o jsonpath='{.metadata.annotations.crossplane-js\.dev/e2e-extra-ns-cm-count}')
+extra_allns_cm_count=$(kubectl get configmap generated-configmap -n test-xfuncjs -o jsonpath='{.metadata.annotations.crossplane-js\.dev/e2e-extra-allns-cm-count}')
+extra_namespace_count=$(kubectl get configmap generated-configmap -n test-xfuncjs -o jsonpath='{.metadata.annotations.crossplane-js\.dev/e2e-extra-namespace-count}')
+
+extra_ns_cm_names=$(kubectl get configmap generated-configmap -n test-xfuncjs -o jsonpath='{.metadata.annotations.crossplane-js\.dev/e2e-extra-ns-cm-names}')
+extra_allns_cm_names=$(kubectl get configmap generated-configmap -n test-xfuncjs -o jsonpath='{.metadata.annotations.crossplane-js\.dev/e2e-extra-allns-cm-names}')
+extra_namespace_names=$(kubectl get configmap generated-configmap -n test-xfuncjs -o jsonpath='{.metadata.annotations.crossplane-js\.dev/e2e-extra-namespace-names}')
+
+echo "extra ns ConfigMap count: $extra_ns_cm_count (names: $extra_ns_cm_names)"
+echo "extra all-ns ConfigMap count: $extra_allns_cm_count (names: $extra_allns_cm_names)"
+echo "extra Namespace count: $extra_namespace_count (names: $extra_namespace_names)"
+
+# Check if the data was transformed correctly (uppercase), FieldRef resolved,
+# and extraResources were retrieved.
+if [[ $configmap_data == *"NAME"* && $configmap_data == *"JOHN DOE"* && $xr_name_label == "sample-configmap" && $extra_ns_cm_count == "1" && $extra_allns_cm_count == "2" && $extra_namespace_count == "1" ]]; then
   echo "Test PASSED: ConfigMap data was transformed correctly!"
   exit 0
 else

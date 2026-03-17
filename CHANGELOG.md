@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.62 (2026-03-17)
+
+### Bug Fixes
+
+- add pause annotation on broken field refs (and tests) ([8becca1](https://github.com/SocialGouv/crossplane-function-js/commit/8becca13992f7d082bb22c6ed55a592e093802ac))
+
 ## 0.0.61 (2026-02-05)
 
 ### Bug Fixes

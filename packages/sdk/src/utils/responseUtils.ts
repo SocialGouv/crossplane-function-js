@@ -5,6 +5,8 @@ import {
   KubernetesResourceLike,
 } from "../types.ts"
 
+import { areFieldRefsBroken } from "./FieldRef.ts"
+
 interface CrossplaneFunctionComposite<T extends KubernetesResourceLike = KubernetesResourceLike> {
   resource: T
   connectionDetails?: Record<string, string>
@@ -35,6 +37,19 @@ export class CrossplaneFunctionResponse<T extends KubernetesResourceLike = Kuber
   }
 
   updateResource(name: string, resource: CrossplaneResourceEntry): void {
+    let kubernetesResource: KubernetesResource
+    if ("toJSON" in resource.resource && typeof resource.resource.toJSON === "function") {
+      kubernetesResource = resource.resource.toJSON()
+    } else {
+      kubernetesResource = resource.resource as KubernetesResource
+    }
+    const fallenBack = areFieldRefsBroken(kubernetesResource)
+    if (fallenBack) {
+      kubernetesResource.metadata.annotations = {
+        ...kubernetesResource.metadata.annotations,
+        "crossplane.io/paused": "true",
+      }
+    }
     this.resources[name] = resource
   }
 

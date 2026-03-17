@@ -9,6 +9,9 @@
     "url": "https://github.com/SocialGouv/crossplane-function-js",
     "directory": "packages/sdk"
   },
+  "scripts": {
+    "test": "vitest run"
+  },
   "dependencies": {
     "@crossplane-js/libs": "workspace:^",
     "@kubernetes-models/apimachinery": "^2.1.0",
@@ -21,7 +24,8 @@
     "yaml": "^2.7.0"
   },
   "devDependencies": {
-    "@types/lodash": "^4"
+    "@types/lodash": "^4",
+    "vitest": "^4.0.16"
   },
   "publishConfig": {
     "access": "public"

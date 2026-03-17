@@ -179,3 +179,27 @@ function processFieldRefs(obj: any): any {
   // For primitive values, return as-is
   return obj
 }
+
+export function areFieldRefsBroken(resource: any): boolean {
+  for (const key of Object.keys(resource)) {
+    const value = resource[key]
+
+    if (value instanceof FieldRef) {
+      if (!value.canResolve()) {
+        return true
+      }
+    } else if (Array.isArray(value)) {
+      for (const item of value) {
+        if (areFieldRefsBroken(item)) {
+          return true
+        }
+      }
+    } else if (typeof value === "object" && value !== null) {
+      if (areFieldRefsBroken(value)) {
+        return true
+      }
+    }
+  }
+
+  return false
+}

@@ -37,16 +37,16 @@ export class CrossplaneFunctionResponse<T extends KubernetesResourceLike = Kuber
   }
 
   updateResource(name: string, resource: CrossplaneResourceEntry): void {
-    let kubernetesResource: KubernetesResource
+    let compositeAsResource: KubernetesResource
     if ("toJSON" in resource.resource && typeof resource.resource.toJSON === "function") {
-      kubernetesResource = resource.resource.toJSON()
+      compositeAsResource = resource.resource.toJSON()
     } else {
-      kubernetesResource = resource.resource as KubernetesResource
+      compositeAsResource = resource.resource as KubernetesResource
     }
-    const fallenBack = areFieldRefsBroken(kubernetesResource)
+    const fallenBack = areFieldRefsBroken(compositeAsResource)
     if (fallenBack) {
-      kubernetesResource.metadata.annotations = {
-        ...kubernetesResource.metadata.annotations,
+      compositeAsResource.metadata.annotations = {
+        ...compositeAsResource.metadata.annotations,
         "crossplane.io/paused": "true",
       }
     }
@@ -68,14 +68,100 @@ export class CrossplaneFunctionResponse<T extends KubernetesResourceLike = Kuber
   }
 }
 
+interface observedResourceError {
+  resourceName: string
+  resourceKind: string
+  reason?: string
+  message?: string
+}
+
+interface KubernetesCondition {
+  type: string
+  status: string
+  reason?: string
+  message?: string
+}
+
+export function getErrorsFromObservedResources(
+  observedResources: Record<string, { resource: KubernetesResource }>
+): observedResourceError[] {
+  const errors: observedResourceError[] = []
+
+  for (const resourceRef in observedResources) {
+    const observedResource = observedResources[resourceRef]
+    const resourceKind = observedResource.resource.kind
+    const resourceName = observedResource.resource.metadata.name
+
+    for (const condition of (observedResource.resource.status
+      ?.conditions as KubernetesCondition[]) || []) {
+      let errored = false
+      if (condition.type === "Synced" && condition.status === "False") {
+        errors.push({
+          resourceName,
+          resourceKind,
+          reason: condition.reason,
+          message: condition.message,
+        })
+        errored = true
+      }
+      if (condition.type === "Ready" && condition.status === "False") {
+        errors.push({
+          resourceName,
+          resourceKind,
+          reason: condition.reason,
+          message: condition.message,
+        })
+        errored = true
+      }
+      if (
+        errored &&
+        observedResource.resource.apiVersion.includes("kubernetes.crossplane.io") &&
+        observedResource.resource.kind === "Object"
+      ) {
+        const kubernetesRessource = observedResource.resource.status?.atProvider as {
+          manifest: KubernetesResource
+        }
+        errors.push({
+          resourceName,
+          resourceKind,
+          reason: "ObjectError",
+          message: `Observed Object resource "${observedResource.resource.kind}/${observedResource.resource.metadata.name}" has conditions indicating an error: \n${JSON.stringify(kubernetesRessource.manifest?.status?.conditions || [], null, 2)}`,
+        })
+      }
+    }
+  }
+  return errors
+}
+
 export function buildResponse<T extends KubernetesResourceLike = KubernetesResourceLike>(
   composite: T,
-  extraResources?: Record<string, KubernetesResource[]>
+  extraResources?: Record<string, KubernetesResource[]>,
+  observedResources?: Record<string, { resource: KubernetesResource }>
 ): CrossplaneFunctionResponse<T> {
+  let compositeAsResource: KubernetesResource
+  if ("toJSON" in composite && typeof composite.toJSON === "function") {
+    compositeAsResource = composite.toJSON()
+  } else {
+    compositeAsResource = composite as KubernetesResource
+  }
+
+  const errors = getErrorsFromObservedResources(observedResources || {})
+  if (errors.length > 0) {
+    compositeAsResource.status = {
+      ...compositeAsResource.status,
+      conditions: errors.map(error => ({
+        type: "Error",
+        status: "True",
+        reason: "ComposedResourceError",
+        message: `Error in observed resource "${error.resourceName}" of kind "${error.resourceKind}". ${error.reason || "Error"}${error.message ? `: ${error.message}` : ""}`,
+      })),
+    }
+  }
+
   const desired: CrossplaneFunctionDesiredResource<T> = {
     resources: {},
     composite: {
-      resource: composite,
+      resource: compositeAsResource as T,
       connectionDetails: {},
     },
     extraResourceRequirements: {},

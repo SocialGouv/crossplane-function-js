@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.63 (2026-03-18)
+
+### Features
+
+- catch & bubble up errors from composed resources ([f89c5b0](https://github.com/SocialGouv/crossplane-function-js/commit/f89c5b0507a115b76b7e94ab9d0f44e869455301))
+
 ## 0.0.62 (2026-03-17)
 
 ### Bug Fixes

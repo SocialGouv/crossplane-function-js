@@ -122,10 +122,10 @@ export function getErrorsFromObservedResources(
           manifest: KubernetesResource
         }
         errors.push({
-          resourceName,
-          resourceKind,
-          reason: "ObjectError",
-          message: `Observed Object resource "${observedResource.resource.kind}/${observedResource.resource.metadata.name}" has conditions indicating an error: \n${JSON.stringify(kubernetesRessource.manifest?.status?.conditions || [], null, 2)}`,
+          resourceName: kubernetesRessource.manifest.metadata.name,
+          resourceKind: kubernetesRessource.manifest.kind,
+          reason: "KubernetesObjectError",
+          message: JSON.stringify(kubernetesRessource.manifest?.status?.conditions || [], null, 2),
         })
       }
     }
@@ -149,12 +149,7 @@ export function buildResponse<T extends KubernetesResourceLike = KubernetesResou
   if (errors.length > 0) {
     compositeAsResource.status = {
       ...compositeAsResource.status,
-      conditions: errors.map(error => ({
-        type: "Error",
-        status: "True",
-        reason: "ComposedResourceError",
-        message: `Error in observed resource "${error.resourceName}" of kind "${error.resourceKind}". ${error.reason || "Error"}${error.message ? `: ${error.message}` : ""}`,
-      })),
+      errors: errors,
     }
   }
 

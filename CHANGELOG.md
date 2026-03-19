@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 0.0.64 (2026-03-19)
+
+### Bug Fixes
+
+- move error out of conditions to avoid duplicate keys ([16d144f](https://github.com/SocialGouv/crossplane-function-js/commit/16d144f6b46487cf6db0a94f1d54c1f206c0e224))
+
 ## 0.0.63 (2026-03-18)
 
 ### Features
